@@ -1,26 +1,18 @@
-const { verifyAuth } = require('../../lib/auth-middleware');
+const { withMiddleware } = require('../../lib/middleware');
 const { getDoc, setDoc } = require('../../lib/firestore');
 const { admin } = require('../../lib/firebase-admin');
 
-module.exports = async function handler(req, res) {
-  const uid = await verifyAuth(req, res);
-  if (!uid) return;
+const ALLOWED_FIELDS = ['displayName', 'currentMode', 'visitType', 'interests', 'favoritePoiIds'];
+const VALID_MODES = ['adult', 'kids', 'teen', 'family'];
+const VALID_VISIT_TYPES = ['first-time', 'tourist', 'local', 'dayTrip'];
+
+module.exports = withMiddleware(async (req, res, log) => {
+  const uid = req.uid;
 
   if (req.method === 'GET') {
-    return handleGet(req, res, uid);
-  } else if (req.method === 'PUT') {
-    return handlePut(req, res, uid);
-  } else {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-};
-
-async function handleGet(req, res, uid) {
-  try {
     let user = await getDoc('users', uid);
 
     if (!user) {
-      // Auto-create profile for new users
       user = {
         uid,
         displayName: '',
@@ -39,24 +31,13 @@ async function handleGet(req, res, uid) {
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       };
       await setDoc('users', uid, user);
+      log.info('Created new user profile', { uid });
     }
 
     res.status(200).json(user);
-  } catch (err) {
-    console.error('[api/user/profile] GET error:', err);
-    res.status(500).json({ error: 'Failed to fetch profile' });
-  }
-}
-
-async function handlePut(req, res, uid) {
-  try {
-    const allowedFields = [
-      'displayName', 'currentMode', 'visitType', 'interests',
-      'favoritePoiIds',
-    ];
-
+  } else if (req.method === 'PUT') {
     const updates = {};
-    for (const field of allowedFields) {
+    for (const field of ALLOWED_FIELDS) {
       if (req.body[field] !== undefined) {
         updates[field] = req.body[field];
       }
@@ -66,13 +47,27 @@ async function handlePut(req, res, uid) {
       return res.status(400).json({ error: 'No valid fields to update' });
     }
 
-    updates.updatedAt = admin.firestore.FieldValue.serverTimestamp();
+    // Validate enum fields
+    if (updates.currentMode && !VALID_MODES.includes(updates.currentMode)) {
+      return res.status(400).json({ error: `Invalid mode. Must be one of: ${VALID_MODES.join(', ')}` });
+    }
+    if (updates.visitType && !VALID_VISIT_TYPES.includes(updates.visitType)) {
+      return res.status(400).json({ error: `Invalid visitType. Must be one of: ${VALID_VISIT_TYPES.join(', ')}` });
+    }
+    if (updates.interests && (!Array.isArray(updates.interests) || updates.interests.length > 20)) {
+      return res.status(400).json({ error: 'Interests must be an array with max 20 items' });
+    }
+    if (updates.displayName && updates.displayName.length > 100) {
+      return res.status(400).json({ error: 'Display name too long (max 100 characters)' });
+    }
 
+    updates.updatedAt = admin.firestore.FieldValue.serverTimestamp();
     await setDoc('users', uid, updates);
     const updated = await getDoc('users', uid);
+
+    log.info('Updated user profile', { uid, fields: Object.keys(updates) });
     res.status(200).json(updated);
-  } catch (err) {
-    console.error('[api/user/profile] PUT error:', err);
-    res.status(500).json({ error: 'Failed to update profile' });
+  } else {
+    res.status(405).json({ error: 'Method not allowed' });
   }
-}
+}, { auth: true, cacheControl: 'PRIVATE' });

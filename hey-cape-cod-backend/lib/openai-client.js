@@ -1,4 +1,5 @@
 const OpenAI = require('openai');
+const { DEFAULT_MODEL } = require('./cost-controls');
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -29,15 +30,18 @@ Cape Cod quick reference:
  * Generate a chat completion with Cape Cod context.
  *
  * @param {string} message - User's message
- * @param {string} mode - "adult", "kids", or "family"
+ * @param {string} mode - "adult", "kids", "teen", or "family"
  * @param {Array} nearbyPois - POIs near the user for context
  * @param {Array} history - Previous messages in the conversation
+ * @param {string} model - OpenAI model to use (from cost controls)
  */
-async function chatCompletion(message, mode = 'adult', nearbyPois = [], history = []) {
+async function chatCompletion(message, mode = 'adult', nearbyPois = [], history = [], model = DEFAULT_MODEL) {
   let systemContent = SYSTEM_PROMPT;
 
   if (mode === 'kids') {
     systemContent += '\n\nYou are currently in KIDS mode. Be Captain Cod the Pirate! Use pirate talk, be silly and fun.';
+  } else if (mode === 'teen') {
+    systemContent += '\n\nYou are currently in TEEN mode. Be chill and engaging. Share cool facts, local legends, and hidden gems.';
   } else if (mode === 'family') {
     systemContent += '\n\nYou are currently in FAMILY mode. Give practical tips for families with children of various ages.';
   }
@@ -51,12 +55,12 @@ async function chatCompletion(message, mode = 'adult', nearbyPois = [], history 
 
   const messages = [
     { role: 'system', content: systemContent },
-    ...history.map((h) => ({ role: h.role, content: h.content })),
+    ...history.slice(-20).map((h) => ({ role: h.role, content: h.content })),
     { role: 'user', content: message },
   ];
 
   const completion = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
+    model,
     messages,
     max_tokens: 1024,
     temperature: 0.8,

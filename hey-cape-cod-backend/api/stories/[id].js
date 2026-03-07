@@ -1,29 +1,29 @@
+const { withMiddleware } = require('../../lib/middleware');
 const { getDoc } = require('../../lib/firestore');
 const cache = require('../../lib/cache');
+const { incrementMetric } = require('../../lib/metrics');
 
-module.exports = async function handler(req, res) {
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
+module.exports = withMiddleware(async (req, res, log) => {
+  const { id } = req.query;
+
+  if (!id || typeof id !== 'string') {
+    return res.status(400).json({ error: 'Story ID is required' });
   }
 
-  try {
-    const { id } = req.query;
-    const cacheKey = `story:${id}`;
-
-    const cached = cache.get(cacheKey);
-    if (cached) {
-      return res.status(200).json(cached);
-    }
-
-    const story = await getDoc('stories', id);
-    if (!story) {
-      return res.status(404).json({ error: 'Story not found' });
-    }
-
-    cache.set(cacheKey, story, cache.TTL.POI_DETAIL);
-    res.status(200).json(story);
-  } catch (err) {
-    console.error('[api/stories/[id]] Error:', err);
-    res.status(500).json({ error: 'Failed to fetch story' });
+  const cacheKey = `story:${id}`;
+  const cached = await cache.get(cacheKey);
+  if (cached) {
+    incrementMetric('storiesPlayed').catch(() => {});
+    return res.status(200).json(cached);
   }
-};
+
+  const story = await getDoc('stories', id);
+  if (!story) {
+    return res.status(404).json({ error: 'Story not found' });
+  }
+
+  await cache.set(cacheKey, story, cache.TTL.POI_DETAIL);
+  incrementMetric('storiesPlayed').catch(() => {});
+
+  res.status(200).json(story);
+}, { methods: ['GET'], cacheControl: 'POI_DETAIL' });
