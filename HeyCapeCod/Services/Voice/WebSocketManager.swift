@@ -65,8 +65,12 @@ final class WebSocketManager: NSObject, @unchecked Sendable {
 
     // MARK: - Init
 
-    init(serverURL: URL = URL(string: "wss://api.heycapecod.com/voice")!) {
-        self.serverURL = serverURL
+    init(serverURL: URL? = nil) {
+        #if DEBUG
+        self.serverURL = serverURL ?? URL(string: "ws://localhost:3000/api/voice")!
+        #else
+        self.serverURL = serverURL ?? URL(string: "wss://v0-cape-cod-ai-travel-assistant.vercel.app/api/voice")!
+        #endif
         super.init()
     }
 
@@ -89,6 +93,11 @@ final class WebSocketManager: NSObject, @unchecked Sendable {
 
         var request = URLRequest(url: serverURL)
         request.timeoutInterval = 10
+
+        // Inject Firebase Auth token for user identification
+        if let token = APIClient.shared.authToken {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
 
         let task = session!.webSocketTask(with: request)
         self.webSocketTask = task

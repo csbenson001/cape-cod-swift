@@ -3,18 +3,18 @@ import Foundation
 /// Central API client for all Hey Cape Cod backend calls.
 ///
 /// - Handles auth token injection from Firebase Auth
-/// - Generic GET/POST with Codable decoding
-/// - Environment switching (dev vs production)
-/// - Structured error handling
+/// - Generic GET/POST/PUT with Codable decoding
+/// - Environment switching (dev/staging/production)
+/// - Structured error handling with emoji logging
 final class APIClient {
     static let shared = APIClient()
 
     /// Firebase Auth token, set after user signs in.
-    /// Injected into every authenticated request.
     var authToken: String?
 
     private let session: URLSession
     private let decoder: JSONDecoder
+    private let environment: Environment
 
     private init() {
         let config = URLSessionConfiguration.default
@@ -24,50 +24,68 @@ final class APIClient {
 
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
         self.decoder = decoder
+
+        #if DEBUG
+        self.environment = .development
+        #else
+        self.environment = .production
+        #endif
     }
 
-    // MARK: - Base URL
+    // MARK: - Environment
+
+    enum Environment {
+        case development
+        case staging
+        case production
+
+        var baseURL: String {
+            switch self {
+            case .development: return "http://localhost:3000/api"
+            case .staging: return "https://staging-cape-cod.vercel.app/api"
+            case .production: return "https://v0-cape-cod-ai-travel-assistant.vercel.app/api"
+            }
+        }
+    }
 
     var baseURL: URL {
-        #if DEBUG
-        // Local development server
-        URL(string: "http://localhost:3000")!
-        #else
-        // Production Vercel deployment
-        URL(string: "https://hey-cape-cod-backend.vercel.app")!
-        #endif
+        URL(string: environment.baseURL)!
     }
 
     // MARK: - GET
 
-    func get<T: Decodable>(_ path: String, query: [String: String] = [], requiresAuth: Bool = false) async throws -> T {
-        var components = URLComponents(url: baseURL.appendingPathComponent(path), resolvingAgainstBaseURL: false)!
-        if !query.isEmpty {
-            components.queryItems = query.map { URLQueryItem(name: $0.key, value: $0.value) }
-        }
+    func get<T: Decodable>(_ endpoint: String, queryItems: [URLQueryItem]? = nil) async throws -> T {
+        var components = URLComponents(url: baseURL.appendingPathComponent(endpoint), resolvingAgainstBaseURL: false)!
+        components.queryItems = queryItems
 
         guard let url = components.url else {
-            throw APIError.invalidURL
+            throw APIError.serverError(0)
         }
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Accept")
 
-        if requiresAuth {
-            guard let token = authToken else { throw APIError.unauthorized }
+        if let token = authToken {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
 
-        print("[APIClient] GET \(url.absoluteString)")
+        print("📡 GET \(url.absoluteString)")
         return try await execute(request)
+    }
+
+    /// Convenience overload accepting a [String: String] dictionary for query params
+    func get<T: Decodable>(_ endpoint: String, query: [String: String]) async throws -> T {
+        let items = query.map { URLQueryItem(name: $0.key, value: $0.value) }
+        return try await get(endpoint, queryItems: items.isEmpty ? nil : items)
     }
 
     // MARK: - POST
 
-    func post<T: Decodable, B: Encodable>(_ path: String, body: B, requiresAuth: Bool = true) async throws -> T {
-        let url = baseURL.appendingPathComponent(path)
+    func post<T: Decodable, B: Encodable>(_ endpoint: String, body: B) async throws -> T {
+        let url = baseURL.appendingPathComponent(endpoint)
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -75,19 +93,18 @@ final class APIClient {
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.httpBody = try JSONEncoder().encode(body)
 
-        if requiresAuth {
-            guard let token = authToken else { throw APIError.unauthorized }
+        if let token = authToken {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
 
-        print("[APIClient] POST \(url.absoluteString)")
+        print("📡 POST \(url.absoluteString)")
         return try await execute(request)
     }
 
     // MARK: - PUT
 
-    func put<T: Decodable, B: Encodable>(_ path: String, body: B, requiresAuth: Bool = true) async throws -> T {
-        let url = baseURL.appendingPathComponent(path)
+    func put<T: Decodable, B: Encodable>(_ endpoint: String, body: B) async throws -> T {
+        let url = baseURL.appendingPathComponent(endpoint)
 
         var request = URLRequest(url: url)
         request.httpMethod = "PUT"
@@ -95,33 +112,40 @@ final class APIClient {
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.httpBody = try JSONEncoder().encode(body)
 
-        if requiresAuth {
-            guard let token = authToken else { throw APIError.unauthorized }
+        if let token = authToken {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
 
-        print("[APIClient] PUT \(url.absoluteString)")
+        print("📡 PUT \(url.absoluteString)")
         return try await execute(request)
     }
 
     // MARK: - Execute
 
     private func execute<T: Decodable>(_ request: URLRequest) async throws -> T {
-        let (data, response) = try await session.data(for: request)
+        let data: Data
+        let response: URLResponse
+
+        do {
+            (data, response) = try await session.data(for: request)
+        } catch {
+            print("❌ Network error: \(error.localizedDescription)")
+            throw APIError.noData
+        }
 
         guard let http = response as? HTTPURLResponse else {
-            throw APIError.serverError(0, "Invalid response")
+            throw APIError.serverError(0)
         }
 
         switch http.statusCode {
         case 200...299:
             do {
                 let decoded = try decoder.decode(T.self, from: data)
-                print("[APIClient] Success (\(http.statusCode))")
+                print("✅ Success (\(http.statusCode))")
                 return decoded
             } catch {
-                print("[APIClient] Decode error: \(error)")
-                throw APIError.decodingFailed(error)
+                print("❌ Decode error: \(error)")
+                throw APIError.decodingError
             }
 
         case 401:
@@ -135,8 +159,8 @@ final class APIClient {
 
         default:
             let body = String(data: data, encoding: .utf8) ?? ""
-            print("[APIClient] Error \(http.statusCode): \(body)")
-            throw APIError.serverError(http.statusCode, body)
+            print("❌ Server error \(http.statusCode): \(body)")
+            throw APIError.serverError(http.statusCode)
         }
     }
 }
@@ -144,23 +168,19 @@ final class APIClient {
 // MARK: - API Errors
 
 enum APIError: LocalizedError {
-    case invalidURL
+    case serverError(Int)
+    case noData
+    case decodingError
     case unauthorized
     case rateLimited
-    case noData
-    case serverError(Int, String)
-    case decodingFailed(Error)
-    case networkError(Error)
 
     var errorDescription: String? {
         switch self {
-        case .invalidURL: "Invalid request URL."
+        case .serverError(let code): "Server error (\(code))."
+        case .noData: "No data found."
+        case .decodingError: "Data format error."
         case .unauthorized: "Please sign in to continue."
         case .rateLimited: "Daily limit reached. Upgrade for unlimited access."
-        case .noData: "No data found."
-        case .serverError(let code, let msg): "Server error (\(code)): \(msg)"
-        case .decodingFailed(let err): "Data format error: \(err.localizedDescription)"
-        case .networkError(let err): "Network error: \(err.localizedDescription)"
         }
     }
 }

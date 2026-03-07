@@ -7,6 +7,11 @@ struct ExploreView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: CodSpacing.sectionSpacing) {
+                    // Offline indicator
+                    if viewModel.isOffline {
+                        offlineBanner
+                    }
+
                     // Search
                     searchBar
 
@@ -14,7 +19,9 @@ struct ExploreView: View {
                     categoryFilters
 
                     // Results
-                    if viewModel.filteredLocations.isEmpty && !viewModel.isLoading {
+                    if viewModel.isLoading && viewModel.filteredLocations.isEmpty {
+                        loadingSkeleton
+                    } else if viewModel.filteredLocations.isEmpty {
                         emptyState
                     } else {
                         locationsList
@@ -28,6 +35,21 @@ struct ExploreView: View {
                 await viewModel.loadLocations()
             }
         }
+    }
+
+    private var offlineBanner: some View {
+        HStack(spacing: CodSpacing.sm) {
+            Image(systemName: "wifi.slash")
+                .font(.caption)
+            Text("Showing offline data")
+                .codTextStyle(.label)
+        }
+        .padding(.horizontal, CodSpacing.md)
+        .padding(.vertical, CodSpacing.xs)
+        .frame(maxWidth: .infinity)
+        .background(Color.capeCod.driftwood.opacity(0.2))
+        .clipShape(RoundedRectangle(cornerRadius: CodRadius.sm))
+        .padding(.horizontal, CodSpacing.screenEdge)
     }
 
     private var searchBar: some View {
@@ -62,6 +84,35 @@ struct ExploreView: View {
             }
             .padding(.horizontal, CodSpacing.screenEdge)
         }
+    }
+
+    private var loadingSkeleton: some View {
+        LazyVStack(spacing: CodSpacing.md) {
+            ForEach(0..<4, id: \.self) { _ in
+                VStack(alignment: .leading, spacing: CodSpacing.sm) {
+                    RoundedRectangle(cornerRadius: CodRadius.card)
+                        .fill(Color.capeCod.driftwood.opacity(0.1))
+                        .frame(height: 160)
+
+                    VStack(alignment: .leading, spacing: CodSpacing.xs) {
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(Color.capeCod.driftwood.opacity(0.15))
+                            .frame(width: 180, height: 16)
+
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(Color.capeCod.driftwood.opacity(0.1))
+                            .frame(width: 120, height: 12)
+                    }
+                    .padding(.horizontal, CodSpacing.sm)
+                    .padding(.bottom, CodSpacing.sm)
+                }
+                .background(Color.capeCod.cardBackground)
+                .clipShape(RoundedRectangle(cornerRadius: CodRadius.card))
+                .codShadow(.card)
+            }
+        }
+        .padding(.horizontal, CodSpacing.screenEdge)
+        .redacted(reason: .placeholder)
     }
 
     private var locationsList: some View {

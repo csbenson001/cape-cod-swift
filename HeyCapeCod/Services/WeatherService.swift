@@ -7,8 +7,12 @@ protocol WeatherServiceProtocol: Sendable {
 
 @Observable
 final class WeatherService: WeatherServiceProtocol {
-    private let session: URLSession
     private var cachedWeather: WeatherData?
+    private(set) var currentWeather: WeatherAPIData?
+    private(set) var tides: [TidePrediction] = []
+    private(set) var lastUpdated: Date?
+
+    private let session: URLSession
 
     // Cape Cod center coordinates (Barnstable)
     static let capeCodCenter = CLLocationCoordinate2D(latitude: 41.7003, longitude: -70.3002)
@@ -19,31 +23,52 @@ final class WeatherService: WeatherServiceProtocol {
         self.session = URLSession(configuration: config)
     }
 
+    // MARK: - Weather
+
     func fetchWeather(for coordinate: CLLocationCoordinate2D) async throws -> WeatherData {
         if let cached = cachedWeather, !cached.isStale {
             return cached
         }
 
-        // Try backend first (cached + aggregated), fall back to direct NOAA
+        // Try backend first, fall back to direct NOAA
         do {
             let weather = try await fetchFromBackend(coordinate)
             cachedWeather = weather
+            lastUpdated = .now
             return weather
         } catch {
-            print("[WeatherService] Backend failed, falling back to direct NOAA: \(error)")
+            print("❌ Backend weather failed, falling back to NOAA: \(error.localizedDescription)")
             let weather = try await fetchDirectFromNOAA(coordinate)
             cachedWeather = weather
+            lastUpdated = .now
             return weather
+        }
+    }
+
+    // MARK: - Tides
+
+    func fetchTides(station: String = "8447930") async {
+        do {
+            let response: TideAPIResponse = try await APIClient.shared.get("/weather/tides", queryItems: [
+                URLQueryItem(name: "station", value: station),
+            ])
+            tides = response.predictions.compactMap { $0.toTidePrediction() }
+            print("✅ Loaded \(tides.count) tide predictions for station \(response.station)")
+        } catch {
+            print("❌ Tide API error: \(error.localizedDescription)")
+            // Keep existing tide data if any
         }
     }
 
     // MARK: - Backend API
 
     private func fetchFromBackend(_ coordinate: CLLocationCoordinate2D) async throws -> WeatherData {
-        let response: WeatherAPIResponse = try await APIClient.shared.get("/api/weather", query: [
-            "lat": String(coordinate.latitude),
-            "lng": String(coordinate.longitude),
+        let response: WeatherAPIData = try await APIClient.shared.get("/weather", queryItems: [
+            URLQueryItem(name: "lat", value: String(coordinate.latitude)),
+            URLQueryItem(name: "lng", value: String(coordinate.longitude)),
         ])
+        currentWeather = response
+        print("✅ Loaded weather from backend: \(response.description)")
         return response.toWeatherData()
     }
 
@@ -82,7 +107,6 @@ final class WeatherService: WeatherServiceProtocol {
     }
 
     private func parseWeatherData(daily: [String: Any], hourly: [String: Any]) throws -> WeatherData {
-        // Parse current conditions from first hourly period
         guard let hourlyProps = hourly["properties"] as? [String: Any],
               let hourlyPeriods = hourlyProps["periods"] as? [[String: Any]],
               let current = hourlyPeriods.first else {
@@ -96,13 +120,9 @@ final class WeatherService: WeatherServiceProtocol {
             humidity: parseHumidity(current["relativeHumidity"] as? [String: Any]),
             windSpeed: parseWindSpeed(current["windSpeed"] as? String ?? ""),
             windDirection: (current["windDirection"] as? String) ?? "N",
-            uvIndex: 0,
-            visibility: 10,
-            pressure: 30.0,
-            dewPoint: 0
+            uvIndex: 0, visibility: 10, pressure: 30.0, dewPoint: 0
         )
 
-        // Parse hourly forecasts
         let hourlyForecasts = hourlyPeriods.prefix(24).map { period -> HourlyForecast in
             HourlyForecast(
                 time: parseISO8601(period["startTime"] as? String ?? "") ?? .now,
@@ -113,7 +133,6 @@ final class WeatherService: WeatherServiceProtocol {
             )
         }
 
-        // Parse daily forecasts
         guard let dailyProps = daily["properties"] as? [String: Any],
               let dailyPeriods = dailyProps["periods"] as? [[String: Any]] else {
             throw WeatherServiceError.invalidResponse
@@ -130,9 +149,7 @@ final class WeatherService: WeatherServiceProtocol {
                 low: (night["temperature"] as? Double) ?? 0,
                 condition: mapCondition(day["shortForecast"] as? String ?? ""),
                 precipChance: (day["probabilityOfPrecipitation"] as? [String: Any])?["value"] as? Int ?? 0,
-                sunrise: .now,
-                sunset: .now,
-                uvIndex: 0
+                sunrise: .now, sunset: .now, uvIndex: 0
             ))
             i += 2
         }
@@ -168,84 +185,6 @@ final class WeatherService: WeatherServiceProtocol {
 
     private func parseISO8601(_ string: String) -> Date? {
         ISO8601DateFormatter().date(from: string)
-    }
-}
-
-// MARK: - Backend Response Mapping
-
-private struct WeatherAPIResponse: Codable {
-    let current: CurrentData?
-    let hourly: [HourlyData]
-    let daily: [DailyData]
-    let fetchedAt: String
-
-    struct CurrentData: Codable {
-        let temperature: Double
-        let condition: String
-        let conditionDescription: String?
-        let humidity: Int?
-        let windSpeed: String?
-        let windDirection: String?
-    }
-
-    struct HourlyData: Codable {
-        let time: String
-        let temperature: Double
-        let condition: String
-        let precipChance: Int?
-        let windSpeed: String?
-    }
-
-    struct DailyData: Codable {
-        let date: String
-        let high: Double
-        let low: Double
-        let condition: String
-        let precipChance: Int?
-    }
-
-    func toWeatherData() -> WeatherData {
-        let mapCond = { (s: String) -> WeatherConditionType in
-            WeatherConditionType(rawValue: s) ?? .clear
-        }
-
-        let currentWeather = CurrentWeather(
-            temperature: current?.temperature ?? 0,
-            feelsLike: current?.temperature ?? 0,
-            condition: mapCond(current?.condition ?? "clear"),
-            humidity: current?.humidity ?? 0,
-            windSpeed: Double(current?.windSpeed?.filter(\.isNumber) ?? "0") ?? 0,
-            windDirection: current?.windDirection ?? "N",
-            uvIndex: 0, visibility: 10, pressure: 30.0, dewPoint: 0
-        )
-
-        let hourlyForecasts = hourly.prefix(24).map { h in
-            HourlyForecast(
-                time: ISO8601DateFormatter().date(from: h.time) ?? .now,
-                temperature: h.temperature,
-                condition: mapCond(h.condition),
-                precipChance: h.precipChance ?? 0,
-                windSpeed: Double(h.windSpeed?.filter(\.isNumber) ?? "0") ?? 0
-            )
-        }
-
-        let dailyForecasts = daily.map { d in
-            DailyForecast(
-                date: ISO8601DateFormatter().date(from: d.date) ?? .now,
-                high: d.high, low: d.low,
-                condition: mapCond(d.condition),
-                precipChance: d.precipChance ?? 0,
-                sunrise: .now, sunset: .now, uvIndex: 0
-            )
-        }
-
-        return WeatherData(
-            current: currentWeather,
-            hourly: Array(hourlyForecasts),
-            daily: dailyForecasts,
-            alerts: [],
-            fetchedAt: .now
-        )
     }
 }
 

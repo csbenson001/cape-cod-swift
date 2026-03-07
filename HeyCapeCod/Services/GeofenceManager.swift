@@ -76,17 +76,21 @@ final class GeofenceManager {
     /// Fetch POIs from API and re-evaluate geofences.
     /// Falls back to bundled/cached POIs if API is unavailable.
     private func fetchAndReEvaluate(around location: CLLocation) async {
-        let nearbyAPIPOIs = await POIService.shared.fetchNearbyPOIs(
+        let nearbyAPIPOIs = await POIService.shared.fetchNearbyPOIsList(
             lat: location.coordinate.latitude,
             lng: location.coordinate.longitude,
-            radius: 15000 // 15km radius
+            radius: 15000
         )
 
         if !nearbyAPIPOIs.isEmpty {
-            cachedPOIs = nearbyAPIPOIs.map { $0.toPointOfInterest() }
-            print("[GeofenceManager] Loaded \(cachedPOIs.count) POIs from API")
+            // Sort by priority descending, take top 20
+            let sorted = nearbyAPIPOIs
+                .sorted { $0.priority > $1.priority }
+                .prefix(Self.maxMonitoredRegions)
+            cachedPOIs = sorted.map { $0.toPointOfInterest() }
+            print("✅ GeofenceManager loaded \(cachedPOIs.count) POIs from API")
         } else {
-            print("[GeofenceManager] API unavailable, using \(cachedPOIs.count) cached/bundled POIs")
+            print("📦 GeofenceManager using \(cachedPOIs.count) cached/bundled POIs")
         }
 
         reEvaluateGeofences(around: location)
@@ -284,22 +288,41 @@ struct StoryVariant: Identifiable, Equatable {
     }
 }
 
-// MARK: - API → PointOfInterest Conversion
+// MARK: - API POI → PointOfInterest Conversion
 
-extension APIPOI {
+extension POI {
     func toPointOfInterest() -> PointOfInterest {
         PointOfInterest(
             id: id,
             name: name,
-            coordinate: CLLocationCoordinate2D(latitude: latitude, longitude: longitude),
-            geofenceRadius: radius ?? 200,
-            category: LocationCategory(rawValue: category) ?? .nature,
+            coordinate: coordinate,
+            geofenceRadius: CLLocationDistance(radius),
+            category: category.toLocationCategory ?? .nature,
             town: CapeCodTown(rawValue: town) ?? .barnstable,
             description: description,
             stories: [],
-            facts: facts ?? [],
-            tips: tips ?? [],
+            facts: facts,
+            tips: tips,
             imageSystemName: nil
+        )
+    }
+}
+
+// MARK: - PointOfInterest → POI Conversion (for BundledContent)
+
+extension PointOfInterest {
+    func toPOI() -> POI {
+        POI(
+            id: id,
+            name: name,
+            description: description,
+            latitude: coordinate.latitude,
+            longitude: coordinate.longitude,
+            radius: Int(geofenceRadius),
+            category: POICategory(rawValue: category.rawValue) ?? .nature,
+            town: town.rawValue,
+            facts: facts,
+            tips: tips
         )
     }
 }

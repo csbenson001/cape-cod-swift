@@ -12,8 +12,10 @@ final class ExploreViewModel {
     var isLoading = false
     var error: Error?
     var hasLoadedFromAPI = false
+    var isOffline = false
 
     private let locationService: LocationService
+    private let poiService = POIService.shared
 
     init(locationService: LocationService = LocationService()) {
         self.locationService = locationService
@@ -89,37 +91,49 @@ final class ExploreViewModel {
         if locations.isEmpty {
             locations = BundledContent.allPOIs.map { $0.toCodLocation() }
             applyFilters()
+            print("📦 ExploreView showing bundled content")
         }
 
         isLoading = true
         defer { isLoading = false }
 
         // Fetch live data from API
-        await POIService.shared.fetchAllPOIs()
-        let apiPOIs = POIService.shared.allPOIs
+        await poiService.fetchAllPOIs()
+        let apiPOIs = poiService.allPOIs
 
         if !apiPOIs.isEmpty {
             locations = apiPOIs.map { $0.toCodLocation() }
             hasLoadedFromAPI = true
-            print("[ExploreViewModel] Loaded \(apiPOIs.count) POIs from API")
+            isOffline = false
+            print("✅ ExploreView loaded \(apiPOIs.count) POIs from API")
         } else {
-            print("[ExploreViewModel] API unavailable, showing bundled content")
+            isOffline = true
+            print("📦 ExploreView showing bundled content (offline)")
         }
 
-        error = POIService.shared.lastError
+        error = poiService.error.map { NSError(domain: "POI", code: 0, userInfo: [NSLocalizedDescriptionKey: $0]) }
         applyFilters()
+    }
+
+    func loadNearby(location: CLLocationCoordinate2D) async {
+        await poiService.fetchNearbyPOIs(lat: location.latitude, lng: location.longitude)
+        let nearby = poiService.nearbyPOIs
+        if !nearby.isEmpty {
+            locations = nearby.map { $0.toCodLocation() }
+            applyFilters()
+        }
     }
 }
 
-// MARK: - APIPOI → CodLocation Conversion
+// MARK: - POI → CodLocation Conversion
 
-extension APIPOI {
+extension POI {
     func toCodLocation() -> CodLocation {
         CodLocation(
             name: name,
             latitude: latitude,
             longitude: longitude,
-            category: LocationCategory(rawValue: category) ?? .nature,
+            category: category.toLocationCategory ?? .nature,
             description: description,
             town: CapeCodTown(rawValue: town) ?? .barnstable
         )
