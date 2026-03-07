@@ -73,6 +73,12 @@ struct CapeCodColors {
         Color(light: .white, dark: .white)
     }
 
+    // MARK: - Convenience Aliases
+
+    var cardBackground: Color { surfaceElevated }
+    var primaryText: Color { textPrimary }
+    var secondaryText: Color { textSecondary }
+
     /// Subtle border for dark mode cards (replaces shadows which don't read well on dark)
     var cardBorder: Color {
         Color(light: Color(hex: 0xA69279).opacity(0.15), dark: .white.opacity(0.08))

@@ -68,35 +68,43 @@ struct MainTabView: View {
                 .shadow(color: .black.opacity(0.06), radius: 12, y: -CodSpacing.xs)
                 .ignoresSafeArea(edges: .bottom)
         )
+        .codAccessible(label: "Tab bar")
     }
 
     // MARK: - Tab Button
 
     private func tabButton(_ tab: AppTab) -> some View {
-        Button {
+        let isSelected = appState.selectedTab == tab
+
+        return Button {
             withAnimation(CodAnimation.tabSwitch) {
                 appState.selectedTab = tab
             }
-            UISelectionFeedbackGenerator().selectionChanged()
+            CodHaptic.selection()
         } label: {
             VStack(spacing: CodSpacing.xs) {
                 Image(systemName: tab.icon)
-                    .font(.system(size: 20, weight: appState.selectedTab == tab ? .semibold : .regular))
-                    .symbolVariant(appState.selectedTab == tab ? .fill : .none)
+                    .font(.system(size: 20, weight: isSelected ? .semibold : .regular))
+                    .symbolVariant(isSelected ? .fill : .none)
 
                 Text(tab.title)
-                    .font(.system(size: 10, weight: .medium))
+                    .codTextStyle(.tabLabel)
             }
-            .foregroundStyle(appState.selectedTab == tab ? Color.capeCod.primary : Color.capeCod.driftwood)
+            .foregroundStyle(isSelected ? Color.capeCod.primary : Color.capeCod.driftwood)
             .frame(maxWidth: .infinity)
+            .frame(minHeight: 44)
         }
+        .codAccessibleButton(
+            tab.title,
+            hint: isSelected ? "Currently selected" : "Switch to \(tab.title) tab"
+        )
     }
 
     // MARK: - Voice FAB
 
     private var voiceFAB: some View {
         Button {
-            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            CodHaptic.tap()
             appState.isVoiceAssistantPresented = true
         } label: {
             ZStack {
@@ -112,6 +120,7 @@ struct MainTabView: View {
         }
         .buttonStyle(CodButtonPressStyle(variant: .primary))
         .frame(maxWidth: .infinity)
+        .codAccessibleButton("Voice Assistant", hint: "Start a voice conversation")
     }
 }
 

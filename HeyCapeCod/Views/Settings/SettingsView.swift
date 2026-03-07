@@ -49,6 +49,7 @@ struct SettingsView: View {
                         .padding(.vertical, CodSpacing.xs)
 
                         Button {
+                            CodHaptic.tap()
                             Task { try? await auth.signInWithApple() }
                         } label: {
                             HStack {
@@ -73,7 +74,7 @@ struct SettingsView: View {
                         Spacer()
                         if subscription.isSubscribed {
                             Text("Active")
-                                .font(.system(size: 11, weight: .semibold))
+                                .codTextStyle(.label)
                                 .foregroundStyle(Color.capeCod.duneGrass)
                                 .padding(.horizontal, CodSpacing.sm)
                                 .padding(.vertical, CodSpacing.xs)
@@ -84,6 +85,7 @@ struct SettingsView: View {
 
                     if !subscription.isSubscribed {
                         Button {
+                            CodHaptic.light()
                             showingSubscription = true
                         } label: {
                             HStack {
@@ -102,6 +104,7 @@ struct SettingsView: View {
                             Spacer()
                             Text("\(PaywallManager.shared.voiceConversationsRemaining)/\(PaywallManager.freeVoiceConversationsPerDay) remaining")
                                 .codTextStyle(.caption)
+                                .monospacedDigit()
                         }
 
                         HStack {
@@ -110,6 +113,7 @@ struct SettingsView: View {
                             Spacer()
                             Text("\(PaywallManager.shared.storiesRemaining)/\(PaywallManager.freeStoriesPerDay) remaining")
                                 .codTextStyle(.caption)
+                                .monospacedDigit()
                         }
                     }
 
@@ -147,8 +151,10 @@ struct SettingsView: View {
                     }
 
                     Toggle("GPS Story Triggers", isOn: $storyTriggersEnabled)
+                        .toggleStyle(.capeCod)
 
                     Toggle("Notifications", isOn: $notificationsEnabled)
+                        .toggleStyle(.capeCod)
                 }
 
                 // About
@@ -157,7 +163,7 @@ struct SettingsView: View {
                         Text("Version")
                         Spacer()
                         Text("1.0.0")
-                            .foregroundStyle(.secondary)
+                            .codTextStyle(.caption)
                     }
 
                     Link(destination: URL(string: "https://heycapecod.com")!) {

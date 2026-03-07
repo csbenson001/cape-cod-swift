@@ -4,23 +4,31 @@ import SwiftUI
 ///
 /// Features:
 /// - Animated orb that responds to audio levels (input & output)
-/// - Color shifts: Seafoam (listening) → Sunset Orange (AI speaking)
+/// - Color shifts: Seafoam (listening) -> Sunset Orange (AI speaking)
+/// - Floating bubble particles for coastal atmosphere
 /// - Scrolling transcript of the conversation
 /// - Swipe down to minimize into a floating mini-bubble
 /// - Barge-in detection (tap while AI is speaking)
 struct VoiceAssistantView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var viewModel = VoiceAssistantViewModel()
     @State private var showEndConfirmation = false
 
     var body: some View {
         ZStack {
-            // Full-screen dark background
-            Color(hex: 0x0D2137)
+            // Full-screen dark background using theme color
+            Color.capeCod.deepNavy
                 .ignoresSafeArea()
 
+            // Ambient bubble particles
+            if !reduceMotion {
+                BubbleParticles()
+                    .opacity(0.6)
+                    .allowsHitTesting(false)
+            }
+
             if viewModel.isMinimized {
-                // Mini-bubble mode — handled by parent via overlay
                 Color.clear
             } else {
                 fullScreenContent
@@ -48,7 +56,6 @@ struct VoiceAssistantView: View {
 
     private var fullScreenContent: some View {
         VStack(spacing: 0) {
-            // Top bar
             topBar
                 .padding(.horizontal, CodSpacing.screenEdge)
                 .padding(.top, CodSpacing.sm)
@@ -63,6 +70,10 @@ struct VoiceAssistantView: View {
             .onTapGesture {
                 handleOrbTap()
             }
+            .codAccessibleButton(
+                orbAccessibilityLabel,
+                hint: orbAccessibilityHint
+            )
 
             // State label
             stateLabel
@@ -73,7 +84,7 @@ struct VoiceAssistantView: View {
             // Transcript
             if !viewModel.transcript.isEmpty {
                 transcriptView
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .transition(.codSlideUp)
             }
 
             // Bottom controls
@@ -89,16 +100,15 @@ struct VoiceAssistantView: View {
 
     private var topBar: some View {
         HStack {
-            // Duration
             if viewModel.state.isActive {
                 Text(formattedDuration)
                     .font(.system(size: 14, weight: .medium, design: .monospaced))
+                    .monospacedDigit()
                     .foregroundStyle(.white.opacity(0.5))
             }
 
             Spacer()
 
-            // Minimize button
             if viewModel.state.isActive {
                 Button {
                     viewModel.toggleMinimized()
@@ -107,9 +117,9 @@ struct VoiceAssistantView: View {
                         .font(.title2)
                         .foregroundStyle(.white.opacity(0.4))
                 }
+                .codAccessibleButton("Minimize conversation")
             }
 
-            // Close button
             Button {
                 if viewModel.state.isActive {
                     showEndConfirmation = true
@@ -121,6 +131,7 @@ struct VoiceAssistantView: View {
                     .font(.title2)
                     .foregroundStyle(.white.opacity(0.4))
             }
+            .codAccessibleButton("Close voice assistant")
         }
     }
 
@@ -129,18 +140,18 @@ struct VoiceAssistantView: View {
     private var stateLabel: some View {
         VStack(spacing: CodSpacing.sm) {
             Text(viewModel.state.label)
-                .font(.system(size: 17, weight: .medium))
+                .codTextStyle(.cardTitle)
                 .foregroundStyle(.white.opacity(0.8))
-                .contentTransition(.opacity)
-                .animation(.easeInOut(duration: 0.2), value: viewModel.state)
+                .contentTransition(.numericText())
+                .animation(CodAnimation.tabSwitch, value: viewModel.state)
 
             if !viewModel.hasConversationsRemaining && viewModel.state == .idle {
                 Text("Daily limit reached")
-                    .font(.system(size: 13))
+                    .codTextStyle(.caption)
                     .foregroundStyle(Color.capeCod.sunsetOrange.opacity(0.8))
             } else if viewModel.state == .idle {
                 Text("\(viewModel.conversationsRemaining) conversations remaining today")
-                    .font(.system(size: 13))
+                    .codTextStyle(.caption)
                     .foregroundStyle(.white.opacity(0.35))
             }
         }
@@ -152,9 +163,10 @@ struct VoiceAssistantView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: CodSpacing.md) {
-                    ForEach(viewModel.transcript) { entry in
+                    ForEach(Array(viewModel.transcript.enumerated()), id: \.element.id) { index, entry in
                         TranscriptBubble(entry: entry)
                             .id(entry.id)
+                            .staggered(index: index, interval: 0.03)
                     }
                 }
                 .padding(.horizontal, CodSpacing.screenEdge)
@@ -187,13 +199,14 @@ struct VoiceAssistantView: View {
                     showEndConfirmation = true
                 } label: {
                     Text("End")
-                        .font(.system(size: 15, weight: .medium))
+                        .codTextStyle(.body)
                         .foregroundStyle(.white.opacity(0.6))
                         .padding(.horizontal, CodSpacing.lg)
                         .padding(.vertical, CodSpacing.sm + 2)
                         .background(.white.opacity(0.1))
                         .clipShape(Capsule())
                 }
+                .codAccessibleButton("End conversation")
             }
         }
     }
@@ -203,10 +216,13 @@ struct VoiceAssistantView: View {
     private func handleOrbTap() {
         switch viewModel.state {
         case .idle:
+            CodHaptic.tap()
             Task { await viewModel.startConversation() }
         case .speaking:
+            CodHaptic.light()
             viewModel.handleBargeIn()
         case .error:
+            CodHaptic.tap()
             Task { await viewModel.startConversation() }
         default:
             break
@@ -218,21 +234,35 @@ struct VoiceAssistantView: View {
         let seconds = Int(viewModel.conversationDuration) % 60
         return String(format: "%d:%02d", minutes, seconds)
     }
+
+    // MARK: - Accessibility
+
+    private var orbAccessibilityLabel: String {
+        switch viewModel.state {
+        case .idle: "Start voice conversation"
+        case .connecting: "Connecting"
+        case .listening: "Listening to you"
+        case .processing: "Processing your question"
+        case .speaking: "AI is responding. Tap to interrupt."
+        case .error: "Error occurred. Tap to retry."
+        }
+    }
+
+    private var orbAccessibilityHint: String {
+        switch viewModel.state {
+        case .idle: "Double tap to start a voice conversation with Cape Cod AI"
+        case .speaking: "Double tap to interrupt and ask a new question"
+        default: ""
+        }
+    }
 }
 
 // MARK: - Voice Orb
 
-/// The central animated circle that represents the AI's state.
-///
-/// - Idle: gentle pulse, muted color
-/// - Listening: seafoam, reactive to input audio levels
-/// - Processing: orbit animation, sunset orange
-/// - Speaking: sunset orange, reactive to output audio levels
 private struct VoiceOrb: View {
     let state: VoiceAssistantViewModel.VoiceState
     let audioLevel: Float
 
-    // Animation state
     @State private var idlePulse: CGFloat = 1.0
     @State private var orbitAngle: Double = 0
     @State private var breathe: CGFloat = 1.0
@@ -241,13 +271,9 @@ private struct VoiceOrb: View {
 
     var body: some View {
         ZStack {
-            // Outer glow rings
             outerRings
-
-            // Main orb
             mainOrb
 
-            // Orbit dots (processing state)
             if state == .processing {
                 orbitDots
             }
@@ -261,25 +287,20 @@ private struct VoiceOrb: View {
         }
     }
 
-    // MARK: - Outer Glow Rings
-
     private var outerRings: some View {
         let levelScale = CGFloat(audioLevel)
 
         return ZStack {
-            // Ring 1 — outermost, faintest
             Circle()
                 .fill(orbColor.opacity(0.04))
                 .frame(width: orbSize * (1.8 + levelScale * 0.6), height: orbSize * (1.8 + levelScale * 0.6))
                 .scaleEffect(breathe * 1.05)
 
-            // Ring 2
             Circle()
                 .fill(orbColor.opacity(0.08))
                 .frame(width: orbSize * (1.5 + levelScale * 0.4), height: orbSize * (1.5 + levelScale * 0.4))
                 .scaleEffect(breathe)
 
-            // Ring 3 — closest to orb
             Circle()
                 .fill(orbColor.opacity(0.12))
                 .frame(width: orbSize * (1.25 + levelScale * 0.25), height: orbSize * (1.25 + levelScale * 0.25))
@@ -287,8 +308,6 @@ private struct VoiceOrb: View {
         }
         .animation(.easeOut(duration: 0.08), value: audioLevel)
     }
-
-    // MARK: - Main Orb
 
     private var mainOrb: some View {
         let levelScale = 1.0 + CGFloat(audioLevel) * 0.15
@@ -308,8 +327,6 @@ private struct VoiceOrb: View {
             .animation(.easeOut(duration: 0.08), value: audioLevel)
     }
 
-    // MARK: - Orbit Dots (Processing)
-
     private var orbitDots: some View {
         ForEach(0..<3, id: \.self) { index in
             Circle()
@@ -319,8 +336,6 @@ private struct VoiceOrb: View {
                 .rotationEffect(.degrees(orbitAngle + Double(index) * 120))
         }
     }
-
-    // MARK: - Color
 
     private var orbColor: Color {
         switch state {
@@ -332,8 +347,6 @@ private struct VoiceOrb: View {
         case .error: Color.capeCod.cranberry
         }
     }
-
-    // MARK: - Animations
 
     private func updateAnimations(for newState: VoiceAssistantViewModel.VoiceState) {
         switch newState {
@@ -390,26 +403,27 @@ private struct TranscriptBubble: View {
             if isUser { Spacer(minLength: 40) }
 
             Text(entry.text)
-                .font(.system(size: 14))
+                .codTextStyle(.body)
                 .foregroundStyle(isUser ? .white : .white.opacity(0.85))
-                .padding(.horizontal, 14)
-                .padding(.vertical, 10)
+                .padding(.horizontal, CodSpacing.md)
+                .padding(.vertical, CodSpacing.sm + 2)
                 .background(
                     isUser
                         ? Color.capeCod.oceanBlue.opacity(0.3)
                         : Color.white.opacity(0.08)
                 )
-                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .clipShape(RoundedRectangle(cornerRadius: CodRadius.card, style: .continuous))
 
             if !isUser { Spacer(minLength: 40) }
         }
+        .codAccessible(
+            label: "\(isUser ? "You" : "Cape Cod AI") said: \(entry.text)"
+        )
     }
 }
 
 // MARK: - Mini Voice Bubble (Floating Overlay)
 
-/// A small floating bubble shown when the voice conversation is minimized.
-/// Displayed as an overlay on the main app content.
 struct VoiceMiniButton: View {
     let state: VoiceAssistantViewModel.VoiceState
     let audioLevel: Float
@@ -418,21 +432,21 @@ struct VoiceMiniButton: View {
     @State private var pulse: CGFloat = 1.0
 
     var body: some View {
-        Button(action: onTap) {
+        Button(action: {
+            CodHaptic.light()
+            onTap()
+        }) {
             ZStack {
-                // Glow ring
                 Circle()
                     .fill(bubbleColor.opacity(0.15))
                     .frame(width: 64, height: 64)
                     .scaleEffect(pulse)
 
-                // Main bubble
                 Circle()
                     .fill(bubbleColor)
                     .frame(width: 48, height: 48)
                     .shadow(color: bubbleColor.opacity(0.4), radius: 8)
 
-                // Icon
                 Image(systemName: bubbleIcon)
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(.white)
@@ -440,10 +454,11 @@ struct VoiceMiniButton: View {
         }
         .buttonStyle(.plain)
         .onAppear {
-            withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
+            withAnimation(CodAnimation.pulse) {
                 pulse = 1.15
             }
         }
+        .codAccessibleButton("Return to voice conversation", hint: "Double tap to expand")
     }
 
     private var bubbleColor: Color {

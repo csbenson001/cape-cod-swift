@@ -18,22 +18,20 @@ struct SubscriptionView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: CodSpacing.lg) {
-                // Hero
                 heroSection
+                    .staggered(index: 0)
 
-                // Feature Comparison
                 featureComparison
+                    .staggered(index: 1)
 
-                // Plan Selector
                 planSelector
+                    .staggered(index: 2)
 
-                // Subscribe Button
                 subscribeButton
+                    .staggered(index: 3)
 
-                // Free Trial Note
                 freeTrialNote
 
-                // Restore & Legal
                 footerLinks
             }
             .padding(.horizontal, CodSpacing.screenEdge)
@@ -70,10 +68,9 @@ struct SubscriptionView: View {
                 )
 
             Text("Hey Cape Cod Premium")
-                .font(.system(size: 26, weight: .bold, design: .rounded))
-                .foregroundStyle(Color.capeCod.textPrimary)
+                .codTextStyle(.heroTitle)
 
-            Text("Your complete Cape Cod companion — unlimited stories, voice conversations, offline access, and more.")
+            Text("Your complete Cape Cod companion \u{2014} unlimited stories, voice conversations, offline access, and more.")
                 .codTextStyle(.body)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, CodSpacing.lg)
@@ -85,7 +82,6 @@ struct SubscriptionView: View {
 
     private var featureComparison: some View {
         VStack(spacing: 0) {
-            // Header
             HStack {
                 Text("Feature")
                     .codTextStyle(.label)
@@ -113,9 +109,9 @@ struct SubscriptionView: View {
             featureRow("Family Sharing", free: false, premium: true)
             featureRow("Priority Support", free: false, premium: true)
         }
-        .clipShape(RoundedRectangle(cornerRadius: CodRadius.card))
+        .clipShape(RoundedRectangle(cornerRadius: CodRadius.card, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: CodRadius.card)
+            RoundedRectangle(cornerRadius: CodRadius.card, style: .continuous)
                 .stroke(Color.capeCod.driftwood.opacity(0.2), lineWidth: 1)
         )
     }
@@ -135,6 +131,7 @@ struct SubscriptionView: View {
         .padding(.horizontal, CodSpacing.cardPadding)
         .padding(.vertical, CodSpacing.sm + 2)
         .background(Color.capeCod.surfaceElevated)
+        .codAccessibleGroup(label: "\(name): Free \(free ? "yes" : "no"), Premium \(premium ? "yes" : "no")")
     }
 
     private func featureRow(_ name: String, free: String, premium: String) -> some View {
@@ -143,17 +140,18 @@ struct SubscriptionView: View {
                 .codTextStyle(.body)
             Spacer()
             Text(free)
-                .font(.system(size: 12, weight: .medium))
+                .codTextStyle(.label)
                 .foregroundStyle(Color.capeCod.driftwood)
                 .frame(width: 60)
             Text(premium)
-                .font(.system(size: 12, weight: .semibold))
+                .codTextStyle(.label)
                 .foregroundStyle(Color.capeCod.duneGrass)
                 .frame(width: 72)
         }
         .padding(.horizontal, CodSpacing.cardPadding)
         .padding(.vertical, CodSpacing.sm + 2)
         .background(Color.capeCod.surfaceElevated)
+        .codAccessibleGroup(label: "\(name): Free \(free), Premium \(premium)")
     }
 
     // MARK: - Plan Selector
@@ -183,7 +181,7 @@ struct SubscriptionView: View {
         return VStack(spacing: CodSpacing.sm) {
             if let badge {
                 Text(badge)
-                    .font(.system(size: 10, weight: .bold))
+                    .codTextStyle(.label)
                     .foregroundStyle(.white)
                     .padding(.horizontal, CodSpacing.sm)
                     .padding(.vertical, 3)
@@ -196,6 +194,7 @@ struct SubscriptionView: View {
 
             Text(price)
                 .font(.system(size: 28, weight: .bold, design: .rounded))
+                .monospacedDigit()
                 .foregroundStyle(isSelected ? Color.capeCod.oceanBlue : Color.capeCod.textPrimary)
 
             Text(detail)
@@ -204,18 +203,28 @@ struct SubscriptionView: View {
         .frame(maxWidth: .infinity)
         .padding(CodSpacing.cardPadding)
         .background(isSelected ? Color.capeCod.oceanBlue.opacity(0.08) : Color.capeCod.surfaceElevated)
-        .clipShape(RoundedRectangle(cornerRadius: CodRadius.card))
+        .clipShape(RoundedRectangle(cornerRadius: CodRadius.card, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: CodRadius.card)
+            RoundedRectangle(cornerRadius: CodRadius.card, style: .continuous)
                 .stroke(isSelected ? Color.capeCod.oceanBlue : Color.capeCod.driftwood.opacity(0.2), lineWidth: isSelected ? 2 : 1)
         )
-        .onTapGesture { selectedPlan = type }
+        .scaleEffect(isSelected ? 1.02 : 1.0)
+        .animation(CodAnimation.quick, value: isSelected)
+        .onTapGesture {
+            withAnimation(CodAnimation.quick) { selectedPlan = type }
+            CodHaptic.selection()
+        }
+        .codAccessibleCard(
+            label: "\(title) plan, \(price) \(detail)\(badge.map { ", \($0)" } ?? "")",
+            hint: isSelected ? "Currently selected" : "Double tap to select"
+        )
     }
 
     // MARK: - Subscribe Button
 
     private var subscribeButton: some View {
         Button {
+            CodHaptic.tap()
             Task { await purchase() }
         } label: {
             Group {
@@ -224,7 +233,7 @@ struct SubscriptionView: View {
                         .tint(.white)
                 } else {
                     Text("Start Free Trial")
-                        .font(.system(size: 17, weight: .semibold))
+                        .codTextStyle(.cardTitle)
                 }
             }
             .frame(maxWidth: .infinity)
@@ -237,9 +246,12 @@ struct SubscriptionView: View {
                     endPoint: .trailing
                 )
             )
-            .clipShape(RoundedRectangle(cornerRadius: CodRadius.button))
+            .clipShape(RoundedRectangle(cornerRadius: CodRadius.button, style: .continuous))
+            .shadow(color: Color.capeCod.oceanBlue.opacity(0.3), radius: 8, y: 4)
         }
         .disabled(isPurchasing)
+        .buttonStyle(CodButtonPressStyle(variant: .primary))
+        .codAccessibleButton("Start Free Trial", hint: "7-day free trial, then auto-renews")
     }
 
     // MARK: - Free Trial Note
@@ -247,10 +259,9 @@ struct SubscriptionView: View {
     private var freeTrialNote: some View {
         VStack(spacing: CodSpacing.xs) {
             Text("7-day free trial, then auto-renews")
-                .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(Color.capeCod.textSecondary)
+                .codTextStyle(.caption)
             Text("Cancel anytime in Settings > Subscriptions")
-                .font(.system(size: 11))
+                .codTextStyle(.label)
                 .foregroundStyle(Color.capeCod.driftwood)
         }
     }
@@ -262,16 +273,16 @@ struct SubscriptionView: View {
             Button("Restore Purchases") {
                 Task { await subscriptionManager.restorePurchases() }
             }
-            .font(.system(size: 14, weight: .medium))
+            .codTextStyle(.body)
             .foregroundStyle(Color.capeCod.oceanBlue)
 
             HStack(spacing: CodSpacing.lg) {
                 Link("Terms of Use", destination: URL(string: "https://heycapecod.com/terms")!)
-                    .font(.system(size: 12))
+                    .codTextStyle(.label)
                     .foregroundStyle(Color.capeCod.driftwood)
 
                 Link("Privacy Policy", destination: URL(string: "https://heycapecod.com/privacy")!)
-                    .font(.system(size: 12))
+                    .codTextStyle(.label)
                     .foregroundStyle(Color.capeCod.driftwood)
             }
         }
@@ -293,14 +304,17 @@ struct SubscriptionView: View {
         guard let product else {
             errorMessage = "Product not available. Please try again later."
             showError = true
+            CodHaptic.error()
             return
         }
 
         do {
             try await subscriptionManager.purchase(product)
+            CodHaptic.success()
         } catch {
             errorMessage = error.localizedDescription
             showError = true
+            CodHaptic.error()
         }
     }
 }

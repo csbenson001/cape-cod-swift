@@ -10,6 +10,7 @@ struct ExploreView: View {
                     // Offline indicator
                     if viewModel.isOffline {
                         offlineBanner
+                            .transition(.codSlideUp)
                     }
 
                     // Search
@@ -48,8 +49,9 @@ struct ExploreView: View {
         .padding(.vertical, CodSpacing.xs)
         .frame(maxWidth: .infinity)
         .background(Color.capeCod.driftwood.opacity(0.2))
-        .clipShape(RoundedRectangle(cornerRadius: CodRadius.sm))
+        .clipShape(RoundedRectangle(cornerRadius: CodRadius.sm, style: .continuous))
         .padding(.horizontal, CodSpacing.screenEdge)
+        .codAccessible(label: "Offline mode active, showing cached data")
     }
 
     private var searchBar: some View {
@@ -65,8 +67,9 @@ struct ExploreView: View {
         }
         .padding(.horizontal, CodSpacing.md)
         .padding(.vertical, CodSpacing.sm + 2)
-        .background(Color.capeCod.cardBackground)
-        .clipShape(RoundedRectangle(cornerRadius: CodRadius.input))
+        .background(Color.capeCod.surfaceElevated)
+        .clipShape(RoundedRectangle(cornerRadius: CodRadius.input, style: .continuous))
+        .adaptiveCardStyle(cornerRadius: CodRadius.input, shadow: .button)
         .padding(.horizontal, CodSpacing.screenEdge)
     }
 
@@ -78,7 +81,10 @@ struct ExploreView: View {
                         category: category,
                         isSelected: viewModel.selectedCategory == category
                     ) {
-                        viewModel.selectCategory(category)
+                        withAnimation(CodAnimation.quick) {
+                            viewModel.selectCategory(category)
+                        }
+                        CodHaptic.selection()
                     }
                 }
             }
@@ -87,37 +93,18 @@ struct ExploreView: View {
     }
 
     private var loadingSkeleton: some View {
-        LazyVStack(spacing: CodSpacing.md) {
-            ForEach(0..<4, id: \.self) { _ in
-                VStack(alignment: .leading, spacing: CodSpacing.sm) {
-                    RoundedRectangle(cornerRadius: CodRadius.card)
-                        .fill(Color.capeCod.driftwood.opacity(0.1))
-                        .frame(height: 160)
-
-                    VStack(alignment: .leading, spacing: CodSpacing.xs) {
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(Color.capeCod.driftwood.opacity(0.15))
-                            .frame(width: 180, height: 16)
-
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(Color.capeCod.driftwood.opacity(0.1))
-                            .frame(width: 120, height: 12)
-                    }
-                    .padding(.horizontal, CodSpacing.sm)
-                    .padding(.bottom, CodSpacing.sm)
-                }
-                .background(Color.capeCod.cardBackground)
-                .clipShape(RoundedRectangle(cornerRadius: CodRadius.card))
-                .codShadow(.card)
+        VStack(spacing: CodSpacing.md) {
+            ForEach(0..<4, id: \.self) { index in
+                LoadingSkeleton(variant: .card)
+                    .staggered(index: index)
             }
         }
         .padding(.horizontal, CodSpacing.screenEdge)
-        .redacted(reason: .placeholder)
     }
 
     private var locationsList: some View {
         LazyVStack(spacing: CodSpacing.md) {
-            ForEach(viewModel.filteredLocations) { location in
+            ForEach(Array(viewModel.filteredLocations.enumerated()), id: \.element.id) { index, location in
                 NavigationLink(value: location) {
                     LocationCard(
                         location: location,
@@ -125,6 +112,7 @@ struct ExploreView: View {
                     )
                 }
                 .buttonStyle(.plain)
+                .staggered(index: index)
             }
         }
         .padding(.horizontal, CodSpacing.screenEdge)
@@ -140,12 +128,13 @@ struct ExploreView: View {
                 .foregroundStyle(Color.capeCod.oceanBlue.opacity(0.3))
 
             Text("No locations found")
-                .codTextStyle(.subtitle)
+                .codTextStyle(.sectionTitle)
 
             Text("Try adjusting your search or filters")
                 .codTextStyle(.caption)
         }
         .padding(.top, CodSpacing.xxl)
+        .codAccessible(label: "No locations found. Try adjusting your search or filters.")
     }
 }
 
@@ -166,11 +155,15 @@ private struct CategoryChip: View {
             }
             .padding(.horizontal, CodSpacing.md)
             .padding(.vertical, CodSpacing.sm)
-            .background(isSelected ? Color.capeCod.oceanBlue : Color.capeCod.cardBackground)
-            .foregroundStyle(isSelected ? .white : Color.capeCod.primaryText)
+            .background(isSelected ? Color.capeCod.oceanBlue : Color.capeCod.surfaceElevated)
+            .foregroundStyle(isSelected ? .white : Color.capeCod.textPrimary)
             .clipShape(Capsule())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(CodButtonPressStyle(variant: .ghost))
+        .codAccessibleButton(
+            "\(category.displayName) filter",
+            hint: isSelected ? "Currently selected" : "Double tap to filter"
+        )
     }
 }
 
@@ -181,16 +174,20 @@ private struct LocationCard: View {
     let distance: String?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: CodSpacing.sm) {
-            // Image placeholder
-            RoundedRectangle(cornerRadius: CodRadius.card)
-                .fill(Color.capeCod.oceanBlue.opacity(0.1))
+        VStack(alignment: .leading, spacing: 0) {
+            // Image placeholder with gradient overlay
+            ImagePlaceholder(categoryColor: categoryColor)
                 .frame(height: 160)
-                .overlay {
+                .overlay(alignment: .center) {
                     Image(systemName: location.category.icon)
                         .font(.system(size: 32))
-                        .foregroundStyle(Color.capeCod.oceanBlue.opacity(0.3))
+                        .foregroundStyle(.white.opacity(0.6))
                 }
+                .overlay(alignment: .bottom) {
+                    Color.capeCod.imageOverlayGradient()
+                        .frame(height: 60)
+                }
+                .clipped()
 
             VStack(alignment: .leading, spacing: CodSpacing.xs) {
                 HStack {
@@ -224,12 +221,24 @@ private struct LocationCard: View {
                         .lineLimit(2)
                 }
             }
-            .padding(.horizontal, CodSpacing.sm)
-            .padding(.bottom, CodSpacing.sm)
+            .padding(CodSpacing.cardPadding)
         }
-        .background(Color.capeCod.cardBackground)
-        .clipShape(RoundedRectangle(cornerRadius: CodRadius.card))
-        .codShadow(.card)
+        .background(Color.capeCod.surfaceElevated)
+        .clipShape(RoundedRectangle(cornerRadius: CodRadius.card, style: .continuous))
+        .adaptiveCardStyle()
+        .codAccessibleCard(
+            label: "\(location.name), \(location.town.displayName)\(distance.map { ", \($0) away" } ?? "")",
+            hint: "Double tap for details"
+        )
+    }
+
+    private var categoryColor: Color {
+        switch location.category {
+        case .beach: Color.capeCod.oceanBlue
+        case .restaurant: Color.capeCod.sunsetOrange
+        case .nature: Color.capeCod.duneGrass
+        default: Color.capeCod.driftwood
+        }
     }
 }
 

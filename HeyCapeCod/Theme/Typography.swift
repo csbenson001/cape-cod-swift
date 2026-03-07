@@ -76,6 +76,11 @@ struct CapeCodTextStyle: ViewModifier {
                 .font(.system(size: 22 * scale, weight: .semibold))
                 .foregroundStyle(Color.capeCod.textPrimary)
 
+        case .subtitle:
+            content
+                .font(.system(size: 17 * scale, weight: .regular))
+                .foregroundStyle(Color.capeCod.textSecondary)
+
         case .cardTitle:
             content
                 .font(.system(size: 17 * scale, weight: .semibold))
@@ -142,6 +147,8 @@ struct CapeCodTextStyle: ViewModifier {
 enum CodTextStyle {
     case heroTitle
     case sectionTitle
+    /// 17pt regular — subtitles, secondary headers
+    case subtitle
     case cardTitle
     case body
     case storyBody

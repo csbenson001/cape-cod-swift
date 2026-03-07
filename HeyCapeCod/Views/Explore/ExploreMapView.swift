@@ -29,21 +29,18 @@ struct ExploreMapView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            // Map
             Map(position: $cameraPosition, selection: $selectedPOI) {
-                // User location
                 UserAnnotation()
 
-                // POI annotations
                 ForEach(filteredPOIs) { poi in
                     Annotation(poi.name, coordinate: poi.coordinate, anchor: .bottom) {
                         POIAnnotationView(poi: poi, isSelected: selectedPOI?.id == poi.id)
+                            .codTransition(.codPinDrop)
                     }
                     .tag(poi)
                     .annotationTitles(.hidden)
                 }
 
-                // Geofence radius circles
                 if showGeofenceRadius {
                     ForEach(filteredPOIs) { poi in
                         MapCircle(center: poi.coordinate, radius: poi.geofenceRadius)
@@ -59,11 +56,9 @@ struct ExploreMapView: View {
             }
             .ignoresSafeArea(edges: .top)
 
-            // Category filter bar
             VStack(spacing: 0) {
                 categoryFilterBar
                     .padding(.top, 8)
-
                 Spacer()
             }
         }
@@ -76,20 +71,28 @@ struct ExploreMapView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
-                    showGeofenceRadius.toggle()
+                    withAnimation(CodAnimation.quick) {
+                        showGeofenceRadius.toggle()
+                    }
+                    CodHaptic.selection()
                 } label: {
                     Image(systemName: showGeofenceRadius ? "circle.dashed.inset.filled" : "circle.dashed")
                         .foregroundStyle(showGeofenceRadius ? Color.capeCod.oceanBlue : Color.capeCod.textSecondary)
                 }
+                .codAccessibleButton(
+                    showGeofenceRadius ? "Hide geofence zones" : "Show geofence zones"
+                )
             }
 
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
+                    CodHaptic.light()
                     centerOnUser()
                 } label: {
                     Image(systemName: "location.fill")
                         .foregroundStyle(Color.capeCod.oceanBlue)
                 }
+                .codAccessibleButton("Center on my location")
             }
         }
     }
@@ -99,13 +102,13 @@ struct ExploreMapView: View {
     private var categoryFilterBar: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: CodSpacing.sm) {
-                // "All" chip
                 FilterChip(
                     label: "All",
                     icon: "map.fill",
                     isSelected: selectedCategory == nil
                 ) {
-                    withAnimation { selectedCategory = nil }
+                    withAnimation(CodAnimation.quick) { selectedCategory = nil }
+                    CodHaptic.selection()
                 }
 
                 ForEach(mapCategories, id: \.self) { category in
@@ -114,9 +117,10 @@ struct ExploreMapView: View {
                         icon: category.icon,
                         isSelected: selectedCategory == category
                     ) {
-                        withAnimation {
+                        withAnimation(CodAnimation.quick) {
                             selectedCategory = selectedCategory == category ? nil : category
                         }
+                        CodHaptic.selection()
                     }
                 }
             }
@@ -124,7 +128,6 @@ struct ExploreMapView: View {
         }
     }
 
-    /// Categories that appear in our POI set
     private var mapCategories: [LocationCategory] {
         let used = Set(allPOIs.map(\.category))
         return LocationCategory.allCases.filter { used.contains($0) }
@@ -142,16 +145,14 @@ struct ExploreMapView: View {
         }
     }
 
-    // MARK: - Helpers
-
     private func annotationColor(for category: LocationCategory) -> Color {
         switch category {
         case .beach: Color.capeCod.oceanBlue
         case .restaurant: Color.capeCod.sunsetOrange
-        case .historic, .museum: Color(hex: 0x8B6914)
+        case .historic, .museum: Color.capeCod.driftwood
         case .nature: Color.capeCod.duneGrass
         case .lighthouse: Color.capeCod.sandbarYellow
-        case .entertainment: Color(hex: 0x9B59B6)
+        case .entertainment: Color.capeCod.cranberry
         case .marina: Color.capeCod.oceanBlue
         default: Color.capeCod.driftwood
         }
@@ -166,7 +167,6 @@ private struct POIAnnotationView: View {
 
     var body: some View {
         VStack(spacing: 2) {
-            // Pin circle with icon
             ZStack {
                 Circle()
                     .fill(pinColor)
@@ -185,16 +185,21 @@ private struct POIAnnotationView: View {
                 .rotationEffect(.degrees(180))
         }
         .animation(CodAnimation.quick, value: isSelected)
+        .codAccessible(
+            label: "\(poi.name), \(poi.category.displayName)",
+            hint: "Double tap for details",
+            traits: .isButton
+        )
     }
 
     private var pinColor: Color {
         switch poi.category {
         case .beach: Color.capeCod.oceanBlue
         case .restaurant: Color.capeCod.sunsetOrange
-        case .historic, .museum: Color(hex: 0x8B6914)
+        case .historic, .museum: Color.capeCod.driftwood
         case .nature: Color.capeCod.duneGrass
         case .lighthouse: Color.capeCod.sandbarYellow
-        case .entertainment: Color(hex: 0x9B59B6)
+        case .entertainment: Color.capeCod.cranberry
         case .marina: Color.capeCod.oceanBlue
         default: Color.capeCod.driftwood
         }
@@ -242,16 +247,20 @@ private struct FilterChip: View {
                 Image(systemName: icon)
                     .font(.system(size: 11))
                 Text(label)
-                    .font(.system(size: 12, weight: .medium))
+                    .codTextStyle(.label)
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
+            .padding(.horizontal, CodSpacing.sm + 4)
+            .padding(.vertical, CodSpacing.sm)
             .background(isSelected ? Color.capeCod.oceanBlue : .ultraThinMaterial)
             .foregroundStyle(isSelected ? .white : Color.capeCod.textPrimary)
             .clipShape(Capsule())
             .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(CodButtonPressStyle(variant: .ghost))
+        .codAccessibleButton(
+            "\(label) filter",
+            hint: isSelected ? "Currently active" : "Double tap to filter map"
+        )
     }
 }
 
@@ -265,33 +274,24 @@ struct POIDetailSheet: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: CodSpacing.lg) {
-                // Header
                 headerSection
-
                 Divider()
 
-                // Description
                 Text(poi.description)
-                    .font(.system(size: 15))
-                    .foregroundStyle(Color.capeCod.textPrimary)
-                    .lineSpacing(4)
+                    .codTextStyle(.storyBody)
 
-                // Stories
                 if !poi.stories.isEmpty {
                     storiesSection
                 }
 
-                // Quick Facts
                 if !poi.facts.isEmpty {
                     factsSection
                 }
 
-                // Insider Tips
                 if !poi.tips.isEmpty {
                     tipsSection
                 }
 
-                // Actions
                 actionsSection
             }
             .padding(CodSpacing.screenEdge)
@@ -311,9 +311,8 @@ struct POIDetailSheet: View {
                     .foregroundStyle(Color.capeCod.oceanBlue)
                     .font(.system(size: 14))
                 Text(poi.category.displayName)
-                    .font(.system(size: 12, weight: .medium))
+                    .codTextStyle(.label)
                     .foregroundStyle(Color.capeCod.oceanBlue)
-                    .textCase(.uppercase)
 
                 Spacer()
 
@@ -323,18 +322,16 @@ struct POIDetailSheet: View {
                             .font(.system(size: 10))
                         Text(dist)
                     }
-                    .font(.system(size: 12, weight: .medium))
+                    .codTextStyle(.label)
                     .foregroundStyle(Color.capeCod.driftwood)
                 }
             }
 
             Text(poi.name)
-                .font(.system(size: 24, weight: .bold))
-                .foregroundStyle(Color.capeCod.textPrimary)
+                .codTextStyle(.heroTitle)
 
             Text("\(poi.town.displayName) \u{2022} \(poi.town.region.rawValue)")
-                .font(.system(size: 14))
-                .foregroundStyle(Color.capeCod.textSecondary)
+                .codTextStyle(.caption)
         }
     }
 
@@ -343,11 +340,11 @@ struct POIDetailSheet: View {
     private var storiesSection: some View {
         VStack(alignment: .leading, spacing: CodSpacing.md) {
             Label("Stories", systemImage: "headphones")
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(Color.capeCod.textPrimary)
+                .codTextStyle(.cardTitle)
 
             ForEach(poi.stories) { story in
                 Button {
+                    CodHaptic.tap()
                     let player = StoryPlayerViewModel()
                     player.loadAndPlay(poi: poi, story: story)
                     storyPlayer = player
@@ -355,17 +352,14 @@ struct POIDetailSheet: View {
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(story.title)
-                                .font(.system(size: 15, weight: .medium))
-                                .foregroundStyle(Color.capeCod.textPrimary)
+                                .codTextStyle(.body)
                             HStack(spacing: CodSpacing.sm) {
                                 Label(story.mode.displayName, systemImage: modeIcon(story.mode))
-                                    .font(.system(size: 12))
-                                    .foregroundStyle(Color.capeCod.textSecondary)
+                                    .codTextStyle(.caption)
                                 Text("\u{2022}")
                                     .foregroundStyle(Color.capeCod.textSecondary)
                                 Text(formatDuration(story.duration))
-                                    .font(.system(size: 12))
-                                    .foregroundStyle(Color.capeCod.textSecondary)
+                                    .codTextStyle(.caption)
                             }
                         }
                         Spacer()
@@ -375,9 +369,13 @@ struct POIDetailSheet: View {
                     }
                     .padding(CodSpacing.md)
                     .background(Color.capeCod.surface)
-                    .clipShape(RoundedRectangle(cornerRadius: CodRadius.card))
+                    .clipShape(RoundedRectangle(cornerRadius: CodRadius.card, style: .continuous))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(CodCardButtonStyle())
+                .codAccessibleCard(
+                    label: "Story: \(story.title), \(story.mode.displayName), \(formatDuration(story.duration))",
+                    hint: "Double tap to play"
+                )
             }
         }
     }
@@ -387,8 +385,7 @@ struct POIDetailSheet: View {
     private var factsSection: some View {
         VStack(alignment: .leading, spacing: CodSpacing.md) {
             Label("Quick Facts", systemImage: "lightbulb.fill")
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(Color.capeCod.textPrimary)
+                .codTextStyle(.cardTitle)
 
             VStack(alignment: .leading, spacing: CodSpacing.sm) {
                 ForEach(Array(poi.facts.enumerated()), id: \.offset) { _, fact in
@@ -398,8 +395,7 @@ struct POIDetailSheet: View {
                             .frame(width: 6, height: 6)
                             .padding(.top, 6)
                         Text(fact)
-                            .font(.system(size: 14))
-                            .foregroundStyle(Color.capeCod.textPrimary)
+                            .codTextStyle(.body)
                     }
                 }
             }
@@ -411,8 +407,7 @@ struct POIDetailSheet: View {
     private var tipsSection: some View {
         VStack(alignment: .leading, spacing: CodSpacing.md) {
             Label("Insider Tips", systemImage: "star.fill")
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(Color.capeCod.textPrimary)
+                .codTextStyle(.cardTitle)
 
             VStack(alignment: .leading, spacing: CodSpacing.sm) {
                 ForEach(Array(poi.tips.enumerated()), id: \.offset) { _, tip in
@@ -422,8 +417,7 @@ struct POIDetailSheet: View {
                             .foregroundStyle(Color.capeCod.sunsetOrange)
                             .padding(.top, 4)
                         Text(tip)
-                            .font(.system(size: 14))
-                            .foregroundStyle(Color.capeCod.textPrimary)
+                            .codTextStyle(.body)
                     }
                 }
             }

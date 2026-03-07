@@ -9,17 +9,32 @@ struct TrafficView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: CodSpacing.sectionSpacing) {
-                    // Bridge Status
-                    bridgeSection
+                    if isLoading && report == nil {
+                        // Loading state
+                        VStack(spacing: CodSpacing.md) {
+                            HStack(spacing: CodSpacing.md) {
+                                LoadingSkeleton(variant: .metric)
+                                LoadingSkeleton(variant: .metric)
+                            }
+                            LoadingSkeleton(variant: .card)
+                        }
+                        .padding(.horizontal, CodSpacing.screenEdge)
+                    } else {
+                        // Bridge Status
+                        bridgeSection
+                            .staggered(index: 0)
 
-                    // Route Conditions
-                    if let report, !report.routes.isEmpty {
-                        routesSection(report.routes)
-                    }
+                        // Route Conditions
+                        if let report, !report.routes.isEmpty {
+                            routesSection(report.routes)
+                                .staggered(index: 1)
+                        }
 
-                    // Active Incidents
-                    if let report, !report.incidents.isEmpty {
-                        incidentsSection(report.incidents)
+                        // Active Incidents
+                        if let report, !report.incidents.isEmpty {
+                            incidentsSection(report.incidents)
+                                .staggered(index: 2)
+                        }
                     }
                 }
                 .padding(.horizontal, CodSpacing.screenEdge)
@@ -68,6 +83,10 @@ struct TrafficView: View {
                     Circle()
                         .fill(congestionColor(route.congestionLevel))
                         .frame(width: 12, height: 12)
+                        .pulsingGlow(
+                            color: congestionColor(route.congestionLevel),
+                            isActive: route.congestionLevel == .heavy || route.congestionLevel == .severe
+                        )
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text(route.name)
@@ -84,15 +103,19 @@ struct TrafficView: View {
                     if route.currentTravelTime > 0 {
                         Text(route.travelTimeFormatted)
                             .codTextStyle(.body)
+                            .monospacedDigit()
                     }
                 }
                 .padding(.vertical, CodSpacing.xs)
+                .codAccessibleGroup(
+                    label: "\(route.name): \(route.congestionLevel.rawValue)\(route.delayMinutes > 0 ? ", \(route.delayMinutes) minute delay" : "")"
+                )
             }
         }
         .padding(CodSpacing.cardPadding)
-        .background(Color.capeCod.cardBackground)
-        .clipShape(RoundedRectangle(cornerRadius: CodRadius.card))
-        .codShadow(.card)
+        .background(Color.capeCod.surfaceElevated)
+        .clipShape(RoundedRectangle(cornerRadius: CodRadius.card, style: .continuous))
+        .adaptiveCardStyle()
     }
 
     // MARK: - Incidents
@@ -119,6 +142,7 @@ struct TrafficView: View {
                     }
                 }
                 .padding(CodSpacing.sm)
+                .codAccessibleGroup(label: "Incident: \(incident.title). \(incident.description)")
             }
         }
     }
@@ -152,6 +176,7 @@ private struct BridgeCard: View {
             Image(systemName: condition?.status.icon ?? "questionmark.circle")
                 .font(.title)
                 .foregroundStyle(statusColor)
+                .contentTransition(.symbolEffect(.replace))
 
             Text(name)
                 .codTextStyle(.cardTitle)
@@ -162,16 +187,29 @@ private struct BridgeCard: View {
                 .foregroundStyle(statusColor)
 
             if let delay = condition?.delayMinutes, delay > 0 {
-                Text("+\(delay) min")
-                    .codTextStyle(.label)
-                    .foregroundStyle(Color.capeCod.sunsetOrange)
+                HStack(spacing: 2) {
+                    Text("+")
+                        .codTextStyle(.label)
+                        .foregroundStyle(Color.capeCod.sunsetOrange)
+                    AnimatedCounter(delay, font: CapeCodTypography.label(), color: Color.capeCod.sunsetOrange)
+                    Text("min")
+                        .codTextStyle(.label)
+                        .foregroundStyle(Color.capeCod.sunsetOrange)
+                }
             }
         }
         .frame(maxWidth: .infinity)
         .padding(CodSpacing.cardPadding)
-        .background(Color.capeCod.cardBackground)
-        .clipShape(RoundedRectangle(cornerRadius: CodRadius.card))
-        .codShadow(.card)
+        .background(Color.capeCod.surfaceElevated)
+        .clipShape(RoundedRectangle(cornerRadius: CodRadius.card, style: .continuous))
+        .adaptiveCardStyle()
+        .pulsingGlow(
+            color: statusColor,
+            isActive: condition?.status == .restricted || condition?.status == .closed
+        )
+        .codAccessibleGroup(
+            label: "\(name): \(condition?.status.displayName ?? "Loading")\(condition?.delayMinutes.map { $0 > 0 ? ", \($0) minute delay" : "" } ?? "")"
+        )
     }
 
     private var statusColor: Color {

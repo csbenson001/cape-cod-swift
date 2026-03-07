@@ -6,11 +6,9 @@ import MediaPlayer
 ///
 /// - Free tier: AVSpeechSynthesizer (on-device)
 /// - Premium tier: OpenAI TTS API (much better quality)
-///
-/// Integrates with MiniPlayerBar for persistent mini-player,
-/// and MPNowPlayingInfoCenter for lock screen controls.
 struct StoryPlayerView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Bindable var viewModel: StoryPlayerViewModel
 
     var body: some View {
@@ -24,39 +22,32 @@ struct StoryPlayerView: View {
             .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                // Drag handle + close
                 topBar
 
                 Spacer()
 
-                // Artwork / icon
                 artworkSection
 
                 Spacer()
 
-                // Title and POI
                 titleSection
                     .padding(.horizontal, CodSpacing.screenEdge)
 
-                // Progress bar
                 progressSection
                     .padding(.top, CodSpacing.lg)
                     .padding(.horizontal, CodSpacing.screenEdge)
 
-                // Playback controls
                 controlsSection
                     .padding(.top, CodSpacing.lg)
 
-                // Script text (scrollable)
                 if viewModel.showTranscript {
                     scriptSection
                         .padding(.top, CodSpacing.lg)
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                        .transition(.codSlideUp)
                 }
 
                 Spacer()
 
-                // Bottom actions
                 bottomSection
                     .padding(.horizontal, CodSpacing.screenEdge)
                     .padding(.bottom, CodSpacing.lg)
@@ -80,19 +71,27 @@ struct StoryPlayerView: View {
                     .foregroundStyle(.white.opacity(0.5))
                     .frame(width: 44, height: 44)
             }
+            .codAccessibleButton("Close player")
+
             Spacer()
+
             Text(viewModel.poi?.name ?? "Story")
-                .font(.system(size: 13, weight: .medium))
+                .codTextStyle(.caption)
                 .foregroundStyle(.white.opacity(0.5))
+
             Spacer()
+
             Button {
-                withAnimation { viewModel.showTranscript.toggle() }
+                withAnimation(CodAnimation.quick) { viewModel.showTranscript.toggle() }
             } label: {
                 Image(systemName: "text.alignleft")
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(viewModel.showTranscript ? Color.capeCod.seafoam : .white.opacity(0.5))
                     .frame(width: 44, height: 44)
             }
+            .codAccessibleButton(
+                viewModel.showTranscript ? "Hide transcript" : "Show transcript"
+            )
         }
         .padding(.horizontal, CodSpacing.sm)
     }
@@ -101,10 +100,12 @@ struct StoryPlayerView: View {
 
     private var artworkSection: some View {
         ZStack {
+            // Outer glow
             Circle()
                 .fill(Color.capeCod.oceanBlue.opacity(0.15))
                 .frame(width: 200, height: 200)
 
+            // Gradient orb
             Circle()
                 .fill(
                     LinearGradient(
@@ -114,11 +115,13 @@ struct StoryPlayerView: View {
                     )
                 )
                 .frame(width: 160, height: 160)
+                .shadow(color: Color.capeCod.oceanBlue.opacity(0.3), radius: 20)
 
             Image(systemName: viewModel.poi?.imageSystemName ?? "headphones")
                 .font(.system(size: 48, weight: .light))
                 .foregroundStyle(.white)
         }
+        .codAccessibleHidden()
     }
 
     // MARK: - Title
@@ -126,13 +129,13 @@ struct StoryPlayerView: View {
     private var titleSection: some View {
         VStack(spacing: CodSpacing.sm) {
             Text(viewModel.currentStory?.title ?? "")
-                .font(.system(size: 22, weight: .semibold))
+                .codTextStyle(.sectionTitle)
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
 
             if let poi = viewModel.poi {
                 Text("\(poi.town.displayName) \u{2022} \(poi.category.displayName)")
-                    .font(.system(size: 14))
+                    .codTextStyle(.caption)
                     .foregroundStyle(.white.opacity(0.5))
             }
         }
@@ -142,7 +145,6 @@ struct StoryPlayerView: View {
 
     private var progressSection: some View {
         VStack(spacing: CodSpacing.xs) {
-            // Scrubber
             Slider(
                 value: $viewModel.progress,
                 in: 0...1,
@@ -156,22 +158,25 @@ struct StoryPlayerView: View {
 
             HStack {
                 Text(viewModel.formattedElapsed)
-                    .font(.system(size: 12, design: .monospaced))
+                    .codTextStyle(.label)
+                    .monospacedDigit()
                     .foregroundStyle(.white.opacity(0.4))
                 Spacer()
                 Text(viewModel.formattedRemaining)
-                    .font(.system(size: 12, design: .monospaced))
+                    .codTextStyle(.label)
+                    .monospacedDigit()
                     .foregroundStyle(.white.opacity(0.4))
             }
         }
+        .codAccessibleGroup(label: "Progress: \(viewModel.formattedElapsed) of \(viewModel.formattedRemaining)")
     }
 
     // MARK: - Controls
 
     private var controlsSection: some View {
         HStack(spacing: CodSpacing.xl) {
-            // Rewind 15s
             Button {
+                CodHaptic.light()
                 viewModel.rewind15()
             } label: {
                 Image(systemName: "gobackward.15")
@@ -179,9 +184,10 @@ struct StoryPlayerView: View {
                     .foregroundStyle(.white.opacity(0.7))
                     .frame(width: 52, height: 52)
             }
+            .codAccessibleButton("Rewind 15 seconds")
 
-            // Play / Pause
             Button {
+                CodHaptic.tap()
                 viewModel.togglePlayPause()
             } label: {
                 Image(systemName: viewModel.isPlaying ? "pause.circle.fill" : "play.circle.fill")
@@ -189,9 +195,10 @@ struct StoryPlayerView: View {
                     .foregroundStyle(.white)
                     .contentTransition(.symbolEffect(.replace))
             }
+            .codAccessibleButton(viewModel.isPlaying ? "Pause" : "Play")
 
-            // Skip (next story or finish)
             Button {
+                CodHaptic.light()
                 viewModel.skip()
             } label: {
                 Image(systemName: "forward.end.fill")
@@ -199,6 +206,7 @@ struct StoryPlayerView: View {
                     .foregroundStyle(.white.opacity(0.7))
                     .frame(width: 52, height: 52)
             }
+            .codAccessibleButton("Skip to next")
         }
     }
 
@@ -207,9 +215,8 @@ struct StoryPlayerView: View {
     private var scriptSection: some View {
         ScrollView {
             Text(viewModel.currentStory?.script ?? "")
-                .font(.system(size: 14))
+                .codTextStyle(.storyBody)
                 .foregroundStyle(.white.opacity(0.65))
-                .lineSpacing(6)
                 .padding(.horizontal, CodSpacing.screenEdge)
         }
         .frame(maxHeight: 160)
@@ -242,17 +249,17 @@ struct StoryPlayerView: View {
                 }
             } label: {
                 Text("\(viewModel.speechRate, specifier: viewModel.speechRate == 1.0 ? "%.0f" : "%.2g")x")
-                    .font(.system(size: 14, weight: .medium))
+                    .codTextStyle(.body)
                     .foregroundStyle(.white.opacity(0.5))
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
+                    .padding(.horizontal, CodSpacing.sm + 4)
+                    .padding(.vertical, CodSpacing.xs + 2)
                     .background(.white.opacity(0.1))
                     .clipShape(Capsule())
             }
+            .codAccessibleButton("Playback speed: \(viewModel.speechRate, specifier: "%.2g")x")
 
             Spacer()
 
-            // Share
             Button {
                 // Future: share story
             } label: {
@@ -261,6 +268,7 @@ struct StoryPlayerView: View {
                     .foregroundStyle(.white.opacity(0.5))
                     .frame(width: 44, height: 44)
             }
+            .codAccessibleButton("Share story")
         }
     }
 }
@@ -285,7 +293,6 @@ final class StoryPlayerViewModel: NSObject {
     var formattedElapsed: String { formatTime(elapsed) }
     var formattedRemaining: String { "-\(formatTime(max(0, duration - elapsed)))" }
 
-    /// Data for the MiniPlayerBar
     var miniPlayerData: MiniPlayerData? {
         guard let story = currentStory else { return nil }
         return MiniPlayerData(
@@ -366,8 +373,6 @@ final class StoryPlayerViewModel: NSObject {
     }
 
     func rewind15() {
-        // AVSpeechSynthesizer doesn't support seeking, so restart with adjusted position
-        // For a real implementation with audio files, this would seek backward
         elapsed = max(0, elapsed - 15)
         progress = duration > 0 ? elapsed / duration : 0
         updateNowPlaying()
@@ -376,7 +381,6 @@ final class StoryPlayerViewModel: NSObject {
     func skip() {
         stop()
         clearNowPlaying()
-        // The GeofenceManager will trigger storyDidFinish
     }
 
     func seekToProgress() {
@@ -386,7 +390,6 @@ final class StoryPlayerViewModel: NSObject {
 
     func setSpeed(_ rate: Float) {
         speechRate = rate
-        // If currently playing, restart with new rate
         if isPlaying, let story = currentStory {
             synthesizer.stopSpeaking(at: .immediate)
             let utterance = AVSpeechUtterance(string: story.script)
@@ -450,7 +453,6 @@ final class StoryPlayerViewModel: NSObject {
             MPMediaItemPropertyMediaType: MPMediaType.podcast.rawValue,
         ]
 
-        // Generate artwork from SF Symbol
         if let systemName = poi?.imageSystemName {
             let config = UIImage.SymbolConfiguration(pointSize: 120, weight: .light)
             if let image = UIImage(systemName: systemName, withConfiguration: config)?
@@ -521,6 +523,7 @@ extension StoryPlayerViewModel: AVSpeechSynthesizerDelegate {
             self?.progress = 1.0
             self?.stopProgressTimer()
             self?.updateNowPlaying()
+            CodHaptic.success()
         }
     }
 

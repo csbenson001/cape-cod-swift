@@ -10,21 +10,26 @@ struct HomeView: View {
                 VStack(spacing: CodSpacing.sectionSpacing) {
                     // Greeting Header
                     greetingSection
+                        .staggered(index: 0)
 
                     // Quick Glance Cards
                     quickGlanceSection
+                        .staggered(index: 1)
 
                     // Voice Assistant CTA
                     voiceAssistantCard
+                        .staggered(index: 2)
 
                     // Featured Stories
                     if !viewModel.featuredStories.isEmpty {
                         storiesSection
+                            .staggered(index: 3)
                     }
 
                     // Recent Conversations
                     if !viewModel.recentConversations.isEmpty {
                         recentSection
+                            .staggered(index: 4)
                     }
                 }
                 .padding(.horizontal, CodSpacing.screenEdge)
@@ -52,6 +57,7 @@ struct HomeView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.top, CodSpacing.md)
+        .codAccessibleHeader(viewModel.greeting)
     }
 
     // MARK: - Quick Glance
@@ -60,21 +66,28 @@ struct HomeView: View {
         VStack(spacing: CodSpacing.md) {
             HStack(spacing: CodSpacing.md) {
                 MetricCard(
-                    title: "Temperature",
                     value: viewModel.temperatureString,
-                    icon: viewModel.conditionIcon
+                    unit: "",
+                    label: "Temperature",
+                    icon: viewModel.conditionIcon,
+                    tint: Color.capeCod.sunsetOrange
                 )
                 MetricCard(
-                    title: "Next Tide",
                     value: viewModel.nextTideString,
-                    icon: "water.waves"
+                    unit: "",
+                    label: "Next Tide",
+                    icon: "water.waves",
+                    tint: Color.capeCod.oceanBlue
                 )
             }
 
             MetricCard(
-                title: "Bridge Traffic",
                 value: viewModel.bridgeSummary,
-                icon: "car.fill"
+                unit: "",
+                label: "Bridge Traffic",
+                icon: "car.fill",
+                tint: Color.capeCod.duneGrass,
+                isLive: true
             )
         }
     }
@@ -83,6 +96,7 @@ struct HomeView: View {
 
     private var voiceAssistantCard: some View {
         Button {
+            CodHaptic.tap()
             appState.isVoiceAssistantPresented = true
         } label: {
             HStack(spacing: CodSpacing.md) {
@@ -103,11 +117,12 @@ struct HomeView: View {
                     .foregroundStyle(Color.capeCod.driftwood)
             }
             .padding(CodSpacing.cardPadding)
-            .background(Color.capeCod.cardBackground)
-            .clipShape(RoundedRectangle(cornerRadius: CodRadius.card))
-            .codShadow(.card)
+            .background(Color.capeCod.surfaceElevated)
+            .clipShape(RoundedRectangle(cornerRadius: CodRadius.card, style: .continuous))
+            .adaptiveCardStyle()
         }
-        .buttonStyle(.plain)
+        .buttonStyle(CodCardButtonStyle())
+        .codAccessibleButton("Ask Cape Cod", hint: "Start a voice conversation with your AI travel companion")
     }
 
     // MARK: - Stories
@@ -117,8 +132,9 @@ struct HomeView: View {
             Text("Stories Nearby")
                 .codTextStyle(.sectionTitle)
 
-            ForEach(viewModel.featuredStories) { story in
+            ForEach(Array(viewModel.featuredStories.enumerated()), id: \.element.id) { index, story in
                 StoryRow(story: story)
+                    .staggered(index: index, interval: 0.03)
             }
         }
     }
@@ -130,8 +146,9 @@ struct HomeView: View {
             Text("Recent Conversations")
                 .codTextStyle(.sectionTitle)
 
-            ForEach(viewModel.recentConversations) { conversation in
+            ForEach(Array(viewModel.recentConversations.enumerated()), id: \.element.id) { index, conversation in
                 ConversationRow(conversation: conversation)
+                    .staggered(index: index, interval: 0.03)
             }
         }
     }
@@ -154,7 +171,7 @@ private struct StoryRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(story.title)
                     .codTextStyle(.body)
-                Text("\(story.narrator) · \(story.formattedDuration)")
+                Text("\(story.narrator) \u{00B7} \(story.formattedDuration)")
                     .codTextStyle(.caption)
             }
 
@@ -163,8 +180,13 @@ private struct StoryRow: View {
             Image(systemName: story.isListened ? "checkmark.circle.fill" : "play.circle.fill")
                 .foregroundStyle(story.isListened ? Color.capeCod.duneGrass : Color.capeCod.oceanBlue)
                 .font(.title2)
+                .contentTransition(.symbolEffect(.replace))
         }
         .padding(CodSpacing.sm)
+        .codAccessibleCard(
+            label: "\(story.title) by \(story.narrator), \(story.formattedDuration)\(story.isListened ? ", listened" : "")",
+            hint: "Double tap to play"
+        )
     }
 }
 
@@ -193,6 +215,10 @@ private struct ConversationRow: View {
                 .codTextStyle(.label)
         }
         .padding(CodSpacing.sm)
+        .codAccessibleCard(
+            label: "\(conversation.title), \(conversation.updatedAt.formatted(.relative(presentation: .named)))",
+            hint: "Double tap to continue conversation"
+        )
     }
 }
 

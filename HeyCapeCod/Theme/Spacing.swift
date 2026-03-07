@@ -41,6 +41,8 @@ enum CodRadius {
     static let input: CGFloat = 10
     /// 8pt — small chips, tags
     static let chip: CGFloat = 8
+    /// 6pt — small elements, banners
+    static let sm: CGFloat = 6
     /// 24pt — large featured cards
     static let featured: CGFloat = 24
 }
