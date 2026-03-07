@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - MetricCard
 
 /// Displays a prominent number with unit, optional trend arrow, and color-coded background.
-/// Used for traffic delays, temperatures, tide times, etc.
+/// Uses AnimatedCounter for smooth number transitions and optional pulsing glow for live data.
 struct MetricCard: View {
     let value: String
     let unit: String
@@ -11,6 +11,7 @@ struct MetricCard: View {
     let icon: String?
     let tint: Color
     let trend: MetricTrend?
+    var isLive: Bool = false
 
     init(
         value: String,
@@ -18,7 +19,8 @@ struct MetricCard: View {
         label: String,
         icon: String? = nil,
         tint: Color = Color.capeCod.primary,
-        trend: MetricTrend? = nil
+        trend: MetricTrend? = nil,
+        isLive: Bool = false
     ) {
         self.value = value
         self.unit = unit
@@ -26,6 +28,7 @@ struct MetricCard: View {
         self.icon = icon
         self.tint = tint
         self.trend = trend
+        self.isLive = isLive
     }
 
     var body: some View {
@@ -43,9 +46,13 @@ struct MetricCard: View {
 
             // Metric value + unit
             HStack(alignment: .firstTextBaseline, spacing: CodSpacing.xs) {
-                Text(value)
-                    .codTextStyle(.metric)
-                    .foregroundStyle(tint)
+                if let intValue = Int(value) {
+                    AnimatedCounter(intValue, color: tint)
+                } else {
+                    Text(value)
+                        .codTextStyle(.metric)
+                        .foregroundStyle(tint)
+                }
 
                 Text(unit)
                     .codTextStyle(.metricUnit)
@@ -65,6 +72,7 @@ struct MetricCard: View {
             RoundedRectangle(cornerRadius: CodRadius.card, style: .continuous)
                 .strokeBorder(tint.opacity(0.15), lineWidth: 0.5)
         )
+        .pulsingGlow(color: tint, isActive: isLive)
     }
 }
 
@@ -101,7 +109,8 @@ enum MetricTrend {
                 label: "Bourne Bridge",
                 icon: "car.fill",
                 tint: Color.capeCod.lobsterRed,
-                trend: .up
+                trend: .up,
+                isLive: true
             )
 
             MetricCard(

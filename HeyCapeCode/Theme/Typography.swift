@@ -2,15 +2,15 @@ import SwiftUI
 
 // MARK: - Cape Cod Typography System
 
-/// Editorial type hierarchy using SF Pro.
+/// Editorial type hierarchy using SF Pro with SF Rounded for hero elements.
 /// Every style supports Dynamic Type scaling via @ScaledMetric.
 struct CapeCodTypography {
 
     // MARK: - Font Definitions
 
-    /// 34pt bold, tight tracking — screen headers like "Explore Cape Cod"
+    /// 34pt bold rounded, tight tracking — screen headers like "Explore Cape Cod"
     static func heroTitle() -> Font {
-        .system(size: 34, weight: .bold, design: .default)
+        .system(size: 34, weight: .bold, design: .rounded)
     }
 
     /// 22pt semibold — section headers like "Nearby Beaches"
@@ -23,8 +23,13 @@ struct CapeCodTypography {
         .system(size: 17, weight: .semibold, design: .default)
     }
 
-    /// 15pt regular — descriptions and story text
+    /// 15pt regular — descriptions and general text
     static func body() -> Font {
+        .system(size: 15, weight: .regular, design: .default)
+    }
+
+    /// 15pt regular with generous line spacing — for story/description text
+    static func storyBody() -> Font {
         .system(size: 15, weight: .regular, design: .default)
     }
 
@@ -62,7 +67,7 @@ struct CapeCodTextStyle: ViewModifier {
         switch style {
         case .heroTitle:
             content
-                .font(.system(size: 34 * scale, weight: .bold))
+                .font(.system(size: 34 * scale, weight: .bold, design: .rounded))
                 .tracking(-0.5)
                 .foregroundStyle(Color.capeCod.textPrimary)
 
@@ -79,6 +84,12 @@ struct CapeCodTextStyle: ViewModifier {
         case .body:
             content
                 .font(.system(size: 15 * scale, weight: .regular))
+                .foregroundStyle(Color.capeCod.textPrimary)
+
+        case .storyBody:
+            content
+                .font(.system(size: 15 * scale, weight: .regular))
+                .lineSpacing(15 * scale * 0.4)
                 .foregroundStyle(Color.capeCod.textPrimary)
 
         case .caption:
@@ -102,6 +113,28 @@ struct CapeCodTextStyle: ViewModifier {
             content
                 .font(.system(size: 13 * scale, weight: .regular))
                 .foregroundStyle(Color.capeCod.textSecondary)
+
+        case .bannerText:
+            content
+                .font(.system(size: 14 * scale, weight: .medium))
+
+        case .bannerAction:
+            content
+                .font(.system(size: 13 * scale, weight: .bold))
+
+        case .miniPlayerTitle:
+            content
+                .font(.system(size: 14 * scale, weight: .semibold))
+                .foregroundStyle(Color.capeCod.textPrimary)
+
+        case .miniPlayerSubtitle:
+            content
+                .font(.system(size: 12 * scale, weight: .regular))
+                .foregroundStyle(Color.capeCod.textSecondary)
+
+        case .tabLabel:
+            content
+                .font(.system(size: 10 * scale, weight: .medium))
         }
     }
 }
@@ -111,10 +144,16 @@ enum CodTextStyle {
     case sectionTitle
     case cardTitle
     case body
+    case storyBody
     case caption
     case label
     case metric
     case metricUnit
+    case bannerText
+    case bannerAction
+    case miniPlayerTitle
+    case miniPlayerSubtitle
+    case tabLabel
 }
 
 extension View {

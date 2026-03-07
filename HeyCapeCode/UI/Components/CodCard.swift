@@ -10,8 +10,6 @@ struct CodCard<Content: View>: View {
     let action: (() -> Void)?
     @ViewBuilder let content: () -> Content
 
-    @State private var isPressed = false
-
     init(
         size: CodCardSize = .standard,
         action: (() -> Void)? = nil,
@@ -43,10 +41,9 @@ struct CodCard<Content: View>: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.capeCod.surfaceElevated)
         .clipShape(RoundedRectangle(cornerRadius: size.cornerRadius, style: .continuous))
-        .codShadow(size == .featured ? .elevated : .card)
-        .overlay(
-            RoundedRectangle(cornerRadius: size.cornerRadius, style: .continuous)
-                .strokeBorder(Color.capeCod.driftwood.opacity(0.15), lineWidth: 0.5)
+        .adaptiveCardStyle(
+            cornerRadius: size.cornerRadius,
+            shadow: size == .featured ? .elevated : .card
         )
     }
 }
@@ -85,7 +82,7 @@ enum CodCardSize {
 
 // MARK: - Card Subcomponents
 
-/// Image header with optional gradient overlay for text readability.
+/// Image header with gradient overlay using deep navy (not pure black).
 struct CodCardImage: View {
     let imageName: String
     let size: CodCardSize
@@ -99,26 +96,23 @@ struct CodCardImage: View {
 
     var body: some View {
         ZStack(alignment: .bottomLeading) {
-            if systemImage {
-                Image(systemName: imageName)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(height: size.imageHeight)
-                    .clipped()
-            } else {
-                Image(imageName)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(height: size.imageHeight)
-                    .clipped()
+            Group {
+                if systemImage {
+                    Image(systemName: imageName)
+                        .resizable()
+                        .scaledToFill()
+                } else {
+                    Image(imageName)
+                        .resizable()
+                        .scaledToFill()
+                        .darkModeDimmed()
+                }
             }
+            .frame(height: size.imageHeight)
+            .clipped()
 
-            // Gradient overlay for text legibility on images
-            LinearGradient(
-                colors: [.clear, .black.opacity(0.4)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
+            // Gradient overlay uses deep navy, not pure black
+            Color.capeCod.imageOverlayGradient()
         }
         .frame(height: size.imageHeight)
         .clipped()
@@ -132,7 +126,9 @@ struct CodCardBadge: View {
 
     var body: some View {
         Text(text)
-            .font(.system(size: 11, weight: .semibold))
+            .codTextStyle(.label)
+            .textCase(nil)
+            .tracking(0)
             .foregroundStyle(.white)
             .padding(.horizontal, CodSpacing.sm)
             .padding(.vertical, CodSpacing.xs)
@@ -195,7 +191,6 @@ extension Animation {
 #Preview("Card Sizes") {
     ScrollView {
         VStack(spacing: CodSpacing.lg) {
-            // Featured card
             CodCard(size: .featured) {
                 Rectangle()
                     .fill(Color.capeCod.oceanBlue.opacity(0.3))
@@ -207,7 +202,6 @@ extension Animation {
                 )
             }
 
-            // Standard card
             CodCard(size: .standard) {
                 CodCardContent(
                     title: "Chatham Lighthouse",
@@ -216,7 +210,6 @@ extension Animation {
                 )
             }
 
-            // Compact cards in horizontal scroll
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: CodSpacing.md) {
                     ForEach(0..<3) { i in

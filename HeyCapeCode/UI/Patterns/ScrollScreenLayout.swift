@@ -27,12 +27,10 @@ struct ScrollScreenLayout<Hero: View, Content: View>: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    // Hero section (full bleed, no horizontal padding)
                     if let hero {
                         hero()
                     }
 
-                    // Main content with screen edge padding
                     VStack(alignment: .leading, spacing: CodSpacing.sectionSpacing) {
                         content()
                     }
@@ -85,11 +83,12 @@ struct SectionHeader: View {
                 Button(action: seeAllAction) {
                     HStack(spacing: CodSpacing.xs) {
                         Text("See All")
-                            .font(.system(size: 15, weight: .medium))
+                            .codTextStyle(.body)
+                            .foregroundStyle(Color.capeCod.primary)
                         Image(systemName: "chevron.right")
                             .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(Color.capeCod.primary)
                     }
-                    .foregroundStyle(Color.capeCod.primary)
                 }
             }
         }
@@ -118,7 +117,6 @@ struct ContentSection<Content: View>: View {
     ScrollScreenLayout(
         title: "Explore",
         hero: {
-            // Hero gradient placeholder
             ZStack(alignment: .bottomLeading) {
                 LinearGradient(
                     colors: [Color.capeCod.oceanBlue, Color.capeCod.seafoam],
@@ -129,10 +127,10 @@ struct ContentSection<Content: View>: View {
 
                 VStack(alignment: .leading, spacing: CodSpacing.xs) {
                     Text("Good Morning")
-                        .font(.system(size: 15, weight: .medium))
+                        .codTextStyle(.caption)
                         .foregroundStyle(.white.opacity(0.8))
                     Text("Explore Cape Cod")
-                        .font(.system(size: 28, weight: .bold))
+                        .codTextStyle(.heroTitle)
                         .foregroundStyle(.white)
                 }
                 .padding(CodSpacing.screenEdge)
@@ -153,6 +151,7 @@ struct ContentSection<Content: View>: View {
                         badge: ("Beach", Color.capeCod.oceanBlue)
                     )
                 }
+                .staggered(index: i)
             }
         }
 
@@ -171,7 +170,8 @@ struct ContentSection<Content: View>: View {
                     label: "Sagamore",
                     icon: "car.fill",
                     tint: Color.capeCod.lobsterRed,
-                    trend: .up
+                    trend: .up,
+                    isLive: true
                 )
             }
         }

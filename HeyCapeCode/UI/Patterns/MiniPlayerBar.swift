@@ -29,15 +29,13 @@ struct MiniPlayerBar: View {
                 )
 
             // Title and subtitle
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: CodSpacing.xs - 2) {
                 Text(title)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(Color.capeCod.textPrimary)
+                    .codTextStyle(.miniPlayerTitle)
                     .lineLimit(1)
 
                 Text(subtitle)
-                    .font(.system(size: 12, weight: .regular))
-                    .foregroundStyle(Color.capeCod.textSecondary)
+                    .codTextStyle(.miniPlayerSubtitle)
                     .lineLimit(1)
             }
 
@@ -71,11 +69,9 @@ struct MiniPlayerBar: View {
         .frame(height: barHeight)
         .background(
             ZStack(alignment: .bottom) {
-                // Blurred background material
                 Rectangle()
                     .fill(.ultraThinMaterial)
 
-                // Progress bar at the very bottom
                 GeometryReader { geometry in
                     Rectangle()
                         .fill(Color.capeCod.primary)
@@ -92,7 +88,6 @@ struct MiniPlayerBar: View {
         .gesture(
             DragGesture()
                 .onChanged { value in
-                    // Only allow right swipe to dismiss
                     if value.translation.width > 0 {
                         dragOffset = value.translation.width
                     }
@@ -120,8 +115,6 @@ struct MiniPlayerBar: View {
 
 // MARK: - MiniPlayerBar Container
 
-/// Use this modifier to attach a MiniPlayerBar above the tab bar.
-/// It handles presentation animation and safe spacing.
 struct MiniPlayerModifier: ViewModifier {
     let player: MiniPlayerData?
     var onPlayPause: () -> Void
@@ -205,7 +198,6 @@ private struct MiniPlayerPreview: View {
                             .tint(Color.capeCod.primary)
                     }
 
-                    // Static examples at different states
                     VStack(spacing: CodSpacing.md) {
                         Text("Static Examples").codTextStyle(.sectionTitle)
 

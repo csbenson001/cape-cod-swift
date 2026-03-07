@@ -73,6 +73,16 @@ struct CapeCodColors {
         Color(light: .white, dark: .white)
     }
 
+    /// Subtle border for dark mode cards (replaces shadows which don't read well on dark)
+    var cardBorder: Color {
+        Color(light: Color(hex: 0xA69279).opacity(0.15), dark: .white.opacity(0.08))
+    }
+
+    /// Image overlay gradient base color — navy instead of pure black for warmth
+    var imageOverlay: Color {
+        Color(light: Color(hex: 0x0D2137).opacity(0.4), dark: Color(hex: 0x0D2137).opacity(0.5))
+    }
+
     // MARK: - Traffic Semantic Colors
 
     var trafficClear: Color { duneGrass }
@@ -103,6 +113,15 @@ struct CapeCodColors {
             endPoint: .bottomTrailing
         )
     }
+
+    /// Image overlay gradient — uses deep navy instead of pure black
+    func imageOverlayGradient(from startPoint: UnitPoint = .top, to endPoint: UnitPoint = .bottom) -> LinearGradient {
+        LinearGradient(
+            colors: [.clear, Color(hex: 0x0D2137).opacity(0.45)],
+            startPoint: startPoint,
+            endPoint: endPoint
+        )
+    }
 }
 
 // MARK: - Adaptive Color Helper
@@ -129,5 +148,55 @@ extension Color {
             blue: Double(hex & 0xFF) / 255.0,
             opacity: opacity
         )
+    }
+}
+
+// MARK: - Dark Mode Image Dimming
+
+/// Reduces image brightness by 10% in dark mode for a more comfortable viewing experience.
+struct DarkModeDimming: ViewModifier {
+    @Environment(\.colorScheme) private var colorScheme
+
+    func body(content: Content) -> some View {
+        content
+            .brightness(colorScheme == .dark ? -0.1 : 0)
+    }
+}
+
+extension View {
+    func darkModeDimmed() -> some View {
+        modifier(DarkModeDimming())
+    }
+}
+
+// MARK: - Adaptive Card Styling
+
+/// Applies shadow in light mode and subtle border in dark mode.
+struct AdaptiveCardStyle: ViewModifier {
+    let cornerRadius: CGFloat
+    let shadow: CodShadow
+    @Environment(\.colorScheme) private var colorScheme
+
+    func body(content: Content) -> some View {
+        if colorScheme == .dark {
+            content
+                .overlay(
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .strokeBorder(Color.white.opacity(0.08), lineWidth: 1)
+                )
+        } else {
+            content
+                .codShadow(shadow)
+                .overlay(
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .strokeBorder(Color.capeCod.driftwood.opacity(0.1), lineWidth: 0.5)
+                )
+        }
+    }
+}
+
+extension View {
+    func adaptiveCardStyle(cornerRadius: CGFloat = CodRadius.card, shadow: CodShadow = .card) -> some View {
+        modifier(AdaptiveCardStyle(cornerRadius: cornerRadius, shadow: shadow))
     }
 }

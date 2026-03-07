@@ -14,26 +14,23 @@ struct StatusBanner: View {
 
     var body: some View {
         HStack(spacing: CodSpacing.sm) {
-            // Icon
             if let icon {
                 Image(systemName: icon)
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(size: CodSpacing.md, weight: .semibold))
                     .foregroundStyle(style.foreground)
             }
 
-            // Message
             Text(message)
-                .font(.system(size: 14, weight: .medium))
+                .codTextStyle(.bannerText)
                 .foregroundStyle(style.foreground)
                 .lineLimit(2)
 
             Spacer(minLength: CodSpacing.xs)
 
-            // Optional action button
             if let actionLabel, let onAction {
                 Button(action: onAction) {
                     Text(actionLabel)
-                        .font(.system(size: 13, weight: .bold))
+                        .codTextStyle(.bannerAction)
                         .foregroundStyle(style.foreground)
                         .padding(.horizontal, CodSpacing.sm)
                         .padding(.vertical, CodSpacing.xs)
@@ -79,7 +76,6 @@ enum BannerStyle {
 
 // MARK: - Banner Modifier
 
-/// Attach banners to any view. Manages presentation, animation, and auto-dismiss.
 struct BannerModifier: ViewModifier {
     @Binding var banner: BannerData?
 
@@ -131,7 +127,6 @@ struct BannerData: Equatable {
     var icon: String? = nil
     var actionLabel: String? = nil
     var autoDismissAfter: TimeInterval = 5.0
-    // Non-equatable action closure — excluded from Equatable
     var onAction: (() -> Void)? = nil
 
     static func == (lhs: BannerData, rhs: BannerData) -> Bool {
@@ -161,7 +156,6 @@ private struct StatusBannerPreview: View {
                     Text("Tap a button to show a banner")
                         .codTextStyle(.body)
 
-                    // Banner triggers
                     bannerButton(
                         "Shark Warning",
                         banner: BannerData(
@@ -200,35 +194,13 @@ private struct StatusBannerPreview: View {
                         )
                     )
 
-                    // Static showcase of all styles
                     VStack(spacing: CodSpacing.md) {
                         Text("All Styles").codTextStyle(.sectionTitle)
 
-                        StatusBanner(
-                            message: "Shark spotted near Nauset Beach",
-                            style: .danger,
-                            icon: "exclamationmark.triangle.fill",
-                            actionLabel: "Details"
-                        )
-
-                        StatusBanner(
-                            message: "Sagamore Bridge: 45 min delay",
-                            style: .warning,
-                            icon: "car.fill",
-                            actionLabel: "Routes"
-                        )
-
-                        StatusBanner(
-                            message: "Low tide at Skaket in 30 min",
-                            style: .info,
-                            icon: "water.waves"
-                        )
-
-                        StatusBanner(
-                            message: "Trip saved successfully",
-                            style: .success,
-                            icon: "checkmark.circle.fill"
-                        )
+                        StatusBanner(message: "Shark spotted near Nauset Beach", style: .danger, icon: "exclamationmark.triangle.fill", actionLabel: "Details")
+                        StatusBanner(message: "Sagamore Bridge: 45 min delay", style: .warning, icon: "car.fill", actionLabel: "Routes")
+                        StatusBanner(message: "Low tide at Skaket in 30 min", style: .info, icon: "water.waves")
+                        StatusBanner(message: "Trip saved successfully", style: .success, icon: "checkmark.circle.fill")
                     }
                     .padding(.top, CodSpacing.xl)
                 }

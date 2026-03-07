@@ -43,20 +43,20 @@ struct PulsingCircle: View {
                 // Outer pulse ring
                 Circle()
                     .fill(stateColor.opacity(0.08))
-                    .frame(width: centerSize + 48, height: centerSize + 48)
+                    .frame(width: centerSize + CodSpacing.xxl, height: centerSize + CodSpacing.xxl)
                     .scaleEffect(outerPulseScale)
 
                 // Middle pulse ring
                 Circle()
                     .fill(stateColor.opacity(0.15))
-                    .frame(width: centerSize + 24, height: centerSize + 24)
+                    .frame(width: centerSize + CodSpacing.lg, height: centerSize + CodSpacing.lg)
                     .scaleEffect(pulseScale)
 
                 // Waveform ring (listening/speaking states)
                 if state == .listening || state == .speaking {
                     WaveformView(
                         levels: audioLevels,
-                        style: .circular(radius: centerSize / 2 + 4),
+                        style: .circular(radius: centerSize / 2 + CodSpacing.xs),
                         color: stateColor,
                         barCount: 48
                     )
@@ -81,7 +81,7 @@ struct PulsingCircle: View {
                         Circle()
                             .fill(centerGradient)
                             .frame(width: centerSize, height: centerSize)
-                            .shadow(color: stateColor.opacity(0.3), radius: 12, y: 4)
+                            .shadow(color: stateColor.opacity(0.3), radius: 12, y: CodSpacing.xs)
 
                         Image(systemName: stateIcon)
                             .font(.system(size: 28, weight: .semibold))
@@ -113,8 +113,8 @@ struct PulsingCircle: View {
             ForEach(0..<3, id: \.self) { index in
                 Circle()
                     .fill(stateColor)
-                    .frame(width: 8, height: 8)
-                    .offset(y: -(centerSize / 2 + 16))
+                    .frame(width: CodSpacing.sm, height: CodSpacing.sm)
+                    .offset(y: -(centerSize / 2 + CodSpacing.md))
                     .rotationEffect(rotationAngle + .degrees(Double(index) * 120))
             }
         }
@@ -123,15 +123,15 @@ struct PulsingCircle: View {
     // MARK: - Connecting Animation
 
     private var connectingAnimation: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: CodSpacing.sm - 2) {
             ForEach(0..<3, id: \.self) { index in
                 Circle()
                     .fill(.white)
-                    .frame(width: 6, height: 6)
+                    .frame(width: CodSpacing.sm - 2, height: CodSpacing.sm - 2)
                     .opacity(connectingDots > CGFloat(index) ? 1.0 : 0.3)
             }
         }
-        .offset(y: centerSize / 2 + 20)
+        .offset(y: centerSize / 2 + CodSpacing.screenEdge)
     }
 
     // MARK: - State Properties
@@ -187,7 +187,6 @@ struct PulsingCircle: View {
     // MARK: - Animation Control
 
     private func updateAnimations(for newState: VoiceAssistantState) {
-        // Reset
         pulseScale = 1.0
         outerPulseScale = 1.0
         rotationAngle = .zero

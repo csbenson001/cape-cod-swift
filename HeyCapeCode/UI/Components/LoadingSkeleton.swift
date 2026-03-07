@@ -32,9 +32,9 @@ struct LoadingSkeleton: View {
 
             VStack(alignment: .leading, spacing: CodSpacing.sm) {
                 ShimmerRect()
-                    .frame(width: 100, height: 20)
+                    .frame(width: 100, height: CodSpacing.screenEdge)
                 ShimmerRect()
-                    .frame(height: 16)
+                    .frame(height: CodSpacing.md)
                 ShimmerRect()
                     .frame(width: 140, height: 14)
             }
@@ -63,11 +63,11 @@ struct LoadingSkeleton: View {
     private var listRowSkeleton: some View {
         HStack(spacing: CodSpacing.md) {
             ShimmerRect(radius: CodRadius.chip)
-                .frame(width: 48, height: 48)
+                .frame(width: CodSpacing.xxl, height: CodSpacing.xxl)
 
             VStack(alignment: .leading, spacing: CodSpacing.xs) {
                 ShimmerRect()
-                    .frame(width: 160, height: 16)
+                    .frame(width: 160, height: CodSpacing.md)
                 ShimmerRect()
                     .frame(width: 100, height: 13)
             }
@@ -75,7 +75,7 @@ struct LoadingSkeleton: View {
             Spacer()
 
             ShimmerRect()
-                .frame(width: 40, height: 16)
+                .frame(width: 40, height: CodSpacing.md)
         }
         .padding(.vertical, CodSpacing.sm)
     }
@@ -87,7 +87,7 @@ struct LoadingSkeleton: View {
             ShimmerRect(radius: CodRadius.card)
                 .frame(height: 200)
             Image(systemName: "map")
-                .font(.system(size: 32))
+                .font(.system(size: CodSpacing.xl))
                 .foregroundStyle(Color.capeCod.driftwood.opacity(0.3))
         }
     }

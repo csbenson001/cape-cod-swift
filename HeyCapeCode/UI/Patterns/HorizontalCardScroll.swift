@@ -11,17 +11,13 @@ struct HorizontalCardScroll<CardContent: View>: View {
     var seeAllAction: (() -> Void)? = nil
     @ViewBuilder let cardContent: (Int) -> CardContent
 
-    /// Card width — leaves room for next card peek
-    private let cardWidth: CGFloat = 200
     private let cardSpacing: CGFloat = CodSpacing.md
 
     var body: some View {
         VStack(alignment: .leading, spacing: CodSpacing.md) {
-            // Section header with screen edge padding
             SectionHeader(title: title, seeAllAction: seeAllAction)
                 .padding(.horizontal, CodSpacing.screenEdge)
 
-            // Horizontal scroll with snap behavior
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack(spacing: cardSpacing) {
                     ForEach(0..<itemCount, id: \.self) { index in
@@ -87,7 +83,6 @@ struct FeaturedCardScroll<CardContent: View>: View {
 
     ScrollView {
         VStack(spacing: CodSpacing.sectionSpacing) {
-            // Compact beach cards
             HorizontalCardScroll(
                 title: "Nearby Beaches",
                 itemCount: beaches.count,
@@ -106,13 +101,9 @@ struct FeaturedCardScroll<CardContent: View>: View {
                         .font(.system(size: 28))
                         .foregroundStyle(Color.capeCod.oceanBlue.opacity(0.3))
                 }
-                CodCardContent(
-                    title: beach.0,
-                    metadata: beach.1
-                )
+                CodCardContent(title: beach.0, metadata: beach.1)
             }
 
-            // Featured POI cards (full-width paging)
             FeaturedCardScroll(
                 title: "Popular Places",
                 itemCount: pois.count,
@@ -128,27 +119,19 @@ struct FeaturedCardScroll<CardContent: View>: View {
                         )
                         .frame(height: 180)
 
-                        LinearGradient(
-                            colors: [.clear, .black.opacity(0.4)],
-                            startPoint: .center,
-                            endPoint: .bottom
-                        )
-                        .frame(height: 180)
+                        Color.capeCod.imageOverlayGradient(from: .center, to: .bottom)
+                            .frame(height: 180)
 
                         Text(poi.0)
-                            .font(.system(size: 20, weight: .bold))
+                            .codTextStyle(.sectionTitle)
                             .foregroundStyle(.white)
                             .padding(CodSpacing.cardPadding)
                     }
 
-                    CodCardContent(
-                        title: poi.0,
-                        subtitle: poi.1
-                    )
+                    CodCardContent(title: poi.0, subtitle: poi.1)
                 }
             }
 
-            // Category filter scroll
             HorizontalCardScroll(
                 title: "By Category",
                 itemCount: 4
@@ -163,7 +146,7 @@ struct FeaturedCardScroll<CardContent: View>: View {
 
                 VStack(spacing: CodSpacing.sm) {
                     Image(systemName: cat.1)
-                        .font(.system(size: 24, weight: .medium))
+                        .font(.system(size: CodSpacing.lg))
                         .foregroundStyle(cat.2)
                         .frame(width: 56, height: 56)
                         .background(cat.2.opacity(0.12))

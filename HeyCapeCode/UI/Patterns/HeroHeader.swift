@@ -50,12 +50,10 @@ struct HeroHeader: View {
                 VStack(alignment: .leading, spacing: CodSpacing.xs) {
                     if let subtitle {
                         Text(subtitle)
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundStyle(Color.capeCod.textSecondary)
+                            .codTextStyle(.caption)
                     }
                     Text(title)
-                        .font(.system(size: 28, weight: .bold))
-                        .foregroundStyle(Color.capeCod.textPrimary)
+                        .codTextStyle(.heroTitle)
                 }
                 .padding(.horizontal, CodSpacing.screenEdge)
                 .padding(.bottom, CodSpacing.lg)
@@ -91,6 +89,7 @@ struct HeroHeader: View {
             Image(imageName)
                 .resizable()
                 .scaledToFill()
+                .darkModeDimmed()
         } else {
             // Gradient fallback using category color
             ZStack {
@@ -121,7 +120,7 @@ struct HeroHeader: View {
             action()
         }) {
             Image(systemName: icon)
-                .font(.system(size: 16, weight: .semibold))
+                .font(.system(size: CodSpacing.md, weight: .semibold))
                 .foregroundStyle(.white)
                 .frame(width: 40, height: 40)
                 .background(.ultraThinMaterial, in: Circle())
@@ -205,21 +204,17 @@ struct DetailScreenLayout<Content: View>: View {
         onBack: {},
         onShare: {}
     ) {
-        // Quick info chips
         HStack(spacing: CodSpacing.sm) {
             CodChip("Historic", style: .category(.brown), icon: "building.columns.fill")
             CodChip("Open Now", style: .status(.open))
             CodChip("Free", style: .filter, isSelected: true) {}
         }
 
-        // Description
         ContentSection(title: "About") {
             Text("Built in 1877, Chatham Lighthouse is one of the most photographed lighthouses on Cape Cod. The grounds offer panoramic views of the Atlantic Ocean and Chatham Harbor, with opportunities to watch seals basking on the nearby sandbars.")
-                .codTextStyle(.body)
-                .lineSpacing(4)
+                .codTextStyle(.storyBody)
         }
 
-        // Metrics
         ContentSection(title: "Conditions") {
             HStack(spacing: CodSpacing.md) {
                 MetricCard(
@@ -239,7 +234,6 @@ struct DetailScreenLayout<Content: View>: View {
             }
         }
 
-        // Actions
         VStack(spacing: CodSpacing.md) {
             CodButton("Get Directions", variant: .primary, icon: "arrow.triangle.turn.up.right.diamond.fill", isFullWidth: true) {}
             CodButton("Save to Trip", variant: .secondary, icon: "bookmark", isFullWidth: true) {}

@@ -4,28 +4,29 @@ import SwiftUI
 
 /// The root tab navigation for Hey Cape Cod.
 /// Voice tab has a raised center button to emphasize it as THE primary feature.
+/// Tab content cross-fades smoothly instead of hard-swapping.
 struct MainTabView: View {
     @State private var selectedTab: CodTab = .explore
     @State private var showVoiceAssistant = false
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            // Tab content
-            Group {
-                switch selectedTab {
-                case .explore:
-                    placeholderView("Explore", icon: "map.fill")
-                case .traffic:
-                    placeholderView("Traffic", icon: "car.fill")
-                case .voice:
-                    EmptyView() // Voice is presented as a sheet/overlay
-                case .beach:
-                    placeholderView("Beaches", icon: "sun.max.fill")
-                case .settings:
-                    placeholderView("Settings", icon: "gearshape.fill")
-                }
+            // Tab content with cross-fade transition
+            ZStack {
+                placeholderView("Explore", icon: "map.fill")
+                    .opacity(selectedTab == .explore ? 1 : 0)
+
+                placeholderView("Traffic", icon: "car.fill")
+                    .opacity(selectedTab == .traffic ? 1 : 0)
+
+                placeholderView("Beaches", icon: "sun.max.fill")
+                    .opacity(selectedTab == .beach ? 1 : 0)
+
+                placeholderView("Settings", icon: "gearshape.fill")
+                    .opacity(selectedTab == .settings ? 1 : 0)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .animation(CodAnimation.tabSwitch, value: selectedTab)
 
             // Custom tab bar
             customTabBar
@@ -45,7 +46,7 @@ struct MainTabView: View {
 
             // Center raised voice button
             voiceFAB
-                .offset(y: -16)
+                .offset(y: -CodSpacing.md)
 
             tabButton(.beach)
             tabButton(.settings)
@@ -56,7 +57,7 @@ struct MainTabView: View {
         .background(
             Rectangle()
                 .fill(Color.capeCod.surfaceElevated)
-                .shadow(color: .black.opacity(0.06), radius: 12, y: -4)
+                .shadow(color: .black.opacity(0.06), radius: 12, y: -CodSpacing.xs)
                 .ignoresSafeArea(edges: .bottom)
         )
     }
@@ -65,18 +66,18 @@ struct MainTabView: View {
 
     private func tabButton(_ tab: CodTab) -> some View {
         Button {
-            withAnimation(.capeCodQuick) {
+            withAnimation(CodAnimation.tabSwitch) {
                 selectedTab = tab
             }
             UISelectionFeedbackGenerator().selectionChanged()
         } label: {
             VStack(spacing: CodSpacing.xs) {
                 Image(systemName: tab.icon)
-                    .font(.system(size: 20, weight: selectedTab == tab ? .semibold : .regular))
+                    .font(.system(size: CodSpacing.screenEdge, weight: selectedTab == tab ? .semibold : .regular))
                     .symbolVariant(selectedTab == tab ? .fill : .none)
 
                 Text(tab.label)
-                    .font(.system(size: 10, weight: .medium))
+                    .codTextStyle(.tabLabel)
             }
             .foregroundStyle(selectedTab == tab ? Color.capeCod.primary : Color.capeCod.driftwood)
             .frame(maxWidth: .infinity)
@@ -94,7 +95,7 @@ struct MainTabView: View {
                 Circle()
                     .fill(Color.capeCod.oceanGradient)
                     .frame(width: 56, height: 56)
-                    .shadow(color: Color.capeCod.oceanBlue.opacity(0.3), radius: 8, y: 4)
+                    .shadow(color: Color.capeCod.oceanBlue.opacity(0.3), radius: CodSpacing.sm, y: CodSpacing.xs)
 
                 Image(systemName: "waveform.circle.fill")
                     .font(.system(size: 26, weight: .semibold))
@@ -110,7 +111,7 @@ struct MainTabView: View {
     private func placeholderView(_ title: String, icon: String) -> some View {
         VStack(spacing: CodSpacing.md) {
             Image(systemName: icon)
-                .font(.system(size: 48, weight: .light))
+                .font(.system(size: CodSpacing.xxl, weight: .light))
                 .foregroundStyle(Color.capeCod.primary)
             Text(title)
                 .codTextStyle(.heroTitle)
@@ -121,12 +122,17 @@ struct MainTabView: View {
     // MARK: - Voice Assistant Sheet
 
     private var voiceAssistantSheet: some View {
-        VStack(spacing: CodSpacing.xl) {
-            Spacer()
-            PulsingCircle(state: .idle) {
-                // Handle voice tap
+        ZStack {
+            // Subtle bubble particles in background
+            BubbleParticles()
+
+            VStack(spacing: CodSpacing.xl) {
+                Spacer()
+                PulsingCircle(state: .idle) {
+                    // Handle voice tap
+                }
+                Spacer()
             }
-            Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.capeCod.background)

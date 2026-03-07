@@ -3,11 +3,15 @@ import SwiftUI
 // MARK: - Design System Preview
 
 /// A living style guide showcasing every component in the Hey Cape Cod design system.
-/// Scroll through to see colors, typography, buttons, cards, chips, metrics, loading states,
-/// and the voice assistant button in both light and dark mode.
+/// Includes all components, micro-interactions, and visual flourishes
+/// in both light and dark mode.
 struct DesignSystemPreview: View {
     @State private var selectedFilter = 0
-    @State private var voiceState: VoiceAssistantState = .idle
+    @State private var isFavorited = false
+    @State private var isToggled = true
+    @State private var segmentIndex = 0
+    @State private var metricValue = 47
+    @State private var activeBanner: BannerData?
 
     var body: some View {
         ScrollView {
@@ -17,16 +21,20 @@ struct DesignSystemPreview: View {
                 typographyShowcase
                 buttonShowcase
                 chipShowcase
+                microInteractionsShowcase
                 cardShowcase
                 metricShowcase
+                animatedCounterShowcase
                 voiceButtonShowcase
                 waveformShowcase
                 loadingShowcase
+                emptyStateShowcase
             }
             .padding(.horizontal, CodSpacing.screenEdge)
             .padding(.bottom, CodSpacing.xxl)
         }
         .background(Color.capeCod.background)
+        .banner($activeBanner)
     }
 
     // MARK: - Header
@@ -36,7 +44,7 @@ struct DesignSystemPreview: View {
             Text("Hey Cape Cod")
                 .codTextStyle(.heroTitle)
             Text("Design System")
-                .font(.system(size: 22, weight: .light))
+                .codTextStyle(.sectionTitle)
                 .foregroundStyle(Color.capeCod.oceanBlue)
             Text("A living style guide for the premium Cape Cod travel companion.")
                 .codTextStyle(.body)
@@ -81,14 +89,15 @@ struct DesignSystemPreview: View {
         VStack(spacing: CodSpacing.xs) {
             RoundedRectangle(cornerRadius: CodRadius.chip)
                 .fill(color)
-                .frame(height: 48)
+                .frame(height: CodSpacing.xxl)
                 .overlay(
                     RoundedRectangle(cornerRadius: CodRadius.chip)
-                        .strokeBorder(Color.capeCod.driftwood.opacity(0.2), lineWidth: 0.5)
+                        .strokeBorder(Color.capeCod.cardBorder, lineWidth: 0.5)
                 )
             Text(name)
-                .font(.system(size: 9, weight: .medium))
-                .foregroundStyle(Color.capeCod.textSecondary)
+                .codTextStyle(.label)
+                .textCase(nil)
+                .tracking(0)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         }
@@ -101,14 +110,16 @@ struct DesignSystemPreview: View {
         VStack(alignment: .leading, spacing: CodSpacing.md) {
             sectionHeader("Typography")
 
-            Text("Hero Title (34pt Bold)")
+            Text("Hero Title (SF Rounded 34pt)")
                 .codTextStyle(.heroTitle)
             Text("Section Title (22pt Semibold)")
                 .codTextStyle(.sectionTitle)
             Text("Card Title (17pt Semibold)")
                 .codTextStyle(.cardTitle)
-            Text("Body text for descriptions and story content. (15pt Regular)")
+            Text("Body text for descriptions and general content. (15pt)")
                 .codTextStyle(.body)
+            Text("Story body with generous line spacing for long-form reading. This demonstrates the 1.4x line height that makes editorial content feel premium and comfortable.")
+                .codTextStyle(.storyBody)
             Text("Caption for metadata and timestamps (13pt)")
                 .codTextStyle(.caption)
             Text("Category Label")
@@ -167,14 +178,46 @@ struct DesignSystemPreview: View {
 
             Text("FILTERS (TOGGLEABLE)").codTextStyle(.label)
             HStack(spacing: CodSpacing.sm) {
-                CodChip("Family Friendly", style: .filter, isSelected: selectedFilter == 0) {
-                    selectedFilter = 0
-                }
-                CodChip("Pet Friendly", style: .filter, isSelected: selectedFilter == 1) {
-                    selectedFilter = 1
-                }
-                CodChip("Free", style: .filter, isSelected: selectedFilter == 2) {
-                    selectedFilter = 2
+                CodChip("Family Friendly", style: .filter, isSelected: selectedFilter == 0) { selectedFilter = 0 }
+                CodChip("Pet Friendly", style: .filter, isSelected: selectedFilter == 1) { selectedFilter = 1 }
+                CodChip("Free", style: .filter, isSelected: selectedFilter == 2) { selectedFilter = 2 }
+            }
+        }
+    }
+
+    // MARK: - Micro-Interactions
+
+    private var microInteractionsShowcase: some View {
+        VStack(alignment: .leading, spacing: CodSpacing.md) {
+            sectionHeader("Micro-Interactions")
+
+            Text("FAVORITE BUTTON").codTextStyle(.label)
+            HStack(spacing: CodSpacing.md) {
+                FavoriteButton(isFavorited: $isFavorited)
+                Text(isFavorited ? "Saved" : "Tap to save")
+                    .codTextStyle(.body)
+            }
+
+            Text("CUSTOM TOGGLE").codTextStyle(.label)
+            Toggle("Notifications", isOn: $isToggled)
+                .toggleStyle(.capeCod)
+                .codTextStyle(.body)
+
+            Text("SEGMENTED CONTROL").codTextStyle(.label)
+            CodSegmentedControl(
+                options: ["All", "Beaches", "Historic"],
+                selection: $segmentIndex
+            )
+
+            Text("BANNER TRIGGER").codTextStyle(.label)
+            CodButton("Show Shark Alert", variant: .secondary, icon: "exclamationmark.triangle.fill") {
+                withAnimation(CodAnimation.spring) {
+                    activeBanner = BannerData(
+                        message: "Shark spotted near Nauset Beach",
+                        style: .danger,
+                        icon: "exclamationmark.triangle.fill",
+                        actionLabel: "Details"
+                    )
                 }
             }
         }
@@ -199,7 +242,7 @@ struct DesignSystemPreview: View {
                     VStack(alignment: .leading, spacing: CodSpacing.xs) {
                         CodCardBadge(text: "Featured", color: Color.capeCod.sunsetOrange)
                         Text("Race Point Beach")
-                            .font(.system(size: 22, weight: .bold))
+                            .codTextStyle(.sectionTitle)
                             .foregroundStyle(.white)
                     }
                     .padding(CodSpacing.cardPadding)
@@ -211,28 +254,17 @@ struct DesignSystemPreview: View {
                 )
             }
 
-            Text("STANDARD").codTextStyle(.label)
-            CodCard(size: .standard, action: {}) {
-                CodCardContent(
-                    title: "Chatham Lighthouse",
-                    subtitle: "Historic lighthouse with panoramic ocean views and seal watching.",
-                    metadata: "0.8 mi away",
-                    badge: ("Historic", Color.capeCod.driftwood)
-                )
-            }
-
-            Text("COMPACT (HORIZONTAL SCROLL)").codTextStyle(.label)
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: CodSpacing.md) {
-                    ForEach(["Nauset Beach", "Sandy Neck", "Marconi"], id: \.self) { name in
-                        CodCard(size: .compact) {
-                            Rectangle()
-                                .fill(Color.capeCod.seafoam.opacity(0.2))
-                                .frame(height: 120)
-                            CodCardContent(title: name, metadata: "Beach")
-                        }
-                    }
+            Text("STANDARD WITH STAGGER").codTextStyle(.label)
+            ForEach(0..<2) { i in
+                CodCard(size: .standard, action: {}) {
+                    CodCardContent(
+                        title: ["Chatham Lighthouse", "Cape Cod Rail Trail"][i],
+                        subtitle: ["Historic lighthouse with panoramic ocean views.", "26-mile paved bike path through the Cape."][i],
+                        metadata: ["\(0.8) mi", "\(1.2) mi"][i],
+                        badge: ([("Historic", Color.capeCod.driftwood), ("Nature", Color.capeCod.duneGrass)][i])
+                    )
                 }
+                .staggered(index: i)
             }
         }
     }
@@ -250,7 +282,8 @@ struct DesignSystemPreview: View {
                     label: "Bourne Bridge",
                     icon: "car.fill",
                     tint: Color.capeCod.lobsterRed,
-                    trend: .up
+                    trend: .up,
+                    isLive: true
                 )
                 MetricCard(
                     value: "74",
@@ -261,23 +294,23 @@ struct DesignSystemPreview: View {
                     trend: .stable
                 )
             }
+        }
+    }
 
-            HStack(spacing: CodSpacing.md) {
-                MetricCard(
-                    value: "2:34",
-                    unit: "PM",
-                    label: "High Tide",
-                    icon: "water.waves",
-                    tint: Color.capeCod.seafoam
-                )
-                MetricCard(
-                    value: "82",
-                    unit: "\u{00B0}F",
-                    label: "Air Temp",
-                    icon: "sun.max.fill",
-                    tint: Color.capeCod.sandbarYellow,
-                    trend: .down
-                )
+    // MARK: - Animated Counter
+
+    private var animatedCounterShowcase: some View {
+        VStack(alignment: .leading, spacing: CodSpacing.md) {
+            sectionHeader("Animated Counter")
+
+            HStack(alignment: .firstTextBaseline, spacing: CodSpacing.xs) {
+                AnimatedCounter(metricValue, color: Color.capeCod.lobsterRed)
+                Text("min delay")
+                    .codTextStyle(.metricUnit)
+            }
+
+            CodButton("Randomize", variant: .secondary, icon: "arrow.triangle.2.circlepath") {
+                metricValue = Int.random(in: 5...120)
             }
         }
     }
@@ -286,7 +319,7 @@ struct DesignSystemPreview: View {
 
     private var voiceButtonShowcase: some View {
         VStack(alignment: .leading, spacing: CodSpacing.md) {
-            sectionHeader("Voice Assistant Button")
+            sectionHeader("Voice Assistant")
 
             let sampleAudio: [CGFloat] = (0..<48).map { i in
                 0.2 + 0.8 * abs(sin(CGFloat(i) / 48 * .pi * 4))
@@ -294,20 +327,14 @@ struct DesignSystemPreview: View {
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: CodSpacing.xl) {
-                    stateDemo("Idle", .idle, [])
-                    stateDemo("Listening", .listening, sampleAudio)
-                    stateDemo("Thinking", .thinking, [])
-                    stateDemo("Speaking", .speaking, sampleAudio)
-                    stateDemo("Error", .error, [])
+                    PulsingCircle(state: .idle) {}
+                    PulsingCircle(state: .listening, audioLevels: sampleAudio) {}
+                    PulsingCircle(state: .thinking) {}
+                    PulsingCircle(state: .speaking, audioLevels: sampleAudio) {}
+                    PulsingCircle(state: .error) {}
                 }
                 .padding(.vertical, CodSpacing.lg)
             }
-        }
-    }
-
-    private func stateDemo(_ label: String, _ state: VoiceAssistantState, _ levels: [CGFloat]) -> some View {
-        VStack(spacing: CodSpacing.sm) {
-            PulsingCircle(state: state, audioLevels: levels) {}
         }
     }
 
@@ -321,11 +348,11 @@ struct DesignSystemPreview: View {
                 0.3 + 0.7 * abs(sin(CGFloat(i) / 40 * .pi * 3))
             }
 
-            Text("LINEAR").codTextStyle(.label)
+            Text("LISTENING").codTextStyle(.label)
             WaveformView(levels: sampleLevels, style: .linear, color: Color.capeCod.seafoam)
                 .frame(maxWidth: .infinity)
 
-            Text("LINEAR (SPEAKING)").codTextStyle(.label)
+            Text("SPEAKING").codTextStyle(.label)
             WaveformView(levels: sampleLevels, style: .linear, color: Color.capeCod.sunsetOrange)
                 .frame(maxWidth: .infinity)
         }
@@ -337,26 +364,38 @@ struct DesignSystemPreview: View {
         VStack(alignment: .leading, spacing: CodSpacing.md) {
             sectionHeader("Loading Skeletons")
 
-            Text("CARD SKELETON").codTextStyle(.label)
             LoadingSkeleton(variant: .card)
 
-            Text("METRIC SKELETONS").codTextStyle(.label)
             HStack(spacing: CodSpacing.md) {
                 LoadingSkeleton(variant: .metric)
                 LoadingSkeleton(variant: .metric)
             }
 
-            Text("LIST ROW SKELETONS").codTextStyle(.label)
-            ForEach(0..<3, id: \.self) { _ in
+            ForEach(0..<2, id: \.self) { _ in
                 LoadingSkeleton(variant: .listRow)
             }
-
-            Text("MAP PLACEHOLDER").codTextStyle(.label)
-            LoadingSkeleton(variant: .mapPlaceholder)
         }
     }
 
-    // MARK: - Section Header Helper
+    // MARK: - Empty States
+
+    private var emptyStateShowcase: some View {
+        VStack(alignment: .leading, spacing: CodSpacing.md) {
+            sectionHeader("Empty States")
+
+            EmptyStateView.noStories(onRefresh: {})
+                .frame(height: 260)
+                .background(Color.capeCod.surface)
+                .clipShape(RoundedRectangle(cornerRadius: CodRadius.card))
+
+            EmptyStateView.offline(onRetry: {})
+                .frame(height: 260)
+                .background(Color.capeCod.surface)
+                .clipShape(RoundedRectangle(cornerRadius: CodRadius.card))
+        }
+    }
+
+    // MARK: - Section Header
 
     private func sectionHeader(_ title: String) -> some View {
         VStack(alignment: .leading, spacing: CodSpacing.xs) {
@@ -369,7 +408,7 @@ struct DesignSystemPreview: View {
     }
 }
 
-// MARK: - Previews (Light & Dark)
+// MARK: - Previews
 
 #Preview("Design System - Light") {
     DesignSystemPreview()
