@@ -1,0 +1,98 @@
+import SwiftUI
+
+@Observable
+final class AppState {
+    // MARK: - Navigation
+    var selectedTab: AppTab = .home
+    var isVoiceAssistantPresented = false
+
+    // MARK: - User Preferences
+    var preferredColorScheme: ColorScheme?
+    var hasCompletedOnboarding: Bool {
+        get { UserDefaults.standard.bool(forKey: "hasCompletedOnboarding") }
+        set { UserDefaults.standard.set(newValue, forKey: "hasCompletedOnboarding") }
+    }
+
+    // MARK: - Active State
+    var activeConversation: Conversation?
+    var currentLocation: CodLocation?
+    var isListening = false
+
+    // MARK: - Errors
+    var currentError: AppError?
+    var showingError: Bool {
+        get { currentError != nil }
+        set { if !newValue { currentError = nil } }
+    }
+
+    func presentError(_ error: AppError) {
+        currentError = error
+    }
+}
+
+// MARK: - App Tab
+
+enum AppTab: String, CaseIterable, Identifiable {
+    case home
+    case explore
+    case weather
+    case traffic
+    case settings
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .home: "Home"
+        case .explore: "Explore"
+        case .weather: "Weather"
+        case .traffic: "Traffic"
+        case .settings: "Settings"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .home: "house.fill"
+        case .explore: "safari.fill"
+        case .weather: "cloud.sun.fill"
+        case .traffic: "car.fill"
+        case .settings: "gearshape.fill"
+        }
+    }
+}
+
+// MARK: - App Error
+
+enum AppError: LocalizedError, Identifiable {
+    case networkUnavailable
+    case locationDenied
+    case microphoneDenied
+    case apiError(String)
+    case unknown(Error)
+
+    var id: String {
+        switch self {
+        case .networkUnavailable: "network"
+        case .locationDenied: "location"
+        case .microphoneDenied: "microphone"
+        case .apiError(let msg): "api-\(msg)"
+        case .unknown: "unknown"
+        }
+    }
+
+    var errorDescription: String? {
+        switch self {
+        case .networkUnavailable:
+            "No internet connection. Some features may be unavailable."
+        case .locationDenied:
+            "Location access is needed for GPS-triggered stories and nearby recommendations."
+        case .microphoneDenied:
+            "Microphone access is needed for voice conversations."
+        case .apiError(let message):
+            message
+        case .unknown(let error):
+            error.localizedDescription
+        }
+    }
+}
