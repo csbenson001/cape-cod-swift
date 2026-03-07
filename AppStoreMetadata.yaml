@@ -1,0 +1,206 @@
+# Hey Cape Cod - App Store Connect Metadata
+# Use this file to populate App Store Connect fields
+
+app:
+  name: "Hey Cape Cod - AI Travel Guide"
+  subtitle: "Voice tours, traffic, tides & stories"
+  bundle_id: com.heycapecod.app
+  sku: HEYCAPECOD001
+  primary_category: Travel
+  secondary_category: Navigation
+
+  # Version Info
+  version: "1.0.0"
+  build: 1
+  copyright: "2026 Hey Cape Cod LLC"
+
+  # Description (max 4000 characters)
+  description: |
+    Hey Cape Cod is your AI-powered travel companion for exploring Cape Cod, Massachusetts. Whether you're a first-time visitor or a lifelong local, Hey Cape Cod brings the Cape's rich history, stunning beaches, and hidden gems to life through voice-powered conversations and GPS-triggered audio stories.
+
+    VOICE-POWERED CONVERSATIONS
+    Ask anything about Cape Cod and get instant, knowledgeable answers. "What's the best beach for kids today?" "Where should I eat near Chatham?" "Tell me about the Nauset Lighthouse." Your AI guide knows Cape Cod inside and out.
+
+    GPS-TRIGGERED STORIES
+    Drive or walk past historic sites, lighthouses, and landmarks to automatically hear fascinating stories tailored to your group. Choose between Kids, Teen, Adult, or Family modes for age-appropriate content that everyone enjoys.
+
+    REAL-TIME BRIDGE & TRAFFIC
+    Never get stuck at the bridges again. Live delay times for the Sagamore and Bourne Bridges, plus Route 6 and Route 3 conditions, with smart recommendations on the best time to cross.
+
+    TIDES, WEATHER & BEACH CONDITIONS
+    Check tide charts for 7 Cape Cod stations, view live water temperature from NOAA buoys, and get smart beach recommendations based on current wind, waves, and weather conditions. Know exactly which beach to visit today.
+
+    SMART BEACH RECOMMENDATIONS
+    Our recommendation engine analyzes wind direction, wave height, tide level, UV index, and crowd patterns across 12 Cape Cod beaches to suggest your perfect beach day.
+
+    EXPLORE THE MAP
+    Discover beaches, restaurants, lighthouses, museums, nature trails, and more across all 15 Cape Cod towns. Filter by category, region, or what's nearby.
+
+    FEATURES:
+    - Hands-free voice conversations about Cape Cod
+    - 50+ GPS-triggered audio stories at landmarks
+    - Live Sagamore & Bourne Bridge traffic
+    - Tide predictions for 7 stations
+    - NOAA buoy data (water temp, waves, wind)
+    - Smart beach recommendation engine
+    - Interactive map with 100+ points of interest
+    - Kids, Teen, Adult, and Family content modes
+    - Offline content for areas with poor signal
+    - Beautiful design inspired by Cape Cod's landscapes
+
+    PREMIUM ($4.99/month or $29.99/year):
+    - Unlimited voice conversations
+    - Unlimited GPS stories
+    - Offline downloads
+    - Ad-free experience
+    - Family Sharing support
+    - Priority support
+
+    Start with a 7-day free trial. Cancel anytime.
+
+    Built with love on Cape Cod.
+
+  # Keywords (max 100 characters total)
+  keywords: "cape cod,travel guide,audio tour,GPS,beach,traffic,tides,AI,family,vacation"
+
+  # What's New (version 1.0.0)
+  whats_new: |
+    Welcome to Hey Cape Cod! Your AI-powered Cape Cod companion.
+
+    - Voice-powered conversations about Cape Cod
+    - GPS-triggered audio stories at 50+ landmarks
+    - Live bridge traffic with delay times
+    - Tide charts for 7 stations
+    - Smart beach recommendations
+    - Interactive map with 100+ POIs
+    - Kids, Teen, Adult & Family modes
+    - Beautiful Cape Cod-inspired design
+
+  # Promotional Text (max 170 characters, can be updated without review)
+  promotional_text: "Your AI-powered Cape Cod companion. Voice tours, live traffic, tide charts, and smart beach recommendations. Try free for 7 days!"
+
+  # Support & Marketing URLs
+  support_url: "https://heycapecod.com/support"
+  marketing_url: "https://heycapecod.com"
+  privacy_url: "https://heycapecod.com/privacy"
+  terms_url: "https://heycapecod.com/terms"
+
+# Age Rating
+age_rating:
+  rating: "4+"
+  notes: "No objectionable content. Voice conversations are filtered for family-friendly responses. All content modes (Kids, Teen, Adult, Family) are appropriate."
+  unrestricted_web_access: false
+  gambling: false
+  contests: false
+  alcohol_tobacco: false
+  mature_content: false
+  profanity: false
+  violence: false
+  sexual_content: false
+  horror: false
+
+# Privacy Nutrition Labels (App Privacy)
+privacy:
+  data_types:
+    - category: Location
+      type: Precise Location
+      purpose: App Functionality
+      linked_to_identity: false
+      used_for_tracking: false
+      notes: "Used for GPS-triggered stories and nearby POI recommendations. 'While In Use' for active exploration, 'Always' for background geofence monitoring."
+
+    - category: Location
+      type: Coarse Location
+      purpose: App Functionality
+      linked_to_identity: false
+      used_for_tracking: false
+
+    - category: Audio Data
+      type: Audio Data
+      purpose: App Functionality
+      linked_to_identity: false
+      used_for_tracking: false
+      notes: "Microphone used for voice conversations with AI assistant. Audio is processed in real-time and not stored permanently."
+
+    - category: Purchases
+      type: Purchase History
+      purpose: App Functionality
+      linked_to_identity: true
+      used_for_tracking: false
+      notes: "Subscription status tracked to manage premium features."
+
+    - category: Identifiers
+      type: User ID
+      purpose: App Functionality
+      linked_to_identity: true
+      used_for_tracking: false
+      notes: "Firebase Auth user ID for account management and data sync."
+
+    - category: Usage Data
+      type: Product Interaction
+      purpose: Analytics
+      linked_to_identity: false
+      used_for_tracking: false
+      notes: "Firebase Analytics for feature usage patterns and app improvement."
+
+    - category: Diagnostics
+      type: Crash Data
+      purpose: App Functionality
+      linked_to_identity: false
+      used_for_tracking: false
+
+    - category: Diagnostics
+      type: Performance Data
+      purpose: App Functionality
+      linked_to_identity: false
+      used_for_tracking: false
+
+# In-App Purchases
+in_app_purchases:
+  - product_id: capecod_monthly
+    type: Auto-Renewable Subscription
+    reference_name: "Hey Cape Cod Premium Monthly"
+    price_tier: 4.99 USD
+    subscription_group: "Hey Cape Cod Premium"
+    description: "Unlimited voice conversations, GPS stories, offline downloads, and ad-free experience."
+    free_trial: 7 days
+
+  - product_id: capecod_annual
+    type: Auto-Renewable Subscription
+    reference_name: "Hey Cape Cod Premium Annual"
+    price_tier: 29.99 USD
+    subscription_group: "Hey Cape Cod Premium"
+    description: "Save 50%! Unlimited voice conversations, GPS stories, offline downloads, and ad-free experience."
+    free_trial: 7 days
+
+# Screenshot Requirements
+screenshots:
+  devices:
+    - name: "iPhone 15 Pro Max"
+      display_size: "6.7 inch"
+      resolution: "1290 x 2796"
+      count: 6
+      scenes:
+        - "Home screen with voice assistant button"
+        - "Voice conversation in progress"
+        - "Explore map with POI markers"
+        - "Weather dashboard with tide chart"
+        - "Traffic view with bridge status"
+        - "Beach conditions report card"
+
+    - name: "iPhone 15 Pro"
+      display_size: "6.1 inch"
+      resolution: "1179 x 2556"
+      count: 6
+      scenes: "Same as 6.7 inch"
+
+    - name: "iPhone 8 Plus"
+      display_size: "5.5 inch"
+      resolution: "1242 x 2208"
+      count: 6
+      scenes: "Same as 6.7 inch"
+
+# App Icon
+app_icon:
+  size: "1024x1024"
+  design_notes: "Lighthouse silhouette with ocean waves and subtle AI waveform motif. Color palette: ocean blue (#1A6B8A) to sunset orange (#E87040) gradient. Clean, recognizable at small sizes."

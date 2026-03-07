@@ -66,6 +66,21 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.heycapecod.uitests
 
+  HeyCapeCodWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: HeyCapeCodWidget
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.heycapecod.app.widget
+        INFOPLIST_KEY_CFBundleDisplayName: Hey Cape Cod Widgets
+        INFOPLIST_KEY_NSExtension_NSExtensionPointIdentifier: com.apple.widgetkit-extension
+        TARGETED_DEVICE_FAMILY: "1"
+    dependencies:
+      - sdk: WidgetKit.framework
+      - sdk: SwiftUI.framework
+
 schemes:
   HeyCapeCod:
     build:
