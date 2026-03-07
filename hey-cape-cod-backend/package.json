@@ -1,0 +1,18 @@
+{
+  "name": "hey-cape-cod-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Backend API for Hey Cape Cod iOS app — POIs, stories, traffic, weather, tides, AI chat, and voice relay",
+  "scripts": {
+    "dev": "vercel dev",
+    "seed": "node scripts/seed-database.js",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.0.0",
+    "openai": "^4.52.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -46,35 +46,86 @@ final class TrafficService: TrafficServiceProtocol {
     // MARK: - Private
 
     private func fetchFromAPI() async throws -> TrafficReport {
-        // TODO: Integrate with MassDOT real-time traffic API
-        // For now, return a structured placeholder that matches the API shape
-        return TrafficReport(
-            routes: Self.monitoredRoutes.enumerated().map { index, name in
-                TrafficRoute(
-                    id: UUID(),
-                    name: name,
-                    origin: index < 2 ? "Mainland" : "Bourne",
-                    destination: index < 2 ? "Cape Cod" : "Provincetown",
-                    currentTravelTime: 0,
-                    typicalTravelTime: 0,
-                    congestionLevel: .free,
-                    distance: 0
-                )
-            },
+        // Fetch from our backend which aggregates MassDOT + Google fallback
+        let response: TrafficAPIResponse = try await APIClient.shared.get("/api/traffic")
+        return response.toTrafficReport()
+    }
+}
+
+// MARK: - Backend Response Mapping
+
+private struct TrafficAPIResponse: Codable {
+    let bridges: BridgesData
+    let routes: RoutesData
+    let recommendation: String
+    let isStale: Bool?
+    let updatedAt: String
+
+    struct BridgesData: Codable {
+        let sagamore: BridgeData
+        let bourne: BridgeData
+    }
+
+    struct BridgeData: Codable {
+        let delayMinutes: Int
+        let status: String
+        let direction: String
+        let lastUpdated: String
+    }
+
+    struct RoutesData: Codable {
+        let route6: RouteData
+        let route3: RouteData
+    }
+
+    struct RouteData: Codable {
+        let status: String
+        let delayMinutes: Int
+    }
+
+    func toTrafficReport() -> TrafficReport {
+        TrafficReport(
+            routes: [
+                TrafficRoute(id: UUID(), name: "Sagamore Bridge", origin: "Mainland", destination: "Cape Cod",
+                    currentTravelTime: TimeInterval(bridges.sagamore.delayMinutes * 60), typicalTravelTime: 0,
+                    congestionLevel: mapCongestion(bridges.sagamore.status), distance: 0),
+                TrafficRoute(id: UUID(), name: "Bourne Bridge", origin: "Mainland", destination: "Cape Cod",
+                    currentTravelTime: TimeInterval(bridges.bourne.delayMinutes * 60), typicalTravelTime: 0,
+                    congestionLevel: mapCongestion(bridges.bourne.status), distance: 0),
+                TrafficRoute(id: UUID(), name: "Route 6", origin: "Bourne", destination: "Provincetown",
+                    currentTravelTime: TimeInterval(routes.route6.delayMinutes * 60), typicalTravelTime: 0,
+                    congestionLevel: mapCongestion(routes.route6.status), distance: 0),
+                TrafficRoute(id: UUID(), name: "Route 3", origin: "Plymouth", destination: "Sagamore",
+                    currentTravelTime: TimeInterval(routes.route3.delayMinutes * 60), typicalTravelTime: 0,
+                    congestionLevel: mapCongestion(routes.route3.status), distance: 0),
+            ],
             incidents: [],
             bridgeStatus: BridgeStatus(
-                bourneBridge: BridgeStatus.BridgeCondition(
-                    status: .open,
-                    delayMinutes: 0,
-                    lastUpdated: .now
-                ),
-                sagamoreBridge: BridgeStatus.BridgeCondition(
-                    status: .open,
-                    delayMinutes: 0,
-                    lastUpdated: .now
-                )
+                bourneBridge: .init(status: mapBridgeStatus(bridges.bourne.status),
+                    delayMinutes: bridges.bourne.delayMinutes, lastUpdated: .now),
+                sagamoreBridge: .init(status: mapBridgeStatus(bridges.sagamore.status),
+                    delayMinutes: bridges.sagamore.delayMinutes, lastUpdated: .now)
             ),
             fetchedAt: .now
         )
+    }
+
+    private func mapCongestion(_ status: String) -> CongestionLevel {
+        switch status {
+        case "clear": .free
+        case "moderate": .moderate
+        case "heavy": .heavy
+        case "severe": .severe
+        default: .light
+        }
+    }
+
+    private func mapBridgeStatus(_ status: String) -> BridgeStatus.BridgeCondition.Status {
+        switch status {
+        case "clear": .open
+        case "heavy", "severe": .restricted
+        case "closed": .closed
+        default: .open
+        }
     }
 }

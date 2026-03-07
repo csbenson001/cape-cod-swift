@@ -1,9 +1,12 @@
 import CoreLocation
 
-/// Seed data: 15+ Cape Cod Points of Interest with GPS coordinates,
+/// Bundled offline fallback data: 15+ Cape Cod Points of Interest with GPS coordinates,
 /// geofence radii, story variants (adult/kids/family), quick facts,
 /// and insider tips.
-enum CapeCodContent {
+///
+/// Used as immediate content on first launch and as a fallback when the API is unreachable.
+/// The app shows bundled data immediately, then replaces with live API data once loaded.
+enum BundledContent {
 
     static let allPOIs: [PointOfInterest] = [
 

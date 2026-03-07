@@ -24,7 +24,32 @@ final class WeatherService: WeatherServiceProtocol {
             return cached
         }
 
-        // Step 1: Get the forecast endpoint from NWS points API
+        // Try backend first (cached + aggregated), fall back to direct NOAA
+        do {
+            let weather = try await fetchFromBackend(coordinate)
+            cachedWeather = weather
+            return weather
+        } catch {
+            print("[WeatherService] Backend failed, falling back to direct NOAA: \(error)")
+            let weather = try await fetchDirectFromNOAA(coordinate)
+            cachedWeather = weather
+            return weather
+        }
+    }
+
+    // MARK: - Backend API
+
+    private func fetchFromBackend(_ coordinate: CLLocationCoordinate2D) async throws -> WeatherData {
+        let response: WeatherAPIResponse = try await APIClient.shared.get("/api/weather", query: [
+            "lat": String(coordinate.latitude),
+            "lng": String(coordinate.longitude),
+        ])
+        return response.toWeatherData()
+    }
+
+    // MARK: - Direct NOAA Fallback
+
+    private func fetchDirectFromNOAA(_ coordinate: CLLocationCoordinate2D) async throws -> WeatherData {
         let pointURL = URL(string: "https://api.weather.gov/points/\(coordinate.latitude),\(coordinate.longitude)")!
         var pointRequest = URLRequest(url: pointURL)
         pointRequest.setValue("HeyCapeCod/1.0", forHTTPHeaderField: "User-Agent")
@@ -37,15 +62,12 @@ final class WeatherService: WeatherServiceProtocol {
             throw WeatherServiceError.invalidResponse
         }
 
-        // Step 2: Fetch daily and hourly forecasts in parallel
         async let dailyData = fetchJSON(from: forecastURLString)
         async let hourlyData = fetchJSON(from: forecastHourlyURLString)
 
         let (daily, hourly) = try await (dailyData, hourlyData)
 
-        let weather = try parseWeatherData(daily: daily, hourly: hourly)
-        cachedWeather = weather
-        return weather
+        return try parseWeatherData(daily: daily, hourly: hourly)
     }
 
     private func fetchJSON(from urlString: String) async throws -> [String: Any] {
@@ -146,6 +168,84 @@ final class WeatherService: WeatherServiceProtocol {
 
     private func parseISO8601(_ string: String) -> Date? {
         ISO8601DateFormatter().date(from: string)
+    }
+}
+
+// MARK: - Backend Response Mapping
+
+private struct WeatherAPIResponse: Codable {
+    let current: CurrentData?
+    let hourly: [HourlyData]
+    let daily: [DailyData]
+    let fetchedAt: String
+
+    struct CurrentData: Codable {
+        let temperature: Double
+        let condition: String
+        let conditionDescription: String?
+        let humidity: Int?
+        let windSpeed: String?
+        let windDirection: String?
+    }
+
+    struct HourlyData: Codable {
+        let time: String
+        let temperature: Double
+        let condition: String
+        let precipChance: Int?
+        let windSpeed: String?
+    }
+
+    struct DailyData: Codable {
+        let date: String
+        let high: Double
+        let low: Double
+        let condition: String
+        let precipChance: Int?
+    }
+
+    func toWeatherData() -> WeatherData {
+        let mapCond = { (s: String) -> WeatherConditionType in
+            WeatherConditionType(rawValue: s) ?? .clear
+        }
+
+        let currentWeather = CurrentWeather(
+            temperature: current?.temperature ?? 0,
+            feelsLike: current?.temperature ?? 0,
+            condition: mapCond(current?.condition ?? "clear"),
+            humidity: current?.humidity ?? 0,
+            windSpeed: Double(current?.windSpeed?.filter(\.isNumber) ?? "0") ?? 0,
+            windDirection: current?.windDirection ?? "N",
+            uvIndex: 0, visibility: 10, pressure: 30.0, dewPoint: 0
+        )
+
+        let hourlyForecasts = hourly.prefix(24).map { h in
+            HourlyForecast(
+                time: ISO8601DateFormatter().date(from: h.time) ?? .now,
+                temperature: h.temperature,
+                condition: mapCond(h.condition),
+                precipChance: h.precipChance ?? 0,
+                windSpeed: Double(h.windSpeed?.filter(\.isNumber) ?? "0") ?? 0
+            )
+        }
+
+        let dailyForecasts = daily.map { d in
+            DailyForecast(
+                date: ISO8601DateFormatter().date(from: d.date) ?? .now,
+                high: d.high, low: d.low,
+                condition: mapCond(d.condition),
+                precipChance: d.precipChance ?? 0,
+                sunrise: .now, sunset: .now, uvIndex: 0
+            )
+        }
+
+        return WeatherData(
+            current: currentWeather,
+            hourly: Array(hourlyForecasts),
+            daily: dailyForecasts,
+            alerts: [],
+            fetchedAt: .now
+        )
     }
 }
 

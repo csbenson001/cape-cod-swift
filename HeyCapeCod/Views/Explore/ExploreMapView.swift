@@ -17,7 +17,7 @@ struct ExploreMapView: View {
     private let locationManager: LocationManager
     private let allPOIs: [PointOfInterest]
 
-    init(locationManager: LocationManager, pois: [PointOfInterest] = CapeCodContent.allPOIs) {
+    init(locationManager: LocationManager, pois: [PointOfInterest] = BundledContent.allPOIs) {
         self.locationManager = locationManager
         self.allPOIs = pois
     }
@@ -490,7 +490,7 @@ extension PointOfInterest: Hashable {
 
 #Preview("POI Detail") {
     POIDetailSheet(
-        poi: CapeCodContent.allPOIs[0],
+        poi: BundledContent.allPOIs[0],
         locationManager: LocationManager()
     )
 }

@@ -11,6 +11,12 @@ import Foundation
 ///   { "type": "audio", "audio": "<base64>", "is_final": bool }
 ///   { "type": "transcript", "text": "...", "role": "user" | "assistant" }
 ///   { "type": "status", "state": "listening" | "thinking" | "speaking" }
+///
+/// TODO: (Prompt 14) Vercel serverless functions have a 10-second timeout (free tier)
+/// or 60-second timeout (Pro). WebSocket connections are NOT supported on Vercel.
+/// The voice relay backend must be deployed to a long-lived server platform such as
+/// Railway, Render, or Fly.io that supports persistent WebSocket connections.
+/// Update `serverURL` to point to the dedicated voice server once deployed.
 @Observable
 final class WebSocketManager: NSObject, @unchecked Sendable {
 

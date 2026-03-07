@@ -11,6 +11,7 @@ final class ExploreViewModel {
     var searchText = ""
     var isLoading = false
     var error: Error?
+    var hasLoadedFromAPI = false
 
     private let locationService: LocationService
 
@@ -81,10 +82,61 @@ final class ExploreViewModel {
         locationService.formattedDistance(to: location)
     }
 
+    // MARK: - Data Loading
+
     func loadLocations() async {
+        // Show bundled content immediately on first load
+        if locations.isEmpty {
+            locations = BundledContent.allPOIs.map { $0.toCodLocation() }
+            applyFilters()
+        }
+
         isLoading = true
         defer { isLoading = false }
-        // TODO: Load from API or local database
+
+        // Fetch live data from API
+        await POIService.shared.fetchAllPOIs()
+        let apiPOIs = POIService.shared.allPOIs
+
+        if !apiPOIs.isEmpty {
+            locations = apiPOIs.map { $0.toCodLocation() }
+            hasLoadedFromAPI = true
+            print("[ExploreViewModel] Loaded \(apiPOIs.count) POIs from API")
+        } else {
+            print("[ExploreViewModel] API unavailable, showing bundled content")
+        }
+
+        error = POIService.shared.lastError
         applyFilters()
+    }
+}
+
+// MARK: - APIPOI → CodLocation Conversion
+
+extension APIPOI {
+    func toCodLocation() -> CodLocation {
+        CodLocation(
+            name: name,
+            latitude: latitude,
+            longitude: longitude,
+            category: LocationCategory(rawValue: category) ?? .nature,
+            description: description,
+            town: CapeCodTown(rawValue: town) ?? .barnstable
+        )
+    }
+}
+
+// MARK: - PointOfInterest → CodLocation Conversion
+
+extension PointOfInterest {
+    func toCodLocation() -> CodLocation {
+        CodLocation(
+            name: name,
+            latitude: coordinate.latitude,
+            longitude: coordinate.longitude,
+            category: category,
+            description: description,
+            town: town
+        )
     }
 }

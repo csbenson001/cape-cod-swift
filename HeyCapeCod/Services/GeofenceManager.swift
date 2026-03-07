@@ -5,6 +5,7 @@ import CoreLocation
 /// to the user's current location.
 ///
 /// Strategy:
+/// - Fetch POIs from backend API, falling back to bundled content
 /// - Re-evaluate which 20 POIs to monitor every time user moves 500+ meters
 /// - On region entry: check cooldown, mode, queue, then trigger story
 /// - 24-hour cooldown per POI stored in UserDefaults
@@ -15,6 +16,7 @@ final class GeofenceManager {
 
     private(set) var activeGeofences: Set<String> = []
     private(set) var lastTriggeredPOI: String?
+    private(set) var cachedPOIs: [PointOfInterest] = []
 
     /// Story mode filter — determines which story variant to play
     enum StoryMode: String, CaseIterable, Identifiable {
@@ -34,7 +36,6 @@ final class GeofenceManager {
     // MARK: - Dependencies
 
     private let locationManager: LocationManager
-    private let allPOIs: () -> [PointOfInterest]
 
     /// Called when a story should be triggered
     var onStoryTriggered: ((PointOfInterest, StoryVariant?) -> Void)?
@@ -47,9 +48,10 @@ final class GeofenceManager {
 
     // MARK: - Init
 
-    init(locationManager: LocationManager, poiProvider: @escaping () -> [PointOfInterest]) {
+    init(locationManager: LocationManager) {
         self.locationManager = locationManager
-        self.allPOIs = poiProvider
+        // Start with bundled content as immediate fallback
+        self.cachedPOIs = BundledContent.allPOIs
         setupLocationCallbacks()
     }
 
@@ -58,7 +60,9 @@ final class GeofenceManager {
     private func setupLocationCallbacks() {
         // Re-evaluate geofences when user moves 500+ meters
         locationManager.onSignificantLocationChange = { [weak self] location in
-            self?.reEvaluateGeofences(around: location)
+            Task { [weak self] in
+                await self?.fetchAndReEvaluate(around: location)
+            }
         }
 
         // Handle region entry
@@ -67,11 +71,32 @@ final class GeofenceManager {
         }
     }
 
+    // MARK: - API Integration
+
+    /// Fetch POIs from API and re-evaluate geofences.
+    /// Falls back to bundled/cached POIs if API is unavailable.
+    private func fetchAndReEvaluate(around location: CLLocation) async {
+        let nearbyAPIPOIs = await POIService.shared.fetchNearbyPOIs(
+            lat: location.coordinate.latitude,
+            lng: location.coordinate.longitude,
+            radius: 15000 // 15km radius
+        )
+
+        if !nearbyAPIPOIs.isEmpty {
+            cachedPOIs = nearbyAPIPOIs.map { $0.toPointOfInterest() }
+            print("[GeofenceManager] Loaded \(cachedPOIs.count) POIs from API")
+        } else {
+            print("[GeofenceManager] API unavailable, using \(cachedPOIs.count) cached/bundled POIs")
+        }
+
+        reEvaluateGeofences(around: location)
+    }
+
     // MARK: - Geofence Management
 
     /// Evaluate which 20 POIs are nearest and set up geofences for them.
     func reEvaluateGeofences(around location: CLLocation) {
-        let pois = allPOIs()
+        let pois = cachedPOIs
 
         // Sort by distance from user
         let sorted = pois
@@ -111,7 +136,9 @@ final class GeofenceManager {
     /// Initial setup — call after location permission is granted
     func startMonitoring() {
         guard let location = locationManager.currentLocation else { return }
-        reEvaluateGeofences(around: location)
+        Task {
+            await fetchAndReEvaluate(around: location)
+        }
     }
 
     func stopMonitoring() {
@@ -123,8 +150,7 @@ final class GeofenceManager {
     // MARK: - Region Entry Handling
 
     private func handleRegionEntry(regionID: String) {
-        let pois = allPOIs()
-        guard let poi = pois.first(where: { $0.id == regionID }) else { return }
+        guard let poi = cachedPOIs.first(where: { $0.id == regionID }) else { return }
 
         // Check cooldown
         guard !isOnCooldown(poiID: poi.id) else { return }
@@ -255,5 +281,25 @@ struct StoryVariant: Identifiable, Equatable {
         self.script = script
         // Rough estimate: ~150 words/minute for TTS
         self.duration = duration > 0 ? duration : Double(script.split(separator: " ").count) / 2.5
+    }
+}
+
+// MARK: - API → PointOfInterest Conversion
+
+extension APIPOI {
+    func toPointOfInterest() -> PointOfInterest {
+        PointOfInterest(
+            id: id,
+            name: name,
+            coordinate: CLLocationCoordinate2D(latitude: latitude, longitude: longitude),
+            geofenceRadius: radius ?? 200,
+            category: LocationCategory(rawValue: category) ?? .nature,
+            town: CapeCodTown(rawValue: town) ?? .barnstable,
+            description: description,
+            stories: [],
+            facts: facts ?? [],
+            tips: tips ?? [],
+            imageSystemName: nil
+        )
     }
 }
