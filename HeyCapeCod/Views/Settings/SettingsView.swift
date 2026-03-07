@@ -6,10 +6,126 @@ struct SettingsView: View {
     @State private var notificationsEnabled = true
     @State private var storyTriggersEnabled = true
     @State private var showingDesignSystem = false
+    @State private var showingSubscription = false
+    @State private var showingSignOut = false
+
+    private var auth: AuthManager { .shared }
+    private var subscription: SubscriptionManager { .shared }
 
     var body: some View {
         NavigationStack {
             List {
+                // Account
+                Section {
+                    if auth.isAuthenticated && !auth.isGuest {
+                        HStack(spacing: CodSpacing.md) {
+                            Image(systemName: "person.crop.circle.fill")
+                                .font(.system(size: 40))
+                                .foregroundStyle(Color.capeCod.oceanBlue)
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(auth.displayName ?? "User")
+                                    .codTextStyle(.cardTitle)
+                                if let email = auth.email {
+                                    Text(email)
+                                        .codTextStyle(.caption)
+                                }
+                            }
+                        }
+                        .padding(.vertical, CodSpacing.xs)
+                    } else {
+                        HStack(spacing: CodSpacing.md) {
+                            Image(systemName: "person.crop.circle.badge.questionmark")
+                                .font(.system(size: 40))
+                                .foregroundStyle(Color.capeCod.driftwood)
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Guest")
+                                    .codTextStyle(.cardTitle)
+                                Text("Sign in to sync your data")
+                                    .codTextStyle(.caption)
+                            }
+                        }
+                        .padding(.vertical, CodSpacing.xs)
+
+                        Button {
+                            Task { try? await auth.signInWithApple() }
+                        } label: {
+                            HStack {
+                                Image(systemName: "apple.logo")
+                                Text("Sign in with Apple")
+                            }
+                        }
+                    }
+                } header: {
+                    Text("Account")
+                }
+
+                // Subscription
+                Section {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Plan")
+                                .codTextStyle(.body)
+                            Text(subscription.isSubscribed ? subscription.currentPlanName : "Free")
+                                .codTextStyle(.caption)
+                        }
+                        Spacer()
+                        if subscription.isSubscribed {
+                            Text("Active")
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundStyle(Color.capeCod.duneGrass)
+                                .padding(.horizontal, CodSpacing.sm)
+                                .padding(.vertical, CodSpacing.xs)
+                                .background(Color.capeCod.duneGrass.opacity(0.12))
+                                .clipShape(Capsule())
+                        }
+                    }
+
+                    if !subscription.isSubscribed {
+                        Button {
+                            showingSubscription = true
+                        } label: {
+                            HStack {
+                                Image(systemName: "sparkles")
+                                    .foregroundStyle(Color.capeCod.sunsetOrange)
+                                Text("Upgrade to Premium")
+                                    .foregroundStyle(Color.capeCod.sunsetOrange)
+                            }
+                        }
+                    }
+
+                    if !subscription.isSubscribed {
+                        HStack {
+                            Text("Voice conversations")
+                                .codTextStyle(.body)
+                            Spacer()
+                            Text("\(PaywallManager.shared.voiceConversationsRemaining)/\(PaywallManager.freeVoiceConversationsPerDay) remaining")
+                                .codTextStyle(.caption)
+                        }
+
+                        HStack {
+                            Text("Stories")
+                                .codTextStyle(.body)
+                            Spacer()
+                            Text("\(PaywallManager.shared.storiesRemaining)/\(PaywallManager.freeStoriesPerDay) remaining")
+                                .codTextStyle(.caption)
+                        }
+                    }
+
+                    if let expires = subscription.expirationDate, subscription.isSubscribed {
+                        HStack {
+                            Text("Renews")
+                                .codTextStyle(.body)
+                            Spacer()
+                            Text(expires.formatted(.dateTime.month().day().year()))
+                                .codTextStyle(.caption)
+                        }
+                    }
+                } header: {
+                    Text("Subscription")
+                }
+
                 // Appearance
                 Section("Appearance") {
                     Picker("Theme", selection: Binding(
@@ -53,6 +169,20 @@ struct SettingsView: View {
                     }
                 }
 
+                // Sign Out
+                if auth.isAuthenticated && !auth.isGuest {
+                    Section {
+                        Button(role: .destructive) {
+                            showingSignOut = true
+                        } label: {
+                            HStack {
+                                Image(systemName: "rectangle.portrait.and.arrow.right")
+                                Text("Sign Out")
+                            }
+                        }
+                    }
+                }
+
                 // Developer
                 #if DEBUG
                 Section("Developer") {
@@ -67,6 +197,20 @@ struct SettingsView: View {
                 NavigationStack {
                     DesignSystemPreview()
                 }
+            }
+            .sheet(isPresented: $showingSubscription) {
+                NavigationStack {
+                    SubscriptionView()
+                }
+            }
+            .alert("Sign Out", isPresented: $showingSignOut) {
+                Button("Cancel", role: .cancel) {}
+                Button("Sign Out", role: .destructive) {
+                    auth.signOut()
+                    UserProfileManager.shared.clearProfile()
+                }
+            } message: {
+                Text("Your data will be saved and available when you sign back in.")
             }
         }
     }
