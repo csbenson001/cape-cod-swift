@@ -1,0 +1,247 @@
+{
+  "app_name": "Hey Cape Cod",
+  "subtitle": "Your AI Cape Cod Travel Companion",
+  "keywords": "Cape Cod,beaches,tides,weather,traffic,travel guide,voice,AI,Provincetown,Chatham,Falmouth,whale watch,ferry,lighthouse,bridge,Sagamore,Bourne,NOAA,vacation,Massachusetts",
+  "description": "Hey Cape Cod is the only travel companion you need for exploring Cape Cod. Powered by conversational AI, it puts local knowledge at your fingertips — just ask a question and get an instant, spoken answer about beaches, restaurants, hiking trails, lighthouses, and everything in between.\n\nTALK TO CAPE COD\nHave a natural voice conversation about anything Cape Cod. Powered by OpenAI's Realtime API, Hey Cape Cod understands your questions and responds with knowledgeable, friendly answers — like having a local expert riding along with you. Ask about the best beach for kids, where to find fresh oysters, or what to do on a rainy day.\n\nGPS-TRIGGERED AUDIO STORIES\nDrive the Cape and let the stories come to you. As you pass more than 50 landmarks — from the Sagamore Bridge to the Pilgrim Monument — Hey Cape Cod automatically plays rich audio narratives about the history, legends, and hidden gems around you. No tapping required.\n\nLIVE WEATHER, TIDES & BEACH CONDITIONS\nGet real-time weather forecasts, tide charts, and beach conditions powered by WeatherKit and NOAA data. Know exactly when low tide hits your favorite sandbar or whether the surf is calm enough for paddleboarding.\n\nBRIDGE TRAFFIC\nCheck live traffic conditions for the Sagamore and Bourne bridges before you drive. Avoid the backups and plan your crossing with up-to-the-minute updates.\n\nINTERACTIVE MAP WITH 100+ POINTS OF INTEREST\nExplore an interactive map spanning all 15 Cape Cod towns, from Bourne to Provincetown. Browse over 100 curated points of interest including beaches, trails, restaurants, historic sites, harbors, and more.\n\nWIDGETS, SIRI & SPOTLIGHT\nAdd home screen widgets for tide times, weather, and bridge traffic at a glance. Use Siri Shortcuts to ask about conditions hands-free. Find Cape Cod places and stories directly from Spotlight search.\n\nSUBSCRIPTION\nHey Cape Cod is free to download with a generous free tier that includes 3 voice conversations and 5 audio stories per day. Upgrade to Premium for unlimited access:\n\n- Premium Monthly: $4.99/month\n- Premium Annual: $29.99/year (save 50%)\n\nPayment is charged to your Apple ID account at confirmation of purchase. Your subscription automatically renews unless canceled at least 24 hours before the end of the current period. You can manage and cancel your subscriptions in your Apple ID account settings. Any unused portion of a free trial period is forfeited upon purchasing a subscription.\n\nTerms of Use: https://heycapecod.com/terms\nPrivacy Policy: https://heycapecod.com/privacy",
+  "promotional_text": "Summer 2026 is here! New audio stories for Wellfleet and Truro, plus live beach parking availability. Ask Hey Cape Cod anything — your AI travel companion is ready.",
+  "privacy_url": "https://heycapecod.com/privacy",
+  "support_url": "https://heycapecod.com",
+  "marketing_url": "https://heycapecod.com",
+  "category": {
+    "primary": "Travel",
+    "secondary": "Weather"
+  },
+  "age_rating": {
+    "rating": "4+",
+    "alcohol_tobacco_drugs": "none",
+    "mature_suggestive_themes": "none",
+    "profanity_crude_humor": "none",
+    "simulated_gambling": "none",
+    "horror_fear": "none",
+    "medical_treatment_info": "none",
+    "violence": {
+      "cartoon_fantasy": "none",
+      "realistic": "none",
+      "prolonged_graphic_sadistic": "none"
+    },
+    "sexual_content": {
+      "graphic": "none",
+      "nudity": "none"
+    },
+    "gambling_contests": "none",
+    "unrestricted_web_access": false
+  },
+  "privacy_labels": {
+    "data_collected": [
+      {
+        "category": "Location",
+        "type": "Precise Location",
+        "purposes": ["App Functionality"],
+        "linked_to_identity": false,
+        "used_for_tracking": false,
+        "collection_note": "Used to trigger GPS-based audio stories and show nearby points of interest. Location is processed on-device and not stored on servers."
+      },
+      {
+        "category": "Location",
+        "type": "Coarse Location",
+        "purposes": ["App Functionality"],
+        "linked_to_identity": false,
+        "used_for_tracking": false,
+        "collection_note": "Used to provide local weather, tides, and beach conditions."
+      },
+      {
+        "category": "Identifiers",
+        "type": "User ID",
+        "purposes": ["App Functionality"],
+        "linked_to_identity": true,
+        "used_for_tracking": false,
+        "collection_note": "Sign in with Apple identifier used for account management and subscription entitlements."
+      },
+      {
+        "category": "Purchases",
+        "type": "Purchase History",
+        "purposes": ["App Functionality"],
+        "linked_to_identity": true,
+        "used_for_tracking": false,
+        "collection_note": "Subscription status is verified to unlock Premium features."
+      },
+      {
+        "category": "Usage Data",
+        "type": "Product Interaction",
+        "purposes": ["Analytics"],
+        "linked_to_identity": false,
+        "used_for_tracking": false,
+        "collection_note": "Anonymized usage metrics to understand feature adoption and improve the app experience."
+      },
+      {
+        "category": "Diagnostics",
+        "type": "Crash Data",
+        "purposes": ["Analytics"],
+        "linked_to_identity": false,
+        "used_for_tracking": false,
+        "collection_note": "Crash logs and performance diagnostics collected to maintain app stability."
+      },
+      {
+        "category": "Diagnostics",
+        "type": "Performance Data",
+        "purposes": ["Analytics"],
+        "linked_to_identity": false,
+        "used_for_tracking": false,
+        "collection_note": "App launch times and network latency metrics for performance optimization."
+      },
+      {
+        "category": "User Content",
+        "type": "Audio Data",
+        "purposes": ["App Functionality"],
+        "linked_to_identity": false,
+        "used_for_tracking": false,
+        "collection_note": "Microphone audio is streamed to OpenAI Realtime API for voice conversations. Audio is not stored after processing."
+      }
+    ],
+    "data_not_collected": [
+      "Contact Info",
+      "Contacts",
+      "Browsing History",
+      "Search History",
+      "Health & Fitness",
+      "Financial Info",
+      "Sensitive Info",
+      "Other Data"
+    ],
+    "privacy_practices": {
+      "tracking": false,
+      "third_party_sharing": false,
+      "third_party_services": [
+        {
+          "name": "OpenAI Realtime API",
+          "purpose": "Voice conversation processing",
+          "data_shared": ["Audio Data"],
+          "retention": "Not retained after processing"
+        },
+        {
+          "name": "Apple WeatherKit",
+          "purpose": "Weather and forecast data",
+          "data_shared": ["Coarse Location"],
+          "retention": "Per Apple's data policy"
+        },
+        {
+          "name": "NOAA Tides & Currents API",
+          "purpose": "Tide predictions and water conditions",
+          "data_shared": [],
+          "retention": "N/A"
+        }
+      ]
+    }
+  },
+  "screenshots": {
+    "6.7_inch": [
+      {
+        "filename": "01_voice_conversation.png",
+        "caption": "Ask anything about Cape Cod with natural voice conversations"
+      },
+      {
+        "filename": "02_audio_stories.png",
+        "caption": "GPS-triggered audio stories at 50+ Cape Cod landmarks"
+      },
+      {
+        "filename": "03_weather_tides.png",
+        "caption": "Live weather, tides, and beach conditions from WeatherKit & NOAA"
+      },
+      {
+        "filename": "04_bridge_traffic.png",
+        "caption": "Real-time Sagamore & Bourne bridge traffic updates"
+      },
+      {
+        "filename": "05_interactive_map.png",
+        "caption": "Explore 100+ points of interest across all 15 Cape Cod towns"
+      },
+      {
+        "filename": "06_widgets_siri.png",
+        "caption": "Home screen widgets and Siri Shortcuts for hands-free access"
+      }
+    ],
+    "6.1_inch": [
+      {
+        "filename": "01_voice_conversation.png",
+        "caption": "Ask anything about Cape Cod with natural voice conversations"
+      },
+      {
+        "filename": "02_audio_stories.png",
+        "caption": "GPS-triggered audio stories at 50+ Cape Cod landmarks"
+      },
+      {
+        "filename": "03_weather_tides.png",
+        "caption": "Live weather, tides, and beach conditions from WeatherKit & NOAA"
+      },
+      {
+        "filename": "04_bridge_traffic.png",
+        "caption": "Real-time Sagamore & Bourne bridge traffic updates"
+      },
+      {
+        "filename": "05_interactive_map.png",
+        "caption": "Explore 100+ points of interest across all 15 Cape Cod towns"
+      },
+      {
+        "filename": "06_widgets_siri.png",
+        "caption": "Home screen widgets and Siri Shortcuts for hands-free access"
+      }
+    ]
+  },
+  "app_icon": {
+    "size": "1024x1024",
+    "format": "PNG",
+    "color_space": "sRGB",
+    "transparency": false,
+    "filename": "AppIcon.png",
+    "notes": "No rounded corners or masks — App Store applies the mask automatically."
+  },
+  "subscription_groups": {
+    "group_name": "Hey Cape Cod Premium",
+    "subscriptions": [
+      {
+        "product_id": "com.heycapecod.premium.monthly",
+        "reference_name": "Premium Monthly",
+        "duration": "1 month",
+        "price": 4.99,
+        "currency": "USD",
+        "display_name": "Premium Monthly",
+        "description": "Unlimited voice conversations, all audio stories, and full access to every feature.",
+        "free_trial": {
+          "duration": "3 days",
+          "offer_type": "introductory"
+        }
+      },
+      {
+        "product_id": "com.heycapecod.premium.annual",
+        "reference_name": "Premium Annual",
+        "duration": "1 year",
+        "price": 29.99,
+        "currency": "USD",
+        "display_name": "Premium Annual",
+        "description": "Unlimited voice conversations, all audio stories, and full access to every feature. Save 50% compared to monthly.",
+        "free_trial": {
+          "duration": "7 days",
+          "offer_type": "introductory"
+        }
+      }
+    ],
+    "free_tier": {
+      "voice_conversations_per_day": 3,
+      "audio_stories_per_day": 5,
+      "weather_access": true,
+      "bridge_traffic_access": true,
+      "map_access": true
+    }
+  },
+  "release_notes": "Welcome to Hey Cape Cod 1.0! Your AI-powered Cape Cod travel companion is here.\n\n- Voice conversations: Ask anything about Cape Cod and get instant spoken answers\n- 50+ GPS-triggered audio stories at landmarks across the Cape\n- Live weather, tides, and beach conditions\n- Sagamore & Bourne bridge traffic updates\n- Interactive map with 100+ points of interest across 15 towns\n- Home screen widgets for weather, tides, and bridge traffic\n- Siri Shortcuts and Spotlight search integration\n- Sign in with Apple for seamless account setup",
+  "localization": {
+    "primary_language": "en-US",
+    "additional_languages": []
+  },
+  "version": "1.0.0",
+  "build_number": "1",
+  "bundle_id": "com.heycapecod.app",
+  "minimum_os_version": "17.0",
+  "devices": ["iPhone"],
+  "copyright": "2026 Hey Cape Cod LLC"
+}

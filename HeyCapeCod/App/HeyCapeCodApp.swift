@@ -36,6 +36,13 @@ struct HeyCapeCodApp: App {
     }
 
     private func configureApp() {
+        // Configure URL cache for network responses (50MB memory, 200MB disk)
+        URLCache.shared = URLCache(
+            memoryCapacity: 50 * 1024 * 1024,
+            diskCapacity: 200 * 1024 * 1024,
+            diskPath: "com.heycapecod.urlcache"
+        )
+
         // Configure UserProfileManager with SwiftData context
         if let container = try? ModelContainer(for: UserProfile.self) {
             let context = ModelContext(container)

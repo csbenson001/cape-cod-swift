@@ -75,6 +75,7 @@ struct BeachConditionsView: View {
         .frame(maxWidth: .infinity)
         .background(ratingColor(rec.rating).opacity(0.06))
         .clipShape(RoundedRectangle(cornerRadius: CodRadius.featured))
+        .codAccessibleGroup(label: "Beach rating: \(rec.rating.rawValue)")
     }
 
     // MARK: - Conditions Grid
@@ -159,6 +160,7 @@ struct BeachConditionsView: View {
         .background(Color.capeCod.surfaceElevated)
         .clipShape(RoundedRectangle(cornerRadius: CodRadius.card))
         .adaptiveCardStyle()
+        .codAccessibleGroup(label: "Best Beach Right Now: \(rec.summary)")
     }
 
     // MARK: - Shark Alert
@@ -204,6 +206,7 @@ struct BeachConditionsView: View {
         .background(isSharkSeason ? Color.capeCod.cranberry.opacity(0.06) : Color.capeCod.surfaceElevated)
         .clipShape(RoundedRectangle(cornerRadius: CodRadius.card))
         .adaptiveCardStyle()
+        .codAccessibleGroup(label: "Shark Advisory: \(isSharkSeason ? "Active season, use caution on outer Cape ocean beaches" : "Low season, low risk")")
     }
 
     // MARK: - Lifeguard Status
@@ -246,6 +249,7 @@ struct BeachConditionsView: View {
         .background(Color.capeCod.surfaceElevated)
         .clipShape(RoundedRectangle(cornerRadius: CodRadius.card))
         .adaptiveCardStyle()
+        .codAccessibleGroup(label: "Lifeguards: \(isOnDuty ? "On duty" : isSummer ? "Off hours" : "Off season")")
     }
 
     // MARK: - Sunscreen Reminder
@@ -268,6 +272,7 @@ struct BeachConditionsView: View {
                 .padding(CodSpacing.cardPadding)
                 .background(uvColor.opacity(0.08))
                 .clipShape(RoundedRectangle(cornerRadius: CodRadius.card))
+                .codAccessibleGroup(label: "Sunscreen Reminder: \(sunscreenMessage)")
             }
         }
     }
@@ -315,6 +320,7 @@ struct BeachConditionsView: View {
                     Spacer()
                 }
                 .padding(.vertical, CodSpacing.xs)
+                .codAccessibleGroup(label: "\(beach.name), \(beach.town)\(beach.isKidFriendly ? ", kid-friendly" : "")\(beach.hasTidePools ? ", has tide pools" : "")")
 
                 if beach.id != BeachRecommendationEngine.beaches.last?.id {
                     Divider()
@@ -438,6 +444,7 @@ private struct ConditionCard: View {
         .background(Color.capeCod.surfaceElevated)
         .clipShape(RoundedRectangle(cornerRadius: CodRadius.card))
         .adaptiveCardStyle()
+        .codAccessibleGroup(label: "\(title): \(value), \(detail)")
     }
 }
 

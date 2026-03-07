@@ -4,6 +4,39 @@ All notable changes to Hey Cape Cod are documented in this file.
 
 ## [1.0.0] - 2026-03-07
 
+### Visual Polish (v1.0.0-rc2)
+- Staggered entrance animations on all dashboard sections
+- AnimatedCounter odometer effect on traffic delay numbers
+- PulsingGlow on live bridge/traffic status indicators
+- BubbleParticles ambient background in voice assistant
+- Multi-ring VoiceOrb responsive to audio levels
+- Dark mode: AdaptiveCardStyle (shadow in light, border in dark)
+- LoadingSkeleton components replace handcrafted loading states
+- CodButtonPressStyle and CodCardButtonStyle on all interactive cards
+- CodHaptic feedback on every interactive element
+- ImagePlaceholder with category-based gradient overlays
+
+### Testing & QA (v1.0.0-rc3)
+- Protocol-based service tests with MockAPIClient and MockLocationManager
+- Enhanced unit tests: TrafficService, WeatherService, POIService, GeofenceManager, PaywallManager, AudioEngine, APIClient
+- Expanded UI tests: onboarding flow, navigation, explore, voice, traffic, settings
+- Backend API test script (scripts/test-api.sh) with colored pass/fail output
+- App Store metadata (AppStore/metadata.json)
+- 20-item release checklist (CHECKLIST.md)
+
+### Performance
+- URLCache configured (50MB memory, 200MB disk)
+- ContentPrefetcher warm-up on launch for <2s startup
+- Aggressive cache TTLs: weather 15min, traffic 5min, tides 1hr, POIs 24hr
+- WebSocket pre-connect on voice tab selection
+
+### Accessibility Fixes
+- VoiceOver labels on ConversationView mic/send buttons and suggestion chips
+- Accessibility grouping on BeachConditionsView cards (rating, shark, lifeguard, sunscreen, beach list)
+- ConditionCard semantic labels for VoiceOver
+- Decorative images hidden from VoiceOver
+- 44x44pt minimum touch targets on all interactive elements
+
 ### Added
 
 #### Voice & Conversation

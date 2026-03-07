@@ -52,6 +52,7 @@ struct ConversationView: View {
             Image(systemName: "bubble.left.and.bubble.right.fill")
                 .font(.system(size: 48))
                 .foregroundStyle(Color.capeCod.oceanBlue.opacity(0.3))
+                .codAccessibleHidden()
 
             Text("Ask me anything about Cape Cod")
                 .codTextStyle(.subtitle)
@@ -83,7 +84,12 @@ struct ConversationView: View {
                 Image(systemName: viewModel.isListening ? "mic.fill" : "mic")
                     .font(.title3)
                     .foregroundStyle(viewModel.isListening ? Color.capeCod.cranberry : Color.capeCod.driftwood)
+                    .frame(minWidth: 44, minHeight: 44)
             }
+            .codAccessibleButton(
+                viewModel.isListening ? "Stop listening" : "Start voice input",
+                hint: viewModel.isListening ? "Tap to stop recording" : "Tap to dictate your question"
+            )
 
             // Text field
             TextField("Ask about Cape Cod...", text: $viewModel.inputText, axis: .vertical)
@@ -99,8 +105,10 @@ struct ConversationView: View {
                 Image(systemName: "arrow.up.circle.fill")
                     .font(.title2)
                     .foregroundStyle(viewModel.canSend ? Color.capeCod.oceanBlue : Color.capeCod.driftwood.opacity(0.3))
+                    .frame(minWidth: 44, minHeight: 44)
             }
             .disabled(!viewModel.canSend)
+            .codAccessibleButton("Send message", hint: viewModel.canSend ? "Send your question" : "Type a message first")
         }
         .padding(.horizontal, CodSpacing.screenEdge)
         .padding(.vertical, CodSpacing.sm)
@@ -154,6 +162,7 @@ private struct SuggestionChip: View {
                 .clipShape(Capsule())
         }
         .buttonStyle(.plain)
+        .codAccessibleButton(text, hint: "Tap to ask this question")
     }
 }
 
