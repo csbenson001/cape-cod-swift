@@ -9,6 +9,14 @@ final class WeatherViewModel {
     var isLoading = false
     var error: Error?
 
+    // Buoy / ocean data
+    var waterTemperature: Double?
+    var waveHeight: Double?
+    var wavePeriod: Double?
+
+    // Beach recommendation
+    var beachRecommendation: BeachRecommendation?
+
     private let weatherService: WeatherService
     private let tideService: TideService
 
@@ -20,8 +28,15 @@ final class WeatherViewModel {
         self.tideService = tideService
     }
 
+    // MARK: - Computed Properties
+
     var currentTemperature: String {
         weather?.current.temperatureFormatted ?? "--°"
+    }
+
+    var feelsLikeTemperature: String {
+        guard let fl = weather?.current.feelsLike else { return "--°" }
+        return "\(Int(fl.rounded()))°"
     }
 
     var conditionName: String {
@@ -46,6 +61,30 @@ final class WeatherViewModel {
         return "\(current.humidity)%"
     }
 
+    var uvIndex: Int {
+        weather?.current.uvIndex ?? 0
+    }
+
+    var uvDescription: String {
+        switch uvIndex {
+        case 0...2: return "Low"
+        case 3...5: return "Moderate"
+        case 6...7: return "High"
+        case 8...10: return "Very High"
+        default: return "Extreme"
+        }
+    }
+
+    var waterTempFormatted: String? {
+        guard let temp = waterTemperature else { return nil }
+        return "\(Int(temp.rounded()))°F"
+    }
+
+    var waveHeightFormatted: String? {
+        guard let height = waveHeight else { return nil }
+        return String(format: "%.1f ft", height)
+    }
+
     var hourlyForecast: [HourlyForecast] {
         weather?.hourly ?? []
     }
@@ -59,18 +98,48 @@ final class WeatherViewModel {
     }
 
     var tidePredictions: [TidePrediction] {
-        tideData?.predictions ?? []
+        tideData?.predictions ?? weatherService.tides
     }
 
     var nextTide: TidePrediction? {
-        tideData?.nextTide
+        tidePredictions.first { $0.time > .now }
     }
 
     var tideStatus: TideStatus {
-        tideData?.currentTideStatus ?? .unknown
+        guard let next = nextTide else { return .unknown }
+        return next.type == .high ? .rising : .falling
     }
 
     var tideStations: [TideStation] { TideStation.allCases }
+
+    var timeUntilNextTide: String? {
+        guard let next = nextTide else { return nil }
+        let interval = next.time.timeIntervalSince(.now)
+        let hours = Int(interval) / 3600
+        let minutes = (Int(interval) % 3600) / 60
+        if hours > 0 { return "\(hours)h \(minutes)m" }
+        return "\(minutes)m"
+    }
+
+    // MARK: - Tide Tips (context-aware)
+
+    var tideTip: String? {
+        guard let next = nextTide else { return nil }
+        let minutesUntil = Int(next.time.timeIntervalSince(.now)) / 60
+
+        if tideStatus == .falling && minutesUntil < 180 {
+            return "Low tide coming in \(minutesUntil / 60)h \(minutesUntil % 60)m — great for tide pools at Skaket Beach!"
+        }
+        if tideStatus == .rising && next.type == .high {
+            return "High tide at \(next.timeFormatted) — less sand, but better swimming conditions."
+        }
+        if tideStatus == .falling {
+            return "Tide is going out — more beach to explore! Perfect for beachcombing."
+        }
+        return "Tide is coming in — keep an eye on your beach setup."
+    }
+
+    // MARK: - Loading
 
     func load() async {
         isLoading = true
@@ -85,6 +154,28 @@ final class WeatherViewModel {
                 do { tideData = try await tideService.fetchTides(station: selectedStation) }
                 catch { self.error = error }
             }
+            group.addTask { [self] in
+                await weatherService.fetchBuoyData()
+            }
+            group.addTask { [self] in
+                await weatherService.fetchTides(station: WeatherService.defaultTideStation, days: 3)
+            }
+        }
+
+        // Copy buoy data
+        waterTemperature = weatherService.waterTemperature
+        waveHeight = weatherService.waveHeight
+        wavePeriod = weatherService.wavePeriod
+
+        // Generate recommendation
+        if let weather {
+            beachRecommendation = BeachRecommendationEngine.recommend(
+                weather: weather,
+                waterTemp: waterTemperature,
+                waveHeight: waveHeight,
+                tideStatus: tideStatus,
+                nextTide: nextTide
+            )
         }
     }
 

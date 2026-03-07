@@ -1,5 +1,8 @@
 import SwiftUI
+import Charts
 
+/// Beautiful tide curve chart using Swift Charts.
+/// Shows today + next 2 days of tides with current time marker.
 struct TideChartView: View {
     let viewModel: WeatherViewModel
 
@@ -10,13 +13,18 @@ struct TideChartView: View {
                 VStack(spacing: CodSpacing.sm) {
                     Text(viewModel.selectedStation.name)
                         .codTextStyle(.sectionTitle)
-                    Text("Tide Predictions")
+                    Text("Tide Predictions — Next 3 Days")
                         .codTextStyle(.caption)
                 }
 
                 // Tide Chart
                 if !viewModel.tidePredictions.isEmpty {
                     tideChart
+                }
+
+                // Context-aware tip
+                if let tip = viewModel.tideTip {
+                    tideTipCard(tip)
                 }
 
                 // Predictions List
@@ -30,88 +38,170 @@ struct TideChartView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
+    // MARK: - Swift Charts Tide Curve
+
     private var tideChart: some View {
-        VStack(alignment: .leading, spacing: CodSpacing.sm) {
-            // Simple visual tide chart
-            GeometryReader { geo in
-                let predictions = viewModel.tidePredictions
-                let maxHeight = predictions.map(\.height).max() ?? 1
-                let minHeight = predictions.map(\.height).min() ?? 0
-                let range = max(maxHeight - minHeight, 0.1)
+        let predictions = viewModel.tidePredictions
 
-                Path { path in
-                    guard predictions.count > 1 else { return }
-                    let stepX = geo.size.width / CGFloat(predictions.count - 1)
+        return VStack(alignment: .leading, spacing: CodSpacing.sm) {
+            Chart {
+                // Tide curve
+                ForEach(predictions) { prediction in
+                    LineMark(
+                        x: .value("Time", prediction.time),
+                        y: .value("Height", prediction.height)
+                    )
+                    .foregroundStyle(Color.capeCod.oceanBlue.gradient)
+                    .interpolationMethod(.catmullRom)
+                    .lineStyle(StrokeStyle(lineWidth: 2.5))
 
-                    for (index, prediction) in predictions.enumerated() {
-                        let x = CGFloat(index) * stepX
-                        let normalizedHeight = (prediction.height - minHeight) / range
-                        let y = geo.size.height * (1 - normalizedHeight)
+                    AreaMark(
+                        x: .value("Time", prediction.time),
+                        y: .value("Height", prediction.height)
+                    )
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [Color.capeCod.oceanBlue.opacity(0.2), Color.capeCod.oceanBlue.opacity(0.02)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .interpolationMethod(.catmullRom)
+                }
 
-                        if index == 0 {
-                            path.move(to: CGPoint(x: x, y: y))
-                        } else {
-                            path.addLine(to: CGPoint(x: x, y: y))
+                // High/low tide point markers
+                ForEach(predictions) { prediction in
+                    PointMark(
+                        x: .value("Time", prediction.time),
+                        y: .value("Height", prediction.height)
+                    )
+                    .foregroundStyle(prediction.type == .high ? Color.capeCod.oceanBlue : Color.capeCod.seafoam)
+                    .symbolSize(40)
+                    .annotation(position: prediction.type == .high ? .top : .bottom) {
+                        VStack(spacing: 0) {
+                            Text(prediction.type == .high ? "H" : "L")
+                                .font(.system(size: 9, weight: .bold))
+                            Text(prediction.timeFormatted)
+                                .font(.system(size: 8))
+                        }
+                        .foregroundStyle(prediction.type == .high ? Color.capeCod.oceanBlue : Color.capeCod.seafoam)
+                    }
+                }
+
+                // Current time marker
+                RuleMark(x: .value("Now", Date.now))
+                    .foregroundStyle(Color.capeCod.sunsetOrange)
+                    .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
+                    .annotation(position: .top, alignment: .center) {
+                        Text("Now")
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundStyle(Color.capeCod.sunsetOrange)
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 2)
+                            .background(Color.capeCod.sunsetOrange.opacity(0.12))
+                            .clipShape(Capsule())
+                    }
+            }
+            .chartXAxis {
+                AxisMarks(values: .stride(by: .hour, count: 6)) { value in
+                    AxisGridLine()
+                    AxisValueLabel(format: .dateTime.hour())
+                }
+            }
+            .chartYAxis {
+                AxisMarks(position: .leading) { value in
+                    AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [2, 4]))
+                    AxisValueLabel {
+                        if let height = value.as(Double.self) {
+                            Text(String(format: "%.1f", height))
+                                .font(.system(size: 10))
                         }
                     }
                 }
-                .stroke(Color.capeCod.oceanBlue, style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
-
-                // Data points
-                ForEach(Array(predictions.enumerated()), id: \.element.id) { index, prediction in
-                    let stepX = geo.size.width / CGFloat(predictions.count - 1)
-                    let x = CGFloat(index) * stepX
-                    let normalizedHeight = (prediction.height - minHeight) / range
-                    let y = geo.size.height * (1 - normalizedHeight)
-
-                    Circle()
-                        .fill(prediction.type == .high ? Color.capeCod.oceanBlue : Color.capeCod.seafoam)
-                        .frame(width: 8, height: 8)
-                        .position(x: x, y: y)
-                }
             }
-            .frame(height: 160)
-            .padding(CodSpacing.cardPadding)
-            .background(Color.capeCod.cardBackground)
-            .clipShape(RoundedRectangle(cornerRadius: CodRadius.card))
+            .chartYAxisLabel("ft", position: .leading)
+            .frame(height: 220)
         }
+        .padding(CodSpacing.cardPadding)
+        .background(Color.capeCod.surfaceElevated)
+        .clipShape(RoundedRectangle(cornerRadius: CodRadius.card))
+        .adaptiveCardStyle()
     }
+
+    // MARK: - Tip Card
+
+    private func tideTipCard(_ tip: String) -> some View {
+        HStack(spacing: CodSpacing.sm) {
+            Image(systemName: "lightbulb.fill")
+                .font(.body)
+                .foregroundStyle(Color.capeCod.sandbarYellow)
+
+            Text(tip)
+                .codTextStyle(.body)
+        }
+        .padding(CodSpacing.cardPadding)
+        .background(Color.capeCod.sandbarYellow.opacity(0.1))
+        .clipShape(RoundedRectangle(cornerRadius: CodRadius.card))
+    }
+
+    // MARK: - Predictions List
 
     private var predictionsList: some View {
         VStack(alignment: .leading, spacing: CodSpacing.sm) {
-            Text("Predictions")
+            Text("All Predictions")
                 .codTextStyle(.sectionTitle)
 
-            ForEach(viewModel.tidePredictions) { prediction in
-                HStack {
-                    Image(systemName: prediction.type.icon)
-                        .foregroundStyle(prediction.type == .high ? Color.capeCod.oceanBlue : Color.capeCod.seafoam)
-                        .frame(width: 24)
+            // Group by day
+            let grouped = Dictionary(grouping: viewModel.tidePredictions) { prediction in
+                Calendar.current.startOfDay(for: prediction.time)
+            }
 
-                    Text(prediction.type.displayName)
-                        .codTextStyle(.body)
+            ForEach(grouped.keys.sorted(), id: \.self) { day in
+                VStack(alignment: .leading, spacing: CodSpacing.xs) {
+                    // Day header
+                    Text(dayLabel(day))
+                        .codTextStyle(.cardTitle)
+                        .padding(.top, CodSpacing.sm)
 
-                    Spacer()
+                    ForEach(grouped[day] ?? []) { prediction in
+                        HStack {
+                            Circle()
+                                .fill(prediction.type == .high ? Color.capeCod.oceanBlue : Color.capeCod.seafoam)
+                                .frame(width: 8, height: 8)
 
-                    Text(prediction.heightFormatted)
-                        .codTextStyle(.body)
-                        .foregroundStyle(Color.capeCod.driftwood)
+                            Image(systemName: prediction.type.icon)
+                                .foregroundStyle(prediction.type == .high ? Color.capeCod.oceanBlue : Color.capeCod.seafoam)
+                                .frame(width: 24)
 
-                    Text(prediction.timeFormatted)
-                        .codTextStyle(.body)
-                        .frame(width: 80, alignment: .trailing)
-                }
-                .padding(.vertical, CodSpacing.xs)
+                            Text(prediction.type.displayName)
+                                .codTextStyle(.body)
 
-                if prediction.id != viewModel.tidePredictions.last?.id {
-                    Divider()
+                            Spacer()
+
+                            Text(prediction.heightFormatted)
+                                .codTextStyle(.body)
+                                .foregroundStyle(Color.capeCod.driftwood)
+
+                            Text(prediction.timeFormatted)
+                                .codTextStyle(.body)
+                                .frame(width: 80, alignment: .trailing)
+                        }
+                        .padding(.vertical, CodSpacing.xs)
+                        .opacity(prediction.time < .now ? 0.5 : 1.0)
+                    }
                 }
             }
         }
         .padding(CodSpacing.cardPadding)
-        .background(Color.capeCod.cardBackground)
+        .background(Color.capeCod.surfaceElevated)
         .clipShape(RoundedRectangle(cornerRadius: CodRadius.card))
-        .codShadow(.card)
+        .adaptiveCardStyle()
+    }
+
+    private func dayLabel(_ date: Date) -> String {
+        if Calendar.current.isDateInToday(date) { return "Today" }
+        if Calendar.current.isDateInTomorrow(date) { return "Tomorrow" }
+        return date.formatted(.dateTime.weekday(.wide).month(.abbreviated).day())
     }
 }
 

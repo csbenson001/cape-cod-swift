@@ -7,12 +7,12 @@ struct WeatherDashboardView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: CodSpacing.sectionSpacing) {
-                    // Current Conditions
-                    currentConditions
+                    // Current Conditions Hero
+                    currentConditionsHero
 
-                    // Beach Day Banner
-                    if viewModel.isBeachDay {
-                        beachDayBanner
+                    // Beach Recommendation Banner
+                    if let rec = viewModel.beachRecommendation {
+                        beachRecommendationBanner(rec)
                     }
 
                     // Hourly Forecast
@@ -23,7 +23,7 @@ struct WeatherDashboardView: View {
                     // Tide Section
                     tideSection
 
-                    // Daily Forecast
+                    // 7-Day Forecast
                     if !viewModel.dailyForecast.isEmpty {
                         dailySection
                     }
@@ -32,6 +32,32 @@ struct WeatherDashboardView: View {
                     if !viewModel.alerts.isEmpty {
                         alertsSection
                     }
+
+                    // Beach Conditions Link
+                    NavigationLink {
+                        BeachConditionsView(viewModel: viewModel)
+                    } label: {
+                        HStack {
+                            Image(systemName: "beach.umbrella.fill")
+                                .font(.title3)
+                                .foregroundStyle(Color.capeCod.sunsetOrange)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Beach Report Card")
+                                    .codTextStyle(.cardTitle)
+                                Text("Water temp, waves, UV, and more")
+                                    .codTextStyle(.caption)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundStyle(Color.capeCod.driftwood)
+                        }
+                        .padding(CodSpacing.cardPadding)
+                        .background(Color.capeCod.surfaceElevated)
+                        .clipShape(RoundedRectangle(cornerRadius: CodRadius.card))
+                        .adaptiveCardStyle()
+                    }
+                    .buttonStyle(.plain)
                 }
                 .padding(.horizontal, CodSpacing.screenEdge)
                 .padding(.bottom, CodSpacing.xxl)
@@ -47,47 +73,103 @@ struct WeatherDashboardView: View {
         }
     }
 
-    // MARK: - Current Conditions
+    // MARK: - Current Conditions Hero
 
-    private var currentConditions: some View {
+    private var currentConditionsHero: some View {
         VStack(spacing: CodSpacing.md) {
-            Image(systemName: viewModel.conditionIcon)
-                .font(.system(size: 56))
-                .foregroundStyle(Color.capeCod.oceanBlue)
-                .symbolRenderingMode(.multicolor)
+            // Large weather icon + temperature
+            HStack(alignment: .top, spacing: CodSpacing.lg) {
+                VStack(alignment: .leading, spacing: CodSpacing.xs) {
+                    Text(viewModel.currentTemperature)
+                        .font(.system(size: 64, weight: .light, design: .rounded))
+                        .foregroundStyle(Color.capeCod.textPrimary)
 
-            Text(viewModel.currentTemperature)
-                .codTextStyle(.heroTitle)
+                    Text(viewModel.conditionName)
+                        .codTextStyle(.cardTitle)
 
-            Text(viewModel.conditionName)
-                .codTextStyle(.subtitle)
+                    if let fl = viewModel.weather?.current.feelsLike {
+                        Text("Feels like \(Int(fl.rounded()))°")
+                            .codTextStyle(.caption)
+                    }
+                }
 
-            HStack(spacing: CodSpacing.lg) {
-                WeatherDetail(icon: "wind", label: "Wind", value: viewModel.windSummary)
-                WeatherDetail(icon: "humidity.fill", label: "Humidity", value: viewModel.humiditySummary)
-                WeatherDetail(icon: "sun.max.fill", label: "UV Index", value: "\(viewModel.weather?.current.uvIndex ?? 0)")
+                Spacer()
+
+                Image(systemName: viewModel.conditionIcon)
+                    .font(.system(size: 56))
+                    .symbolRenderingMode(.multicolor)
+                    .foregroundStyle(Color.capeCod.oceanBlue)
             }
-        }
-        .padding(.vertical, CodSpacing.lg)
-    }
 
-    private var beachDayBanner: some View {
-        HStack(spacing: CodSpacing.md) {
-            Image(systemName: "beach.umbrella.fill")
-                .font(.title2)
-                .foregroundStyle(Color.capeCod.sunsetOrange)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Beach Day!")
-                    .codTextStyle(.cardTitle)
-                Text("Perfect conditions for the beach today")
-                    .codTextStyle(.caption)
+            // Detail row: Wind, Humidity, UV, Water Temp
+            HStack(spacing: 0) {
+                WeatherDetailPill(icon: "wind", label: "Wind", value: viewModel.windSummary)
+                Spacer()
+                WeatherDetailPill(icon: "humidity.fill", label: "Humidity", value: viewModel.humiditySummary)
+                Spacer()
+                WeatherDetailPill(icon: "sun.max.fill", label: "UV", value: "\(viewModel.uvIndex) \(viewModel.uvDescription)")
+                if let waterTemp = viewModel.waterTempFormatted {
+                    Spacer()
+                    WeatherDetailPill(icon: "water.waves", label: "Water", value: waterTemp)
+                }
             }
-            Spacer()
         }
         .padding(CodSpacing.cardPadding)
-        .background(Color.capeCod.sunsetOrange.opacity(0.1))
+        .background(Color.capeCod.surfaceElevated)
+        .clipShape(RoundedRectangle(cornerRadius: CodRadius.featured))
+        .adaptiveCardStyle(cornerRadius: CodRadius.featured)
+    }
+
+    // MARK: - Beach Recommendation
+
+    private func beachRecommendationBanner(_ rec: BeachRecommendation) -> some View {
+        VStack(alignment: .leading, spacing: CodSpacing.sm) {
+            HStack(spacing: CodSpacing.sm) {
+                Image(systemName: rec.rating.icon)
+                    .font(.title3)
+                    .foregroundStyle(ratingColor(rec.rating))
+                Text(rec.rating.rawValue)
+                    .codTextStyle(.cardTitle)
+                Spacer()
+            }
+
+            Text(rec.summary)
+                .codTextStyle(.body)
+
+            Text(rec.details)
+                .codTextStyle(.caption)
+
+            // Factor pills
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: CodSpacing.sm) {
+                    ForEach(rec.factors, id: \.label) { factor in
+                        HStack(spacing: CodSpacing.xs) {
+                            Image(systemName: factor.icon)
+                                .font(.caption2)
+                            Text("\(factor.label): \(factor.value)")
+                                .font(.system(size: 11, weight: .medium))
+                        }
+                        .padding(.horizontal, CodSpacing.sm)
+                        .padding(.vertical, CodSpacing.xs)
+                        .background(factor.isPositive ? Color.capeCod.duneGrass.opacity(0.15) : Color.capeCod.sandbarYellow.opacity(0.15))
+                        .foregroundStyle(factor.isPositive ? Color.capeCod.duneGrass : Color.capeCod.sandbarYellow)
+                        .clipShape(Capsule())
+                    }
+                }
+            }
+        }
+        .padding(CodSpacing.cardPadding)
+        .background(ratingColor(rec.rating).opacity(0.08))
         .clipShape(RoundedRectangle(cornerRadius: CodRadius.card))
+    }
+
+    private func ratingColor(_ rating: BeachRecommendation.BeachRating) -> Color {
+        switch rating {
+        case .great: Color.capeCod.duneGrass
+        case .good: Color.capeCod.oceanBlue
+        case .caution: Color.capeCod.sandbarYellow
+        case .notRecommended: Color.capeCod.cranberry
+        }
     }
 
     // MARK: - Hourly
@@ -113,11 +195,11 @@ struct WeatherDashboardView: View {
 
                             if hour.precipChance > 0 {
                                 Text("\(hour.precipChance)%")
-                                    .codTextStyle(.label)
+                                    .font(.system(size: 10, weight: .medium))
                                     .foregroundStyle(Color.capeCod.oceanBlue)
                             }
                         }
-                        .frame(width: 60)
+                        .frame(width: 56)
                     }
                 }
             }
@@ -141,7 +223,7 @@ struct WeatherDashboardView: View {
                 } label: {
                     HStack(spacing: CodSpacing.xs) {
                         Text(viewModel.selectedStation.name)
-                            .codTextStyle(.label)
+                            .font(.system(size: 11, weight: .medium))
                         Image(systemName: "chevron.down")
                             .font(.caption2)
                     }
@@ -149,33 +231,47 @@ struct WeatherDashboardView: View {
                 }
             }
 
+            // Next tide info
             if let next = viewModel.nextTide {
                 HStack(spacing: CodSpacing.md) {
-                    Image(systemName: viewModel.tideStatus.icon)
+                    Image(systemName: viewModel.tideStatus == .rising ? "arrow.up" : "arrow.down")
                         .font(.title)
                         .foregroundStyle(Color.capeCod.oceanBlue)
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text("\(viewModel.tideStatus.displayName) — \(next.type.displayName) at \(next.timeFormatted)")
                             .codTextStyle(.body)
-                        Text(next.heightFormatted)
-                            .codTextStyle(.caption)
+                        if let timeUntil = viewModel.timeUntilNextTide {
+                            Text("in \(timeUntil) (\(next.heightFormatted))")
+                                .codTextStyle(.caption)
+                        }
                     }
                 }
+            }
+
+            // Tide tip
+            if let tip = viewModel.tideTip {
+                Text(tip)
+                    .font(.system(size: 13, weight: .regular))
+                    .foregroundStyle(Color.capeCod.oceanBlue)
+                    .padding(CodSpacing.sm)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.capeCod.oceanBlue.opacity(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: CodRadius.chip))
             }
 
             NavigationLink {
                 TideChartView(viewModel: viewModel)
             } label: {
                 Text("View Full Tide Chart")
-                    .codTextStyle(.label)
+                    .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(Color.capeCod.oceanBlue)
             }
         }
         .padding(CodSpacing.cardPadding)
-        .background(Color.capeCod.cardBackground)
+        .background(Color.capeCod.surfaceElevated)
         .clipShape(RoundedRectangle(cornerRadius: CodRadius.card))
-        .codShadow(.card)
+        .adaptiveCardStyle()
     }
 
     // MARK: - Daily
@@ -197,7 +293,7 @@ struct WeatherDashboardView: View {
 
                     if day.precipChance > 0 {
                         Text("\(day.precipChance)%")
-                            .codTextStyle(.label)
+                            .font(.system(size: 11, weight: .medium))
                             .foregroundStyle(Color.capeCod.oceanBlue)
                             .frame(width: 36)
                     } else {
@@ -215,9 +311,9 @@ struct WeatherDashboardView: View {
             }
         }
         .padding(CodSpacing.cardPadding)
-        .background(Color.capeCod.cardBackground)
+        .background(Color.capeCod.surfaceElevated)
         .clipShape(RoundedRectangle(cornerRadius: CodRadius.card))
-        .codShadow(.card)
+        .adaptiveCardStyle()
     }
 
     // MARK: - Alerts
@@ -248,9 +344,9 @@ struct WeatherDashboardView: View {
     }
 }
 
-// MARK: - Weather Detail
+// MARK: - Weather Detail Pill
 
-private struct WeatherDetail: View {
+private struct WeatherDetailPill: View {
     let icon: String
     let label: String
     let value: String
@@ -258,12 +354,16 @@ private struct WeatherDetail: View {
     var body: some View {
         VStack(spacing: CodSpacing.xs) {
             Image(systemName: icon)
-                .font(.body)
+                .font(.caption)
                 .foregroundStyle(Color.capeCod.driftwood)
             Text(value)
-                .codTextStyle(.body)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(Color.capeCod.textPrimary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
             Text(label)
-                .codTextStyle(.label)
+                .font(.system(size: 10, weight: .regular))
+                .foregroundStyle(Color.capeCod.textSecondary)
         }
     }
 }
