@@ -1,9 +1,24 @@
 import Foundation
 
+// MARK: - ChatContext
+
+struct ChatContext: Sendable {
+    var experienceMode: ExperienceMode = .adult
+    var visitType: String = "tourist"
+    var interests: [String] = []
+    var userName: String = "friend"
+    // Live data context
+    var currentWeather: String?
+    var currentTide: String?
+    var bridgeStatus: String?
+    var waterTemp: String?
+    var nearbyPOIs: [String] = []
+}
+
 @preconcurrency @MainActor
 protocol AIServiceProtocol: Sendable {
-    func sendMessage(_ text: String, history: [Message]) async throws -> String
-    func streamMessage(_ text: String, history: [Message]) -> AsyncThrowingStream<String, Error>
+    func sendMessage(_ text: String, history: [Message], context: ChatContext) async throws -> String
+    func streamMessage(_ text: String, history: [Message], context: ChatContext) -> AsyncThrowingStream<String, Error>
 }
 
 @preconcurrency @MainActor
@@ -12,17 +27,6 @@ final class AIService: AIServiceProtocol {
     private let apiKey: String
     private let session: URLSession
 
-    private let systemPrompt = """
-    You are a friendly, knowledgeable Cape Cod travel assistant called "Hey Cape Cod." \
-    You have deep local knowledge of all 15 towns on Cape Cod, from Bourne to Provincetown. \
-    You know the best beaches, restaurants, lighthouses, nature trails, maritime history, \
-    local events, tide schedules, and traffic patterns including the Bourne and Sagamore bridges. \
-    You speak warmly like a well-traveled local friend — enthusiastic but not pushy. \
-    Keep responses concise and actionable. When relevant, mention specific places by name \
-    and suggest the best times to visit. You can help with real-time questions about weather, \
-    tides, traffic, and local recommendations.
-    """
-
     init(apiKey: String = "") {
         self.apiKey = apiKey
         let config = URLSessionConfiguration.default
@@ -30,9 +34,79 @@ final class AIService: AIServiceProtocol {
         self.session = URLSession(configuration: config)
     }
 
-    func sendMessage(_ text: String, history: [Message]) async throws -> String {
-        let messages = buildMessages(text, history: history)
-        let request = try buildRequest(messages: messages, stream: false)
+    // MARK: - Build System Prompt
+
+    func buildSystemPrompt(context: ChatContext) -> String {
+        var prompt = """
+        You are "Hey Cape Cod," a friendly Cape Cod travel assistant.
+
+        **User Profile:**
+        - Name: \(context.userName)
+        - Experience mode: \(context.experienceMode.displayName)
+        - Visit type: \(context.visitType)
+        """
+
+        if !context.interests.isEmpty {
+            prompt += "\n- Interests: \(context.interests.joined(separator: ", "))"
+        }
+
+        // Mode-specific behavior
+        switch context.experienceMode {
+        case .kids:
+            prompt += "\n\n**Mode-specific behavior:**\nUse fun, exciting language! Include pirate facts, animal facts, and adventure hooks. Keep it simple and enthusiastic."
+        case .teen:
+            prompt += "\n\n**Mode-specific behavior:**\nBe chill but informative. Include hidden gems, cool history, local legends, and Instagram-worthy spots."
+        case .adult:
+            prompt += "\n\n**Mode-specific behavior:**\nProvide detailed, sophisticated responses. Include dining recommendations, wine/cocktail spots, historical depth, and practical logistics."
+        case .family:
+            prompt += "\n\n**Mode-specific behavior:**\nBalance fun facts for kids with useful info for parents. Mention kid-friendliness, parking, facilities."
+        }
+
+        // Visit type behavior
+        switch context.visitType {
+        case "local":
+            prompt += "\n\n**Visit type behavior:**\nSkip obvious tourist info. Focus on events, seasonal changes, local-only spots, new openings."
+        case "dayTrip":
+            prompt += "\n\n**Visit type behavior:**\nPrioritize efficiency — cluster nearby attractions, mention drive times, suggest optimal routes."
+        default: // tourist
+            prompt += "\n\n**Visit type behavior:**\nGive full context with directions, parking tips, best times to visit."
+        }
+
+        // Live conditions
+        var liveConditions: [String] = []
+        if let weather = context.currentWeather {
+            liveConditions.append(weather)
+        }
+        if let tide = context.currentTide {
+            liveConditions.append(tide)
+        }
+        if let bridge = context.bridgeStatus {
+            liveConditions.append("Bridge traffic: \(bridge)")
+        }
+        if let waterTemp = context.waterTemp {
+            liveConditions.append("Water temperature: \(waterTemp)")
+        }
+
+        if !liveConditions.isEmpty {
+            prompt += "\n\n**Live Conditions (share when relevant):**\n"
+            prompt += liveConditions.joined(separator: "\n")
+        }
+
+        // Nearby POIs
+        if !context.nearbyPOIs.isEmpty {
+            prompt += "\n\n**Nearby Points of Interest:**\n"
+            prompt += context.nearbyPOIs.joined(separator: ", ")
+        }
+
+        prompt += "\n\nKeep responses concise and actionable. Mention specific places by name. You have deep knowledge of all 15 towns from Bourne to Provincetown."
+
+        return prompt
+    }
+
+    func sendMessage(_ text: String, history: [Message], context: ChatContext = ChatContext()) async throws -> String {
+        let systemPrompt = buildSystemPrompt(context: context)
+        let messages = buildMessages(text, history: history, systemPrompt: systemPrompt)
+        let request = try buildRequest(messages: messages, systemPrompt: systemPrompt, stream: false)
 
         let (data, response) = try await session.data(for: request)
 
@@ -44,12 +118,13 @@ final class AIService: AIServiceProtocol {
         return try parseResponse(data)
     }
 
-    func streamMessage(_ text: String, history: [Message]) -> AsyncThrowingStream<String, Error> {
-        AsyncThrowingStream { continuation in
+    func streamMessage(_ text: String, history: [Message], context: ChatContext = ChatContext()) -> AsyncThrowingStream<String, Error> {
+        let systemPrompt = buildSystemPrompt(context: context)
+        return AsyncThrowingStream { continuation in
             Task {
                 do {
-                    let messages = buildMessages(text, history: history)
-                    let request = try buildRequest(messages: messages, stream: true)
+                    let messages = buildMessages(text, history: history, systemPrompt: systemPrompt)
+                    let request = try buildRequest(messages: messages, systemPrompt: systemPrompt, stream: true)
 
                     let (bytes, response) = try await session.bytes(for: request)
 
@@ -74,7 +149,7 @@ final class AIService: AIServiceProtocol {
 
     // MARK: - Private
 
-    private func buildMessages(_ text: String, history: [Message]) -> [[String: String]] {
+    private func buildMessages(_ text: String, history: [Message], systemPrompt: String) -> [[String: String]] {
         var messages: [[String: String]] = [
             ["role": "system", "content": systemPrompt]
         ]
@@ -88,7 +163,7 @@ final class AIService: AIServiceProtocol {
         return messages
     }
 
-    private func buildRequest(messages: [[String: String]], stream: Bool) throws -> URLRequest {
+    private func buildRequest(messages: [[String: String]], systemPrompt: String, stream: Bool) throws -> URLRequest {
         guard let url = URL(string: "https://api.anthropic.com/v1/messages") else {
             throw AIServiceError.invalidURL
         }

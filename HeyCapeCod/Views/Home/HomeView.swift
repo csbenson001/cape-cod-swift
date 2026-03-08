@@ -16,20 +16,24 @@ struct HomeView: View {
                     quickGlanceSection
                         .staggered(index: 1)
 
+                    // Today on Cape Cod - personalized insights
+                    todaySection
+                        .staggered(index: 2)
+
                     // Voice Assistant CTA
                     voiceAssistantCard
-                        .staggered(index: 2)
+                        .staggered(index: 3)
 
                     // Featured Stories
                     if !viewModel.featuredStories.isEmpty {
                         storiesSection
-                            .staggered(index: 3)
+                            .staggered(index: 4)
                     }
 
                     // Recent Conversations
                     if !viewModel.recentConversations.isEmpty {
                         recentSection
-                            .staggered(index: 4)
+                            .staggered(index: 5)
                     }
                 }
                 .padding(.horizontal, CodSpacing.screenEdge)
@@ -130,6 +134,92 @@ struct HomeView: View {
         }
         .buttonStyle(CodCardButtonStyle())
         .codAccessibleButton("Ask Cape Cod", hint: "Start a voice conversation with your AI travel companion")
+    }
+
+    // MARK: - Today on Cape Cod
+
+    private var todaySection: some View {
+        let profile = UserProfileManager.shared.currentProfile
+        let mode = profile?.experienceMode ?? .adult
+        let visitType = profile?.visitType ?? "tourist"
+
+        return VStack(alignment: .leading, spacing: CodSpacing.md) {
+            HStack {
+                Image(systemName: "sun.horizon.fill")
+                    .foregroundStyle(Color.capeCod.sunsetOrange)
+                Text("Today on Cape Cod")
+                    .codTextStyle(.sectionTitle)
+            }
+
+            VStack(alignment: .leading, spacing: CodSpacing.sm) {
+                // Weather-based suggestion
+                if viewModel.temperatureString != "--°" {
+                    todayInsightRow(
+                        icon: viewModel.conditionIcon,
+                        text: weatherSuggestion(temp: viewModel.temperatureString, mode: mode)
+                    )
+                }
+
+                // Tide-based suggestion
+                if viewModel.nextTideString != "Loading..." {
+                    todayInsightRow(
+                        icon: "water.waves",
+                        text: tideSuggestion(tide: viewModel.nextTideString, mode: mode)
+                    )
+                }
+
+                // Visit type suggestion
+                todayInsightRow(
+                    icon: visitType == "local" ? "house.fill" : (visitType == "dayTrip" ? "car.fill" : "mappin.and.ellipse"),
+                    text: visitTypeSuggestion(visitType: visitType, mode: mode)
+                )
+            }
+            .padding(CodSpacing.cardPadding)
+            .background(Color.capeCod.surfaceElevated)
+            .clipShape(RoundedRectangle(cornerRadius: CodRadius.card, style: .continuous))
+            .adaptiveCardStyle()
+        }
+    }
+
+    private func todayInsightRow(icon: String, text: String) -> some View {
+        HStack(alignment: .top, spacing: CodSpacing.sm) {
+            Image(systemName: icon)
+                .foregroundStyle(Color.capeCod.oceanBlue)
+                .frame(width: 24)
+            Text(text)
+                .codTextStyle(.body)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private func weatherSuggestion(temp: String, mode: ExperienceMode) -> String {
+        switch mode {
+        case .kids: return "It's \(temp) outside — perfect for a beach adventure! 🏖️"
+        case .teen: return "\(temp) today — great weather to explore some hidden spots."
+        case .adult: return "Currently \(temp). A lovely day to explore Cape Cod's coastal trails or waterfront dining."
+        case .family: return "It's \(temp) — great family weather! Pack sunscreen and snacks for a full day out."
+        }
+    }
+
+    private func tideSuggestion(tide: String, mode: ExperienceMode) -> String {
+        switch mode {
+        case .kids: return "\(tide) — low tide is the best time to find crabs and sea shells! 🦀"
+        case .teen: return "\(tide) — plan your beach time around the tides for the best experience."
+        case .adult: return "\(tide). Plan beach walks and kayaking around the tide schedule."
+        case .family: return "\(tide) — low tide means more sand for the kids to play on!"
+        }
+    }
+
+    private func visitTypeSuggestion(visitType: String, mode: ExperienceMode) -> String {
+        switch (visitType, mode) {
+        case ("local", .kids): return "Explore your backyard! Check out the new exhibits at local nature centers."
+        case ("local", _): return "Check out what's new this season — several restaurants have updated their spring menus."
+        case ("dayTrip", .family): return "Family day trip tip: start at Upper Cape, pack lunch, and head to the beaches by noon!"
+        case ("dayTrip", _): return "Maximize your day: start at the Upper Cape and work your way to the Outer Cape."
+        case (_, .kids): return "Adventure awaits! The Cape Cod National Seashore has awesome nature trails! 🌊"
+        case (_, .family): return "Family must-see: Cape Cod National Seashore. Arrive early for free parking at most beaches."
+        default: return "Don't miss the Cape Cod National Seashore — free parking before 9 AM at most beaches."
+        }
     }
 
     // MARK: - Stories

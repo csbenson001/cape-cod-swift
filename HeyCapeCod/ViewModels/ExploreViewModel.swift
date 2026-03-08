@@ -59,6 +59,34 @@ final class ExploreViewModel {
                 return distA < distB
             }
         }
+
+        // After existing sort by distance, add interest-based boost
+        let interests = UserProfileManager.shared.currentProfile?.interests ?? []
+        if !interests.isEmpty && searchText.isEmpty && selectedCategory == nil {
+            let interestCategories = Set(interests.flatMap { categoriesForInterest($0) })
+            filteredLocations.sort { a, b in
+                let aMatch = interestCategories.contains(a.category)
+                let bMatch = interestCategories.contains(b.category)
+                if aMatch != bMatch { return aMatch }
+                return false // preserve existing order
+            }
+        }
+    }
+
+    private func categoriesForInterest(_ interest: String) -> [LocationCategory] {
+        switch interest.lowercased() {
+        case "beaches": return [.beach]
+        case "history": return [.historic, .museum, .lighthouse]
+        case "food": return [.restaurant]
+        case "nature": return [.nature]
+        case "lighthouses": return [.lighthouse]
+        case "fishing": return [.marina]
+        case "art": return [.museum, .entertainment]
+        case "shopping": return [.shopping]
+        case "nightlife": return [.entertainment, .restaurant]
+        case "family": return [.beach, .nature, .entertainment]
+        default: return []
+        }
     }
 
     func selectCategory(_ category: LocationCategory?) {

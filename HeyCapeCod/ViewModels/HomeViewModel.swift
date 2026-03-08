@@ -32,12 +32,16 @@ final class HomeViewModel {
 
     var greeting: String {
         let hour = Calendar.current.component(.hour, from: .now)
+        let name = UserProfileManager.shared.currentProfile?.displayName
+        let hasName = name != nil && name != "Guest" && !(name?.isEmpty ?? true)
+        let timeGreeting: String
         switch hour {
-        case 5..<12: return "Good morning"
-        case 12..<17: return "Good afternoon"
-        case 17..<21: return "Good evening"
-        default: return "Good night"
+        case 5..<12: timeGreeting = "Good morning"
+        case 12..<17: timeGreeting = "Good afternoon"
+        case 17..<21: timeGreeting = "Good evening"
+        default: timeGreeting = "Good night"
         }
+        return hasName ? "\(timeGreeting), \(name ?? "")" : timeGreeting
     }
 
     var temperatureString: String {

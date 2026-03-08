@@ -39,6 +39,9 @@ struct ChatView: View {
                     .codAccessibleButton("New Chat", hint: "Start a new conversation")
                 }
             }
+            .task {
+                await viewModel.loadLiveContext()
+            }
         }
     }
 
@@ -147,14 +150,49 @@ struct ChatView: View {
     }
 
     private var suggestionGrid: some View {
-        let suggestions: [(icon: String, text: String, query: String)] = [
-            ("beach.umbrella", "Best beaches for families?", "What are the best beaches for families on Cape Cod?"),
-            ("fork.knife", "Where to eat in Provincetown?", "Where are the best restaurants in Provincetown?"),
-            ("water.waves", "Whale watching tips", "Tell me about whale watching on Cape Cod — best times, companies, and tips"),
-            ("building.columns", "History of the Cape Cod Canal", "Tell me about the history of the Cape Cod Canal"),
-            ("cloud.rain", "What to do on a rainy day?", "What are the best things to do on a rainy day on Cape Cod?"),
-            ("sunset", "Best sunset spots", "Where are the best sunset viewing spots on Cape Cod?")
-        ]
+        let profile = UserProfileManager.shared.currentProfile
+        let mode = profile?.experienceMode ?? .adult
+
+        let suggestions: [(icon: String, text: String, query: String)] = {
+            switch mode {
+            case .kids:
+                return [
+                    ("binoculars", "Pirate adventures!", "Where can I go on a pirate adventure on Cape Cod?"),
+                    ("tortoise", "Cool animals to see", "What cool animals can I see on Cape Cod?"),
+                    ("beach.umbrella", "Best beaches for kids?", "What are the most fun beaches for kids on Cape Cod?"),
+                    ("star", "Treasure hunting spots", "Are there any treasure hunting or geocaching spots on Cape Cod?"),
+                    ("fish", "Go fishing!", "Where can kids go fishing on Cape Cod?"),
+                    ("sparkles", "Fun rainy day stuff", "What are the most fun things for kids to do on a rainy day on Cape Cod?")
+                ]
+            case .teen:
+                return [
+                    ("camera", "Instagram-worthy spots", "What are the most Instagram-worthy spots on Cape Cod?"),
+                    ("map", "Hidden gems & secret spots", "What are some hidden gems and secret spots on Cape Cod that most tourists miss?"),
+                    ("water.waves", "Best surfing spots", "Where are the best surfing spots on Cape Cod?"),
+                    ("moon.stars", "Spooky legends & ghost stories", "Tell me about spooky legends and ghost stories on Cape Cod"),
+                    ("fork.knife", "Best cheap eats", "Where are the best cheap eats and food trucks on Cape Cod?"),
+                    ("figure.hiking", "Adventure activities", "What are the coolest adventure activities for teens on Cape Cod?")
+                ]
+            case .family:
+                return [
+                    ("beach.umbrella", "Best beaches for families?", "What are the best beaches for families on Cape Cod? Include parking and facilities info."),
+                    ("fork.knife", "Kid-friendly restaurants", "Where are the best kid-friendly restaurants on Cape Cod?"),
+                    ("water.waves", "Whale watching tips", "Tell me about whale watching on Cape Cod — best times, companies, and tips for families"),
+                    ("cloud.rain", "Rainy day with kids?", "What are the best things to do with kids on a rainy day on Cape Cod?"),
+                    ("car", "Day trip routes", "What's the best day trip route for families on Cape Cod?"),
+                    ("tent", "Camping with kids", "Where are the best family-friendly campgrounds on Cape Cod?")
+                ]
+            case .adult:
+                return [
+                    ("beach.umbrella", "Best beaches for families?", "What are the best beaches for families on Cape Cod?"),
+                    ("fork.knife", "Where to eat in Provincetown?", "Where are the best restaurants in Provincetown?"),
+                    ("water.waves", "Whale watching tips", "Tell me about whale watching on Cape Cod — best times, companies, and tips"),
+                    ("building.columns", "History of the Cape Cod Canal", "Tell me about the history of the Cape Cod Canal"),
+                    ("cloud.rain", "What to do on a rainy day?", "What are the best things to do on a rainy day on Cape Cod?"),
+                    ("sunset", "Best sunset spots", "Where are the best sunset viewing spots on Cape Cod?")
+                ]
+            }
+        }()
 
         return LazyVGrid(
             columns: [
