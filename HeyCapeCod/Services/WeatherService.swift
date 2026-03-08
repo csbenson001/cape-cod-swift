@@ -119,7 +119,7 @@ final class WeatherService: WeatherServiceProtocol, @unchecked Sendable {
                 title: alert.summary,
                 description: alert.detailsURL.absoluteString,
                 severity: mapAlertSeverity(alert.severity),
-                startTime: alert.metadata.issueDate,
+                startTime: alert.metadata.date,
                 endTime: alert.metadata.expirationDate
             )
         } ?? []

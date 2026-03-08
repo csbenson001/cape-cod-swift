@@ -83,7 +83,7 @@ struct AnimatedCounter: View {
             .font(font)
             .monospacedDigit()
             .foregroundStyle(color)
-            .contentTransition(.numericText(value: displayedValue))
+            .contentTransition(.numericText(value: Double(displayedValue)))
             .animation(CodAnimation.spring, value: displayedValue)
             .onChange(of: value) { _, newValue in
                 displayedValue = newValue
