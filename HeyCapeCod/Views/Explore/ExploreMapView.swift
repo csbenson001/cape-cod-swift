@@ -29,32 +29,7 @@ struct ExploreMapView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            Map(position: $cameraPosition, selection: $selectedPOI) {
-                UserAnnotation()
-
-                ForEach(filteredPOIs) { poi in
-                    Annotation(poi.name, coordinate: poi.coordinate, anchor: .bottom) {
-                        POIAnnotationView(poi: poi, isSelected: selectedPOI?.id == poi.id)
-                            .codTransition(.codPinDrop)
-                    }
-                    .tag(poi)
-                    .annotationTitles(.hidden)
-                }
-
-                if showGeofenceRadius {
-                    ForEach(filteredPOIs) { poi in
-                        MapCircle(center: poi.coordinate, radius: poi.geofenceRadius)
-                            .foregroundStyle(annotationColor(for: poi.category).opacity(0.08))
-                            .strokeStyle(StrokeStyle(lineWidth: 1))
-                    }
-                }
-            }
-            .mapStyle(.standard(elevation: .realistic, emphasis: .automatic, pointsOfInterest: .excludingAll))
-            .mapControls {
-                MapCompass()
-                MapScaleView()
-            }
-            .ignoresSafeArea(edges: .top)
+            mapContent
 
             VStack(spacing: 0) {
                 categoryFilterBar
@@ -70,31 +45,67 @@ struct ExploreMapView: View {
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    withAnimation(CodAnimation.quick) {
-                        showGeofenceRadius.toggle()
-                    }
-                    CodHaptic.selection()
-                } label: {
-                    Image(systemName: showGeofenceRadius ? "circle.dashed.inset.filled" : "circle.dashed")
-                        .foregroundStyle(showGeofenceRadius ? Color.capeCod.oceanBlue : Color.capeCod.textSecondary)
-                }
-                .codAccessibleButton(
-                    showGeofenceRadius ? "Hide geofence zones" : "Show geofence zones"
-                )
+                geofenceToggleButton
             }
-
             ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    CodHaptic.light()
-                    centerOnUser()
-                } label: {
-                    Image(systemName: "location.fill")
-                        .foregroundStyle(Color.capeCod.oceanBlue)
-                }
-                .codAccessibleButton("Center on my location")
+                centerOnUserButton
             }
         }
+    }
+
+    private var mapContent: some View {
+        Map(position: $cameraPosition, selection: $selectedPOI) {
+            UserAnnotation()
+
+            ForEach(filteredPOIs) { poi in
+                Annotation(poi.name, coordinate: poi.coordinate, anchor: .bottom) {
+                    POIAnnotationView(poi: poi, isSelected: selectedPOI?.id == poi.id)
+                        .codTransition(.codPinDrop)
+                }
+                .tag(poi)
+                .annotationTitles(.hidden)
+            }
+
+            if showGeofenceRadius {
+                ForEach(filteredPOIs) { poi in
+                    MapCircle(center: poi.coordinate, radius: poi.geofenceRadius)
+                        .foregroundStyle(annotationColor(for: poi.category).opacity(0.08))
+                        .strokeStyle(StrokeStyle(lineWidth: 1))
+                }
+            }
+        }
+        .mapStyle(.standard(elevation: .realistic, emphasis: .automatic, pointsOfInterest: .excludingAll))
+        .mapControls {
+            MapCompass()
+            MapScaleView()
+        }
+        .ignoresSafeArea(edges: .top)
+    }
+
+    private var geofenceToggleButton: some View {
+        Button {
+            withAnimation(CodAnimation.quick) {
+                showGeofenceRadius.toggle()
+            }
+            CodHaptic.selection()
+        } label: {
+            Image(systemName: showGeofenceRadius ? "circle.dashed.inset.filled" : "circle.dashed")
+                .foregroundStyle(showGeofenceRadius ? Color.capeCod.oceanBlue : Color.capeCod.textSecondary)
+        }
+        .codAccessibleButton(
+            showGeofenceRadius ? "Hide geofence zones" : "Show geofence zones"
+        )
+    }
+
+    private var centerOnUserButton: some View {
+        Button {
+            CodHaptic.light()
+            centerOnUser()
+        } label: {
+            Image(systemName: "location.fill")
+                .foregroundStyle(Color.capeCod.oceanBlue)
+        }
+        .codAccessibleButton("Center on my location")
     }
 
     // MARK: - Category Filter
