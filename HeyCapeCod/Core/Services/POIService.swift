@@ -7,7 +7,7 @@ import Foundation
 /// 1. SwiftData cache (fastest — loaded on launch)
 /// 2. API fetch (freshest — replaces cache on success)
 /// 3. BundledContent (always available — never deleted)
-@MainActor
+@preconcurrency @MainActor
 @Observable
 final class POIService {
     static let shared = POIService()
@@ -21,17 +21,15 @@ final class POIService {
     private var cache: POICacheManager { POICacheManager.shared }
 
     private init() {
-        Task { @MainActor in
-            // Tier 1: Try SwiftData cache first
-            let cached = cache.loadCachedPOIs()
-            if !cached.isEmpty {
-                allPOIs = cached
-                print("💾 Loaded \(cached.count) POIs from cache")
-            } else {
-                // Tier 3: Fall back to bundled content
-                allPOIs = BundledContent.allPOIs.map { $0.toPOI() }
-                print("📦 Using bundled content (\(allPOIs.count) POIs)")
-            }
+        // Tier 1: Try SwiftData cache first
+        let cached = cache.loadCachedPOIs()
+        if !cached.isEmpty {
+            allPOIs = cached
+            print("💾 Loaded \(cached.count) POIs from cache")
+        } else {
+            // Tier 3: Fall back to bundled content
+            allPOIs = BundledContent.allPOIs.map { $0.toPOI() }
+            print("📦 Using bundled content (\(allPOIs.count) POIs)")
         }
     }
 

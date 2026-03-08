@@ -9,7 +9,7 @@ import CoreLocation
 /// - Re-evaluate which 20 POIs to monitor every time user moves 500+ meters
 /// - On region entry: check cooldown, mode, queue, then trigger story
 /// - 24-hour cooldown per POI stored in UserDefaults
-@MainActor
+@preconcurrency @MainActor
 @Observable
 final class GeofenceManager {
 

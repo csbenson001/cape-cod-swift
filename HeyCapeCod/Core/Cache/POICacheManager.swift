@@ -3,7 +3,7 @@ import SwiftData
 
 /// Manages the SwiftData cache for POIs and stories.
 /// Used by POIService to provide fast local reads before API refresh.
-@MainActor
+@preconcurrency @MainActor
 @Observable
 final class POICacheManager {
     static let shared = POICacheManager()
@@ -14,15 +14,13 @@ final class POICacheManager {
     var lastUpdatedText: String = ""
 
     private init() {
-        Task { @MainActor in
-            do {
-                let schema = Schema([CachedPOI.self, CachedStory.self])
-                let config = ModelConfiguration(isStoredInMemoryOnly: false)
-                modelContainer = try ModelContainer(for: schema, configurations: [config])
-                modelContext = modelContainer.map { ModelContext($0) }
-            } catch {
-                print("❌ SwiftData init failed: \(error)")
-            }
+        do {
+            let schema = Schema([CachedPOI.self, CachedStory.self])
+            let config = ModelConfiguration(isStoredInMemoryOnly: false)
+            modelContainer = try ModelContainer(for: schema, configurations: [config])
+            modelContext = modelContainer.map { ModelContext($0) }
+        } catch {
+            print("❌ SwiftData init failed: \(error)")
         }
     }
 

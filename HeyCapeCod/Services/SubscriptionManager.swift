@@ -9,7 +9,7 @@ import StoreKit
 ///
 /// Handles purchasing, restoring, transaction listening, Family Sharing,
 /// and server-side receipt verification.
-@MainActor
+@preconcurrency @MainActor
 @Observable
 final class SubscriptionManager {
     static let shared = SubscriptionManager()
@@ -38,11 +38,8 @@ final class SubscriptionManager {
     private var updateListenerTask: Task<Void, Never>?
 
     private init() {
-        // Defer MainActor-isolated work since init is nonisolated
-        Task { @MainActor [self] in
-            self.updateListenerTask = self.listenForTransactions()
-            await self.loadProducts()
-        }
+        updateListenerTask = listenForTransactions()
+        Task { await loadProducts() }
     }
 
     // MARK: - Load Products

@@ -7,7 +7,7 @@ import SwiftUI
 ///
 /// Coordinates AudioEngine (capture), WebSocketManager (relay), and AudioPlayer (playback)
 /// to deliver a seamless voice conversation experience.
-@MainActor
+@preconcurrency @MainActor
 @Observable
 final class VoiceAssistantViewModel {
 
@@ -393,10 +393,8 @@ final class VoiceAssistantViewModel {
     }
 
     deinit {
-        let webSocket = self.webSocket
-        Task { @MainActor in
-            webSocket.disconnect()
-        }
+        cleanUp()
+        webSocket.disconnect()
     }
 }
 

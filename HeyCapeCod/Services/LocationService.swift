@@ -1,6 +1,6 @@
 import CoreLocation
 
-@MainActor
+@preconcurrency @MainActor
 @Observable
 final class LocationService: NSObject, CLLocationManagerDelegate {
     var currentLocation: CLLocation?

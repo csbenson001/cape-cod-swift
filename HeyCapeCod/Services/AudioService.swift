@@ -1,7 +1,7 @@
 import AVFoundation
 import Speech
 
-@MainActor
+@preconcurrency @MainActor
 @Observable
 final class AudioService: NSObject {
     var isRecording = false

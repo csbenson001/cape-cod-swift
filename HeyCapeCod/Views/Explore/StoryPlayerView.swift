@@ -275,7 +275,7 @@ struct StoryPlayerView: View {
 
 // MARK: - Story Player ViewModel
 
-@MainActor
+@preconcurrency @MainActor
 @Observable
 final class StoryPlayerViewModel: NSObject {
 
@@ -510,10 +510,8 @@ final class StoryPlayerViewModel: NSObject {
     }
 
     deinit {
-        Task { @MainActor [self] in
-            stop()
-            clearNowPlaying()
-        }
+        stop()
+        clearNowPlaying()
     }
 }
 

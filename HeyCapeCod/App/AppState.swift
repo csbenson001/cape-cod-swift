@@ -1,6 +1,6 @@
 import SwiftUI
 
-@MainActor
+@preconcurrency @MainActor
 @Observable
 final class AppState {
     // MARK: - Navigation

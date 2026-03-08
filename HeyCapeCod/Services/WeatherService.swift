@@ -2,7 +2,7 @@ import Foundation
 import CoreLocation
 import WeatherKit
 
-@MainActor
+@preconcurrency @MainActor
 protocol WeatherServiceProtocol: Sendable {
     func fetchWeather(for coordinate: CLLocationCoordinate2D) async throws -> WeatherData
 }
@@ -12,7 +12,7 @@ protocol WeatherServiceProtocol: Sendable {
 /// - Water temperature from NOAA Buoy 44018 (Cape Cod area)
 /// - Tide predictions from NOAA CO-OPS stations
 /// - Buoy wave data for beach conditions
-@MainActor
+@preconcurrency @MainActor
 @Observable
 final class WeatherService: WeatherServiceProtocol {
     private var cachedWeather: WeatherData?

@@ -1,11 +1,11 @@
 import Foundation
 
-@MainActor
+@preconcurrency @MainActor
 protocol TrafficServiceProtocol: Sendable {
     func fetchTrafficReport() async throws -> TrafficReport
 }
 
-@MainActor
+@preconcurrency @MainActor
 @Observable
 final class TrafficService: TrafficServiceProtocol {
     private(set) var currentTraffic: TrafficResponse?

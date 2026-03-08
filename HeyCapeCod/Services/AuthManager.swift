@@ -6,7 +6,7 @@ import CryptoKit
 ///
 /// Supports Sign in with Apple (required for App Store), Google, email/password,
 /// and guest mode. Persists auth state across launches via Keychain-backed token storage.
-@MainActor
+@preconcurrency @MainActor
 @Observable
 final class AuthManager: NSObject {
     static let shared = AuthManager()
@@ -29,9 +29,7 @@ final class AuthManager: NSObject {
 
     private override init() {
         super.init()
-        Task { @MainActor in
-            restoreSession()
-        }
+        restoreSession()
     }
 
     // MARK: - Auth User Model

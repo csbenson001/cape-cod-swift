@@ -1,11 +1,11 @@
 import Foundation
 
-@MainActor
+@preconcurrency @MainActor
 protocol TideServiceProtocol: Sendable {
     func fetchTides(station: TideStation, date: Date) async throws -> TideData
 }
 
-@MainActor
+@preconcurrency @MainActor
 @Observable
 final class TideService: TideServiceProtocol {
     private let session: URLSession

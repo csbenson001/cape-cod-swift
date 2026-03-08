@@ -8,7 +8,7 @@ import CoreLocation
 /// - Audio latency: < 200ms round trip
 /// - GPS battery: < 5% per hour in background
 /// - App launch: < 2 seconds
-@MainActor
+@preconcurrency @MainActor
 @Observable
 final class ContentPrefetcher {
     static let shared = ContentPrefetcher()

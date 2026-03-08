@@ -9,7 +9,7 @@ import Foundation
 /// - Ads shown
 ///
 /// Premium unlocks unlimited everything + offline + no ads.
-@MainActor
+@preconcurrency @MainActor
 @Observable
 final class PaywallManager {
     static let shared = PaywallManager()

@@ -150,7 +150,7 @@ final class UserProfile {
 
 // MARK: - UserProfile Manager
 
-@MainActor
+@preconcurrency @MainActor
 @Observable
 final class UserProfileManager {
     static let shared = UserProfileManager()

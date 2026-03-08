@@ -1,6 +1,6 @@
 import Foundation
 
-@MainActor
+@preconcurrency @MainActor
 @Observable
 final class ConversationViewModel {
     var conversation: Conversation

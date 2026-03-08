@@ -5,9 +5,9 @@ import Foundation
 
 /// Siri Shortcut: "Hey Siri, ask Cape Cod about traffic"
 struct AskCapeCodIntent: AppIntent {
-    static let title: LocalizedStringResource = "Ask Cape Cod"
-    static let description =IntentDescription("Ask your AI Cape Cod guide a question")
-    static let openAppWhenRun =true
+    nonisolated static let title: LocalizedStringResource = "Ask Cape Cod"
+    nonisolated static let description = IntentDescription("Ask your AI Cape Cod guide a question")
+    nonisolated static let openAppWhenRun = true
 
     @Parameter(title: "Question")
     var question: String
@@ -33,9 +33,9 @@ struct AskCapeCodIntent: AppIntent {
 
 /// Siri Shortcut: "Hey Siri, check Cape Cod traffic"
 struct CheckTrafficIntent: AppIntent {
-    static let title: LocalizedStringResource = "Check Cape Cod Traffic"
-    static let description =IntentDescription("Get current bridge and traffic conditions")
-    static let openAppWhenRun =false
+    nonisolated static let title: LocalizedStringResource = "Check Cape Cod Traffic"
+    nonisolated static let description = IntentDescription("Get current bridge and traffic conditions")
+    nonisolated static let openAppWhenRun = false
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
         let service = TrafficService()
@@ -61,9 +61,9 @@ struct CheckTrafficIntent: AppIntent {
 
 /// Siri Shortcut: "Hey Siri, check Cape Cod tides"
 struct CheckTidesIntent: AppIntent {
-    static let title: LocalizedStringResource = "Check Cape Cod Tides"
-    static let description =IntentDescription("Get current tide information")
-    static let openAppWhenRun =false
+    nonisolated static let title: LocalizedStringResource = "Check Cape Cod Tides"
+    nonisolated static let description = IntentDescription("Get current tide information")
+    nonisolated static let openAppWhenRun = false
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
         let service = WeatherService()

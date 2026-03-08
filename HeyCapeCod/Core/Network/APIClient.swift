@@ -6,7 +6,7 @@ import Foundation
 /// - Generic GET/POST/PUT with Codable decoding
 /// - Environment switching (dev/staging/production)
 /// - Structured error handling with emoji logging
-@MainActor
+@preconcurrency @MainActor
 final class APIClient {
     static let shared = APIClient()
 

@@ -1,7 +1,7 @@
 import Foundation
 import CoreLocation
 
-@MainActor
+@preconcurrency @MainActor
 @Observable
 final class ExploreViewModel {
     var locations: [CodLocation] = []

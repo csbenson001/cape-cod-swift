@@ -3,7 +3,7 @@ import Accelerate
 
 /// Streams and plays PCM16 audio responses from the AI with gapless playback,
 /// barge-in support (50ms fade-out), and proper AVAudioSession management.
-@MainActor
+@preconcurrency @MainActor
 @Observable
 final class AudioPlayer {
 

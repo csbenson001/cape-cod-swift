@@ -5,7 +5,7 @@ import CoreLocation
 /// Supports two permission levels:
 /// - "When In Use" — continuous location for the map
 /// - "Always" — background geofence triggers for GPS-triggered stories
-@MainActor
+@preconcurrency @MainActor
 @Observable
 final class LocationManager: NSObject {
 

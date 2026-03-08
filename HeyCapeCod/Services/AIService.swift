@@ -1,12 +1,12 @@
 import Foundation
 
-@MainActor
+@preconcurrency @MainActor
 protocol AIServiceProtocol: Sendable {
     func sendMessage(_ text: String, history: [Message]) async throws -> String
     func streamMessage(_ text: String, history: [Message]) -> AsyncThrowingStream<String, Error>
 }
 
-@MainActor
+@preconcurrency @MainActor
 @Observable
 final class AIService: AIServiceProtocol {
     private let apiKey: String
