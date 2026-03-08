@@ -18,9 +18,9 @@ final class CachedPOI {
     var town: String
     var address: String?
     var imageUrl: String?
-    @Attribute(.transformable(by: NSSecureUnarchiveFromDataTransformerName))
+    @Attribute(.transformable(by: NSSecureUnarchiveFromDataTransformerName.rawValue))
     var facts: [String]
-    @Attribute(.transformable(by: NSSecureUnarchiveFromDataTransformerName))
+    @Attribute(.transformable(by: NSSecureUnarchiveFromDataTransformerName.rawValue))
     var tips: [String]
     var priority: Int
     var cachedAt: Date
