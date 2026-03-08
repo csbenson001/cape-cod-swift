@@ -95,7 +95,9 @@ final class AudioEngine {
         let tapBufferSize = AVAudioFrameCount(hardwareFormat.sampleRate * Self.chunkDuration)
 
         inputNode.installTap(onBus: 0, bufferSize: tapBufferSize, format: hardwareFormat) { [weak self] buffer, time in
-            self?.processInputBuffer(buffer, time: time)
+            Task { @MainActor [weak self] in
+                self?.processInputBuffer(buffer, time: time)
+            }
         }
 
         engine.prepare()

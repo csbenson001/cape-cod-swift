@@ -103,24 +103,32 @@ final class VoiceAssistantViewModel {
     private func setupCallbacks() {
         // Audio capture → WebSocket
         audioEngine.onAudioChunk = { [weak self] base64Audio, timestamp in
-            self?.webSocket.sendAudio(base64Audio, timestamp: timestamp)
+            Task { @MainActor [weak self] in
+                self?.webSocket.sendAudio(base64Audio, timestamp: timestamp)
+            }
         }
 
         // End of turn (1.5s silence) → notify backend
         audioEngine.onEndOfTurn = { [weak self] in
-            guard self?.state == .listening else { return }
-            self?.webSocket.sendControl(action: "end_turn")
-            self?.transition(to: .processing)
+            Task { @MainActor [weak self] in
+                guard self?.state == .listening else { return }
+                self?.webSocket.sendControl(action: "end_turn")
+                self?.transition(to: .processing)
+            }
         }
 
         // WebSocket → handle inbound messages
         webSocket.onMessage = { [weak self] message in
-            self?.handleInboundMessage(message)
+            Task { @MainActor [weak self] in
+                self?.handleInboundMessage(message)
+            }
         }
 
         // Connection state tracking
         webSocket.onConnectionStateChanged = { [weak self] connectionState in
-            self?.handleConnectionStateChange(connectionState)
+            Task { @MainActor [weak self] in
+                self?.handleConnectionStateChange(connectionState)
+            }
         }
     }
 

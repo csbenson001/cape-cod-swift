@@ -162,7 +162,9 @@ final class WebSocketManager: NSObject {
         webSocketTask?.send(.string(string)) { [weak self] error in
             if let error {
                 print("[WebSocket] Send error: \(error.localizedDescription)")
-                self?.handleDisconnection(error: error)
+                Task { @MainActor [weak self] in
+                    self?.handleDisconnection(error: error)
+                }
             }
         }
     }
@@ -171,17 +173,19 @@ final class WebSocketManager: NSObject {
 
     private func startReceiving() {
         webSocketTask?.receive { [weak self] result in
-            guard let self else { return }
+            Task { @MainActor [weak self] in
+                guard let self else { return }
 
-            switch result {
-            case .success(let message):
-                self.handleInboundMessage(message)
-                // Continue receiving
-                self.startReceiving()
+                switch result {
+                case .success(let message):
+                    self.handleInboundMessage(message)
+                    // Continue receiving
+                    self.startReceiving()
 
-            case .failure(let error):
-                print("[WebSocket] Receive error: \(error.localizedDescription)")
-                self.handleDisconnection(error: error)
+                case .failure(let error):
+                    print("[WebSocket] Receive error: \(error.localizedDescription)")
+                    self.handleDisconnection(error: error)
+                }
             }
         }
     }
@@ -273,7 +277,8 @@ final class WebSocketManager: NSObject {
         let backoff = min(pow(2.0, Double(reconnectAttempt - 1)), Self.maxBackoffSeconds)
         updateState(.reconnecting(attempt: reconnectAttempt))
 
-        DispatchQueue.global().asyncAfter(deadline: .now() + backoff) { [weak self] in
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .seconds(backoff))
             guard let self, !self.isIntentionalDisconnect else { return }
             self.connect()
         }
@@ -290,18 +295,24 @@ final class WebSocketManager: NSObject {
 // MARK: - URLSessionWebSocketDelegate
 
 extension WebSocketManager: URLSessionWebSocketDelegate {
-    func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
-        updateState(.connected)
-        reconnectAttempt = 0
+    nonisolated func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
+        Task { @MainActor in
+            updateState(.connected)
+            reconnectAttempt = 0
+        }
     }
 
-    func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
-        handleDisconnection(error: nil)
+    nonisolated func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
+        Task { @MainActor in
+            handleDisconnection(error: nil)
+        }
     }
 
-    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-        if let error {
-            handleDisconnection(error: error)
+    nonisolated func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        Task { @MainActor in
+            if let error {
+                handleDisconnection(error: error)
+            }
         }
     }
 }

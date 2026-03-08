@@ -82,7 +82,9 @@ final class AudioPlayer {
 
         // Install a tap on the mixer for output level metering
         mixer.installTap(onBus: 0, bufferSize: 1024, format: playbackFormat) { [weak self] buffer, _ in
-            self?.updateOutputLevel(buffer: buffer)
+            Task { @MainActor [weak self] in
+                self?.updateOutputLevel(buffer: buffer)
+            }
         }
 
         engine.prepare()
@@ -143,18 +145,20 @@ final class AudioPlayer {
         }
 
         playerNode.scheduleBuffer(buf) { [weak self] in
-            // When this buffer finishes, try to schedule the next one
-            self?.scheduleNextBuffer()
+            Task { @MainActor [weak self] in
+                // When this buffer finishes, try to schedule the next one
+                self?.scheduleNextBuffer()
 
-            // Check if we're done
-            self?.bufferQueue.sync {
-                if self?.pendingBuffers.isEmpty == true {
-                    Task { @MainActor [weak self] in
-                        // Small delay to confirm no more buffers are incoming
-                        try? await Task.sleep(for: .seconds(0.1))
-                        self?.bufferQueue.sync {
-                            if self?.pendingBuffers.isEmpty == true {
-                                self?.isPlaying = false
+                // Check if we're done
+                self?.bufferQueue.sync {
+                    if self?.pendingBuffers.isEmpty == true {
+                        Task { @MainActor [weak self] in
+                            // Small delay to confirm no more buffers are incoming
+                            try? await Task.sleep(for: .seconds(0.1))
+                            self?.bufferQueue.sync {
+                                if self?.pendingBuffers.isEmpty == true {
+                                    self?.isPlaying = false
+                                }
                             }
                         }
                     }

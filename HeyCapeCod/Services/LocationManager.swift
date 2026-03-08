@@ -213,59 +213,71 @@ final class LocationManager: NSObject {
 
 extension LocationManager: CLLocationManagerDelegate {
 
-    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        authorizationStatus = manager.authorizationStatus
+    nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        let status = manager.authorizationStatus
+        Task { @MainActor in
+            authorizationStatus = status
 
-        if let continuation = authorizationContinuation {
-            authorizationContinuation = nil
-            continuation.resume(returning: authorizationStatus)
-        }
+            if let continuation = authorizationContinuation {
+                authorizationContinuation = nil
+                continuation.resume(returning: authorizationStatus)
+            }
 
-        if isAuthorized {
-            startContinuousUpdates()
+            if isAuthorized {
+                startContinuousUpdates()
+            }
         }
     }
 
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+    nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
-        currentLocation = location
+        Task { @MainActor in
+            currentLocation = location
 
-        // Fulfill one-shot request
-        if let continuation = locationContinuation {
-            locationContinuation = nil
-            continuation.resume(returning: location)
-        }
+            // Fulfill one-shot request
+            if let continuation = locationContinuation {
+                locationContinuation = nil
+                continuation.resume(returning: location)
+            }
 
-        // Check for significant movement (500m) for geofence re-evaluation
-        if let last = lastSignificantLocation {
-            if location.distance(from: last) >= Self.significantDistanceThreshold {
+            // Check for significant movement (500m) for geofence re-evaluation
+            if let last = lastSignificantLocation {
+                if location.distance(from: last) >= Self.significantDistanceThreshold {
+                    lastSignificantLocation = location
+                    onSignificantLocationChange?(location)
+                }
+            } else {
                 lastSignificantLocation = location
                 onSignificantLocationChange?(location)
             }
-        } else {
-            lastSignificantLocation = location
-            onSignificantLocationChange?(location)
         }
     }
 
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        locationError = error
+    nonisolated func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        Task { @MainActor in
+            locationError = error
 
-        if let continuation = locationContinuation {
-            locationContinuation = nil
-            continuation.resume(throwing: error)
+            if let continuation = locationContinuation {
+                locationContinuation = nil
+                continuation.resume(throwing: error)
+            }
         }
     }
 
-    func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
-        heading = newHeading
+    nonisolated func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
+        Task { @MainActor in
+            heading = newHeading
+        }
     }
 
-    func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
-        onRegionEntered?(region.identifier)
+    nonisolated func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
+        let identifier = region.identifier
+        Task { @MainActor in
+            onRegionEntered?(identifier)
+        }
     }
 
-    func locationManager(_ manager: CLLocationManager, monitoringDidFailFor region: CLRegion?, withError error: Error) {
+    nonisolated func locationManager(_ manager: CLLocationManager, monitoringDidFailFor region: CLRegion?, withError error: Error) {
         // Non-fatal — region monitoring may be temporarily unavailable
         print("[LocationManager] Monitoring failed for \(region?.identifier ?? "unknown"): \(error.localizedDescription)")
     }
