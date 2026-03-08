@@ -147,18 +147,18 @@ final class WeatherViewModel {
         defer { isLoading = false }
 
         await withTaskGroup(of: Void.self) { group in
-            group.addTask { [self] in
+            group.addTask { @MainActor [self] in
                 do { weather = try await weatherService.fetchWeather(for: WeatherService.capeCodCenter) }
                 catch { self.error = error }
             }
-            group.addTask { [self] in
+            group.addTask { @MainActor [self] in
                 do { tideData = try await tideService.fetchTides(station: selectedStation) }
                 catch { self.error = error }
             }
-            group.addTask { [self] in
+            group.addTask { @MainActor [self] in
                 await weatherService.fetchBuoyData()
             }
-            group.addTask { [self] in
+            group.addTask { @MainActor [self] in
                 await weatherService.fetchTides(station: WeatherService.defaultTideStation, days: 3)
             }
         }

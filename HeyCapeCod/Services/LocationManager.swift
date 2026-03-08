@@ -5,8 +5,9 @@ import CoreLocation
 /// Supports two permission levels:
 /// - "When In Use" — continuous location for the map
 /// - "Always" — background geofence triggers for GPS-triggered stories
+@MainActor
 @Observable
-final class LocationManager: NSObject, @unchecked Sendable {
+final class LocationManager: NSObject {
 
     // MARK: - Public State
 

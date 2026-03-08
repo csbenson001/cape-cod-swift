@@ -1,12 +1,14 @@
 import Foundation
 
+@MainActor
 protocol AIServiceProtocol: Sendable {
     func sendMessage(_ text: String, history: [Message]) async throws -> String
     func streamMessage(_ text: String, history: [Message]) -> AsyncThrowingStream<String, Error>
 }
 
+@MainActor
 @Observable
-final class AIService: AIServiceProtocol, @unchecked Sendable {
+final class AIService: AIServiceProtocol {
     private let apiKey: String
     private let session: URLSession
 

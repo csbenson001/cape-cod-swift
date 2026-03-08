@@ -17,8 +17,9 @@ import Foundation
 /// The voice relay backend must be deployed to a long-lived server platform such as
 /// Railway, Render, or Fly.io that supports persistent WebSocket connections.
 /// Update `serverURL` to point to the dedicated voice server once deployed.
+@MainActor
 @Observable
-final class WebSocketManager: NSObject, @unchecked Sendable {
+final class WebSocketManager: NSObject {
 
     // MARK: - Singleton
 

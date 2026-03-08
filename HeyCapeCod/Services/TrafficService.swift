@@ -1,11 +1,13 @@
 import Foundation
 
+@MainActor
 protocol TrafficServiceProtocol: Sendable {
     func fetchTrafficReport() async throws -> TrafficReport
 }
 
+@MainActor
 @Observable
-final class TrafficService: TrafficServiceProtocol, @unchecked Sendable {
+final class TrafficService: TrafficServiceProtocol {
     private(set) var currentTraffic: TrafficResponse?
     private(set) var lastReport: TrafficReport?
     private(set) var isStale = false

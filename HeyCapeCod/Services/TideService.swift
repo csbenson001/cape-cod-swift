@@ -1,11 +1,13 @@
 import Foundation
 
+@MainActor
 protocol TideServiceProtocol: Sendable {
     func fetchTides(station: TideStation, date: Date) async throws -> TideData
 }
 
+@MainActor
 @Observable
-final class TideService: TideServiceProtocol, @unchecked Sendable {
+final class TideService: TideServiceProtocol {
     private let session: URLSession
     private let baseURL = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter"
     private var cache: [String: TideData] = [:]
