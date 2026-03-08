@@ -33,6 +33,13 @@ enum TourCategory: String, CaseIterable, Identifiable {
     case family
     case foodAndCulture
     case adventure
+    case pirate
+    case haunted
+    case maritime
+    case art
+    case romantic
+    case photography
+    case custom
 
     var id: String { rawValue }
 
@@ -44,6 +51,13 @@ enum TourCategory: String, CaseIterable, Identifiable {
         case .family: "Family Fun"
         case .foodAndCulture: "Food & Culture"
         case .adventure: "Adventure"
+        case .pirate: "Pirates"
+        case .haunted: "Haunted"
+        case .maritime: "Maritime"
+        case .art: "Art & Culture"
+        case .romantic: "Romantic"
+        case .photography: "Photo Spots"
+        case .custom: "Custom"
         }
     }
 
@@ -55,6 +69,31 @@ enum TourCategory: String, CaseIterable, Identifiable {
         case .family: "figure.2.and.child.holdinghands"
         case .foodAndCulture: "fork.knife"
         case .adventure: "figure.hiking"
+        case .pirate: "flag.filled.and.flag.crossed"
+        case .haunted: "moon.stars.fill"
+        case .maritime: "sailboat.fill"
+        case .art: "paintpalette.fill"
+        case .romantic: "heart.fill"
+        case .photography: "camera.fill"
+        case .custom: "sparkles"
+        }
+    }
+
+    var themeColor: String {
+        switch self {
+        case .lighthouses: "sandbarYellow"
+        case .history: "sunsetOrange"
+        case .nature: "duneGrass"
+        case .family: "oceanBlue"
+        case .foodAndCulture: "cranberry"
+        case .adventure: "sunsetOrange"
+        case .pirate: "lobsterRed"
+        case .haunted: "deepNavy"
+        case .maritime: "oceanBlue"
+        case .art: "seafoam"
+        case .romantic: "cranberry"
+        case .photography: "sandbarYellow"
+        case .custom: "oceanBlue"
         }
     }
 }
@@ -84,6 +123,12 @@ enum CuratedTours {
         canalToSandwich,
         capeTipExplorer,
         piratesAndLegends,
+        hauntedCapeCod,
+        maritimeHeritage,
+        artAndCultureTrail,
+        romanticGetaway,
+        photoTour,
+        foodieCrawl,
     ]
 
     static let lighthouseTrail = GuidedTour(
@@ -162,11 +207,95 @@ enum CuratedTours {
         subtitle: "Shipwrecks, treasure, and tall tales",
         description: "Discover the swashbuckling history of Cape Cod — from Black Sam Bellamy's treasure at the Whydah Museum to the shipwreck-laden waters off Marconi Beach and the spooky drive-in at Wellfleet.",
         icon: "flag.filled.and.flag.crossed",
-        category: .history,
+        category: .pirate,
         estimatedDuration: "4-5 hours",
         distance: "35 miles",
         difficulty: .easy,
         stopIDs: ["whydah-museum", "marconi-beach", "wellfleet-drive-in"],
+        region: nil
+    )
+
+    static let hauntedCapeCod = GuidedTour(
+        id: "tour-haunted",
+        name: "Haunted Cape Cod",
+        subtitle: "Ghosts, shipwrecks, and eerie legends",
+        description: "As night falls on the Cape, the stories come alive. Visit the sites of ghostly sightings, tragic shipwrecks, and unexplained phenomena. From the Lady in Black of Highland Light to the phantom sailors of Marconi Beach, Cape Cod has no shortage of spine-tingling tales.",
+        icon: "moon.stars.fill",
+        category: .haunted,
+        estimatedDuration: "3-4 hours",
+        distance: "40 miles",
+        difficulty: .easy,
+        stopIDs: ["highland-light", "marconi-beach", "wellfleet-drive-in", "whydah-museum"],
+        region: nil
+    )
+
+    static let maritimeHeritage = GuidedTour(
+        id: "tour-maritime",
+        name: "Maritime Heritage Trail",
+        subtitle: "Fishing, sailing, and seafaring tradition",
+        description: "Cape Cod was built on the sea. Follow the maritime heritage from the working waterfront of Chatham Fish Pier to the historic Cape Cod Canal, lighthouses that guided ships for centuries, and the beaches where lifesaving crews risked everything.",
+        icon: "sailboat.fill",
+        category: .maritime,
+        estimatedDuration: "5-6 hours",
+        distance: "55 miles",
+        difficulty: .moderate,
+        stopIDs: ["chatham-fish-pier", "nobska-light", "canal-bike-path", "highland-light"],
+        region: nil
+    )
+
+    static let artAndCultureTrail = GuidedTour(
+        id: "tour-art-culture",
+        name: "Art & Culture Trail",
+        subtitle: "Galleries, theater, and creative Cape Cod",
+        description: "Cape Cod has inspired artists for centuries. From the Provincetown art colony that launched American modernism to the galleries of Wellfleet and the heritage museums of Sandwich, discover the Cape's creative soul.",
+        icon: "paintpalette.fill",
+        category: .art,
+        estimatedDuration: "4-5 hours",
+        distance: "60 miles",
+        difficulty: .easy,
+        stopIDs: ["pilgrim-monument", "wellfleet-drive-in", "heritage-museums", "jfk-museum"],
+        region: nil
+    )
+
+    static let romanticGetaway = GuidedTour(
+        id: "tour-romantic",
+        name: "Romantic Cape Cod",
+        subtitle: "Sunsets, lighthouses, and seaside charm",
+        description: "The perfect couples' tour: watch the sunset from Nobska Light, stroll the inscribed planks of Sandwich Boardwalk, and end the evening at the Wellfleet Drive-In under the stars. Cape Cod at its most enchanting.",
+        icon: "heart.fill",
+        category: .romantic,
+        estimatedDuration: "4-5 hours",
+        distance: "50 miles",
+        difficulty: .easy,
+        stopIDs: ["nobska-light", "sandwich-boardwalk", "race-point-beach", "wellfleet-drive-in"],
+        region: nil
+    )
+
+    static let photoTour = GuidedTour(
+        id: "tour-photo",
+        name: "Cape Cod Photo Tour",
+        subtitle: "The most Instagrammable spots",
+        description: "Hit every iconic photo opportunity on the Cape — from the candy-striped Nauset Light to the dramatic cliffs of Marconi Beach, the boardwalk of a thousand messages, and the wild beauty of Race Point at golden hour.",
+        icon: "camera.fill",
+        category: .photography,
+        estimatedDuration: "Full day",
+        distance: "70 miles",
+        difficulty: .moderate,
+        stopIDs: ["nauset-light", "marconi-beach", "sandwich-boardwalk", "highland-light", "race-point-beach"],
+        region: nil
+    )
+
+    static let foodieCrawl = GuidedTour(
+        id: "tour-foodie",
+        name: "Cape Cod Foodie Crawl",
+        subtitle: "Seafood shacks, local fare, and sweet treats",
+        description: "Taste your way across the Cape — from the freshest catch at Chatham Fish Pier to Provincetown's world-class dining scene, with stops at Wellfleet's legendary oyster beds and the ice cream shops of Main Street Hyannis.",
+        icon: "fork.knife",
+        category: .foodAndCulture,
+        estimatedDuration: "Full day",
+        distance: "65 miles",
+        difficulty: .easy,
+        stopIDs: ["chatham-fish-pier", "jfk-museum", "pilgrim-monument"],
         region: nil
     )
 }

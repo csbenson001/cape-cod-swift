@@ -18,6 +18,9 @@ struct MainTabView: View {
                 TourListView()
                     .opacity(appState.selectedTab == .tours ? 1 : 0)
 
+                RestaurantListView()
+                    .opacity(appState.selectedTab == .dining ? 1 : 0)
+
                 ProfileView()
                     .opacity(appState.selectedTab == .profile ? 1 : 0)
             }
@@ -51,12 +54,13 @@ struct MainTabView: View {
         HStack(spacing: 0) {
             tabButton(.home)
             tabButton(.explore)
+            tabButton(.tours)
 
             // Center raised action buttons (voice + chat)
             centerActions
                 .offset(y: -CodSpacing.md)
 
-            tabButton(.tours)
+            tabButton(.dining)
             tabButton(.profile)
         }
         .padding(.horizontal, CodSpacing.sm)

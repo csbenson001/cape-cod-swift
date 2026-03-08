@@ -1,0 +1,212 @@
+import Foundation
+
+/// Bundled restaurant data with menu highlights and community ratings.
+/// Used as immediate content on first launch and as fallback when API is unavailable.
+enum BundledRestaurants {
+
+    static let all: [Restaurant] = [
+
+        Restaurant(
+            id: "rest-chatham-pier-market",
+            name: "Chatham Pier Fish Market",
+            description: "The freshest seafood on Cape Cod — literally steps from the fishing boats. Famous for their fish & chips, lobster rolls, and chowder made with the day's catch.",
+            latitude: 41.6718,
+            longitude: -69.9508,
+            town: "chatham",
+            address: "45 Barcliff Avenue, Chatham",
+            cuisine: .seafood,
+            priceRange: .moderate,
+            imageUrl: nil,
+            phoneNumber: nil,
+            websiteUrl: nil,
+            hours: "10 AM - 7 PM (Seasonal)",
+            menuHighlights: [
+                MenuItem(id: "cpm-1", name: "Lobster Roll", description: "Fresh-picked lobster on a toasted New England roll with drawn butter", price: 28.99, category: .seafood, communityRating: 4.8, ratingCount: 342, isSignatureDish: true, dietaryTags: [.localCatch]),
+                MenuItem(id: "cpm-2", name: "Fish & Chips", description: "Beer-battered local cod with hand-cut fries and coleslaw", price: 18.99, category: .seafood, communityRating: 4.6, ratingCount: 287, isSignatureDish: false, dietaryTags: [.localCatch]),
+                MenuItem(id: "cpm-3", name: "New England Clam Chowder", description: "Creamy chowder loaded with fresh clams, potatoes, and salt pork", price: 9.99, category: .soup, communityRating: 4.7, ratingCount: 198, isSignatureDish: true, dietaryTags: [.localCatch]),
+                MenuItem(id: "cpm-4", name: "Fried Clam Strips", description: "Tender clam strips lightly breaded and fried golden", price: 16.99, category: .appetizer, communityRating: 4.4, ratingCount: 156, isSignatureDish: false, dietaryTags: [.localCatch]),
+                MenuItem(id: "cpm-5", name: "Grilled Swordfish Plate", description: "Day-boat swordfish grilled with lemon herb butter", price: 24.99, category: .seafood, communityRating: 4.5, ratingCount: 89, isSignatureDish: false, dietaryTags: [.localCatch, .glutenFree]),
+            ],
+            averageRating: 4.6,
+            totalReviews: 1072,
+            tags: ["seafood", "waterfront", "casual", "local catch"]
+        ),
+
+        Restaurant(
+            id: "rest-arnolds-lobster",
+            name: "Arnold's Lobster & Clam Bar",
+            description: "A legendary Cape Cod clam shack since 1955. Their fried clams are consistently ranked among the best in New England, and the raw bar is outstanding.",
+            latitude: 41.7541,
+            longitude: -70.0718,
+            town: "eastham",
+            address: "3580 State Highway Route 6, Eastham",
+            cuisine: .seafood,
+            priceRange: .moderate,
+            imageUrl: nil,
+            phoneNumber: nil,
+            websiteUrl: nil,
+            hours: "11 AM - 9 PM (Seasonal)",
+            menuHighlights: [
+                MenuItem(id: "alc-1", name: "Whole Belly Fried Clams", description: "The Cape's best whole belly clams — golden, crispy, and impossibly tender", price: 29.99, category: .seafood, communityRating: 4.9, ratingCount: 523, isSignatureDish: true, dietaryTags: [.localCatch]),
+                MenuItem(id: "alc-2", name: "Raw Oysters", description: "Wellfleet oysters on the half shell with mignonette and cocktail sauce", price: 18.99, category: .appetizer, communityRating: 4.7, ratingCount: 312, isSignatureDish: true, dietaryTags: [.localCatch, .glutenFree]),
+                MenuItem(id: "alc-3", name: "Lobster Mac & Cheese", description: "Creamy four-cheese mac loaded with chunks of fresh lobster", price: 26.99, category: .entree, communityRating: 4.6, ratingCount: 201, isSignatureDish: false, dietaryTags: []),
+                MenuItem(id: "alc-4", name: "Clam Chowder", description: "Award-winning creamy New England chowder", price: 10.99, category: .soup, communityRating: 4.5, ratingCount: 178, isSignatureDish: false, dietaryTags: [.localCatch]),
+                MenuItem(id: "alc-5", name: "Ice Cream Sundae", description: "Homemade ice cream with your choice of toppings", price: 8.99, category: .dessert, communityRating: 4.3, ratingCount: 145, isSignatureDish: false, dietaryTags: []),
+            ],
+            averageRating: 4.5,
+            totalReviews: 1359,
+            tags: ["clam shack", "outdoor seating", "family friendly", "cash preferred"]
+        ),
+
+        Restaurant(
+            id: "rest-lobster-pot",
+            name: "The Lobster Pot",
+            description: "Provincetown's iconic waterfront restaurant. A Cape Cod institution since 1979, known for their lobster bisque, boiled lobster dinners, and stunning harbor views.",
+            latitude: 42.0530,
+            longitude: -70.1847,
+            town: "provincetown",
+            address: "321 Commercial Street, Provincetown",
+            cuisine: .seafood,
+            priceRange: .upscale,
+            imageUrl: nil,
+            phoneNumber: nil,
+            websiteUrl: nil,
+            hours: "11:30 AM - 10 PM",
+            menuHighlights: [
+                MenuItem(id: "lp-1", name: "Lobster Bisque", description: "The Cape's most famous bisque — rich, creamy, and loaded with lobster", price: 14.99, category: .soup, communityRating: 4.9, ratingCount: 876, isSignatureDish: true, dietaryTags: [.localCatch]),
+                MenuItem(id: "lp-2", name: "Boiled Lobster Dinner", description: "2 lb live lobster with corn on the cob, drawn butter, and coleslaw", price: 44.99, category: .seafood, communityRating: 4.7, ratingCount: 654, isSignatureDish: true, dietaryTags: [.localCatch, .glutenFree]),
+                MenuItem(id: "lp-3", name: "Portuguese Fisherman's Stew", description: "Chorizo, littleneck clams, shrimp, and cod in saffron tomato broth", price: 32.99, category: .seafood, communityRating: 4.8, ratingCount: 312, isSignatureDish: true, dietaryTags: [.localCatch]),
+                MenuItem(id: "lp-4", name: "Baked Stuffed Lobster", description: "Whole lobster stuffed with scallop and shrimp stuffing", price: 52.99, category: .seafood, communityRating: 4.6, ratingCount: 234, isSignatureDish: false, dietaryTags: [.localCatch]),
+                MenuItem(id: "lp-5", name: "Wellfleet Oysters Rockefeller", description: "Baked oysters with spinach, cream, and Pernod", price: 18.99, category: .appetizer, communityRating: 4.5, ratingCount: 189, isSignatureDish: false, dietaryTags: [.localCatch]),
+            ],
+            averageRating: 4.6,
+            totalReviews: 2265,
+            tags: ["waterfront dining", "iconic", "lobster", "harbor views"]
+        ),
+
+        Restaurant(
+            id: "rest-captain-linnell",
+            name: "Captain Linnell House",
+            description: "Fine dining in a beautifully restored 1840 sea captain's mansion. Elegant New England cuisine with a focus on local ingredients and seasonal menus.",
+            latitude: 41.7917,
+            longitude: -69.9875,
+            town: "orleans",
+            address: "137 Skaket Beach Road, Orleans",
+            cuisine: .fineDining,
+            priceRange: .upscale,
+            imageUrl: nil,
+            phoneNumber: nil,
+            websiteUrl: nil,
+            hours: "5 PM - 9 PM",
+            menuHighlights: [
+                MenuItem(id: "clh-1", name: "Pan-Seared Day Boat Scallops", description: "Chatham scallops with truffle risotto and brown butter", price: 38.99, category: .seafood, communityRating: 4.8, ratingCount: 267, isSignatureDish: true, dietaryTags: [.localCatch, .glutenFree]),
+                MenuItem(id: "clh-2", name: "Rack of Lamb", description: "Herb-crusted rack with roasted garlic mashed potatoes", price: 42.99, category: .entree, communityRating: 4.7, ratingCount: 189, isSignatureDish: false, dietaryTags: [.glutenFree]),
+                MenuItem(id: "clh-3", name: "Lobster Thermidor", description: "Classic preparation with sherry cream sauce, gruyère gratin", price: 46.99, category: .seafood, communityRating: 4.6, ratingCount: 145, isSignatureDish: true, dietaryTags: [.localCatch]),
+                MenuItem(id: "clh-4", name: "Crème Brûlée", description: "Classic vanilla bean custard with caramelized sugar", price: 12.99, category: .dessert, communityRating: 4.5, ratingCount: 198, isSignatureDish: false, dietaryTags: [.glutenFree]),
+            ],
+            averageRating: 4.7,
+            totalReviews: 799,
+            tags: ["fine dining", "romantic", "historic mansion", "prix fixe"]
+        ),
+
+        Restaurant(
+            id: "rest-pjs-family",
+            name: "PJ's Family Restaurant",
+            description: "A beloved Cape Cod family restaurant with massive portions and a friendly atmosphere. Famous for their breakfast and fresh-baked pies.",
+            latitude: 41.9338,
+            longitude: -70.0155,
+            town: "wellfleet",
+            address: "2616 State Highway Route 6, Wellfleet",
+            cuisine: .american,
+            priceRange: .budget,
+            imageUrl: nil,
+            phoneNumber: nil,
+            websiteUrl: nil,
+            hours: "7 AM - 2 PM",
+            menuHighlights: [
+                MenuItem(id: "pj-1", name: "Blueberry Pancakes", description: "Fluffy buttermilk pancakes loaded with fresh Cape Cod blueberries", price: 12.99, category: .entree, communityRating: 4.7, ratingCount: 456, isSignatureDish: true, dietaryTags: [.vegetarian]),
+                MenuItem(id: "pj-2", name: "Lobster Benedict", description: "Poached eggs and lobster on English muffin with hollandaise", price: 19.99, category: .entree, communityRating: 4.8, ratingCount: 312, isSignatureDish: true, dietaryTags: [.localCatch]),
+                MenuItem(id: "pj-3", name: "Homemade Pie", description: "Seasonal fruit pie baked fresh daily — ask what's available", price: 7.99, category: .dessert, communityRating: 4.6, ratingCount: 278, isSignatureDish: true, dietaryTags: [.vegetarian]),
+                MenuItem(id: "pj-4", name: "Fish Tacos", description: "Grilled local catch with mango salsa and lime crema", price: 15.99, category: .entree, communityRating: 4.4, ratingCount: 167, isSignatureDish: false, dietaryTags: [.localCatch]),
+            ],
+            averageRating: 4.5,
+            totalReviews: 1213,
+            tags: ["breakfast", "family friendly", "homemade pies", "generous portions"]
+        ),
+
+        Restaurant(
+            id: "rest-portuguese-bakery",
+            name: "The Portuguese Bakery",
+            description: "A Provincetown institution serving authentic Portuguese pastries, breads, and sandwiches since 1950. The malasadas and meat pies are legendary.",
+            latitude: 42.0524,
+            longitude: -70.1853,
+            town: "provincetown",
+            address: "299 Commercial Street, Provincetown",
+            cuisine: .portuguese,
+            priceRange: .budget,
+            imageUrl: nil,
+            phoneNumber: nil,
+            websiteUrl: nil,
+            hours: "6 AM - 9 PM",
+            menuHighlights: [
+                MenuItem(id: "pb-1", name: "Malasadas", description: "Traditional Portuguese fried dough dusted with sugar — warm and pillowy", price: 3.99, category: .dessert, communityRating: 4.9, ratingCount: 876, isSignatureDish: true, dietaryTags: [.vegetarian]),
+                MenuItem(id: "pb-2", name: "Portuguese Meat Pie", description: "Savory pie filled with spiced pork and linguiça", price: 6.99, category: .entree, communityRating: 4.7, ratingCount: 543, isSignatureDish: true, dietaryTags: []),
+                MenuItem(id: "pb-3", name: "Pastéis de Nata", description: "Classic Portuguese custard tarts with flaky pastry", price: 4.99, category: .dessert, communityRating: 4.8, ratingCount: 412, isSignatureDish: true, dietaryTags: [.vegetarian]),
+                MenuItem(id: "pb-4", name: "Linguiça Sandwich", description: "Grilled Portuguese sausage on fresh-baked bread with peppers", price: 9.99, category: .sandwich, communityRating: 4.5, ratingCount: 298, isSignatureDish: false, dietaryTags: []),
+            ],
+            averageRating: 4.7,
+            totalReviews: 2129,
+            tags: ["bakery", "Portuguese", "cash only", "local institution"]
+        ),
+
+        Restaurant(
+            id: "rest-seafood-sams",
+            name: "Seafood Sam's",
+            description: "A Cape Cod chain of casual seafood restaurants with consistently good fried seafood and family-friendly prices. Multiple locations across the Cape.",
+            latitude: 41.7636,
+            longitude: -70.4943,
+            town: "sandwich",
+            address: "6 Coast Guard Road, Sandwich",
+            cuisine: .casual,
+            priceRange: .moderate,
+            imageUrl: nil,
+            phoneNumber: nil,
+            websiteUrl: nil,
+            hours: "11 AM - 9 PM",
+            menuHighlights: [
+                MenuItem(id: "ss-1", name: "Fisherman's Platter", description: "Fried clams, scallops, shrimp, and fish with fries and coleslaw", price: 32.99, category: .seafood, communityRating: 4.5, ratingCount: 567, isSignatureDish: true, dietaryTags: [.localCatch]),
+                MenuItem(id: "ss-2", name: "Clam Roll", description: "Whole belly clams on a toasted New England roll", price: 22.99, category: .sandwich, communityRating: 4.4, ratingCount: 345, isSignatureDish: false, dietaryTags: [.localCatch]),
+                MenuItem(id: "ss-3", name: "Kids Fish & Chips", description: "Kid-sized portion of fried fish with fries", price: 9.99, category: .kids, communityRating: 4.3, ratingCount: 234, isSignatureDish: false, dietaryTags: []),
+                MenuItem(id: "ss-4", name: "Garden Salad with Grilled Fish", description: "Fresh greens topped with grilled catch of the day", price: 18.99, category: .salad, communityRating: 4.2, ratingCount: 123, isSignatureDish: false, dietaryTags: [.glutenFree, .localCatch]),
+            ],
+            averageRating: 4.3,
+            totalReviews: 1269,
+            tags: ["family friendly", "casual", "kid-friendly", "multiple locations"]
+        ),
+
+        Restaurant(
+            id: "rest-mac-seafood",
+            name: "Mac's Seafood",
+            description: "Farm-to-table seafood from their own oyster farm and fishing fleet. Multiple locations in Wellfleet and Eastham with the freshest local seafood.",
+            latitude: 41.9297,
+            longitude: -70.0361,
+            town: "wellfleet",
+            address: "265 Commercial Street, Wellfleet",
+            cuisine: .farmToTable,
+            priceRange: .moderate,
+            imageUrl: nil,
+            phoneNumber: nil,
+            websiteUrl: nil,
+            hours: "11 AM - 8 PM (Seasonal)",
+            menuHighlights: [
+                MenuItem(id: "ms-1", name: "Wellfleet Oysters", description: "From their own oyster farm — briny, sweet, and impossibly fresh", price: 16.99, category: .appetizer, communityRating: 4.9, ratingCount: 678, isSignatureDish: true, dietaryTags: [.localCatch, .glutenFree]),
+                MenuItem(id: "ms-2", name: "Sushi-Grade Tuna Poke Bowl", description: "Fresh tuna poke with avocado, edamame, and sesame", price: 22.99, category: .entree, communityRating: 4.7, ratingCount: 345, isSignatureDish: true, dietaryTags: [.localCatch, .glutenFree]),
+                MenuItem(id: "ms-3", name: "Lobster Roll", description: "Chilled lobster salad on a buttered roll with chips", price: 26.99, category: .seafood, communityRating: 4.6, ratingCount: 456, isSignatureDish: false, dietaryTags: [.localCatch]),
+                MenuItem(id: "ms-4", name: "Fish Tacos", description: "Grilled mahi-mahi with pineapple salsa and chipotle crema", price: 17.99, category: .entree, communityRating: 4.5, ratingCount: 234, isSignatureDish: false, dietaryTags: [.localCatch]),
+            ],
+            averageRating: 4.6,
+            totalReviews: 1713,
+            tags: ["oyster farm", "farm to table", "fresh local seafood", "outdoor seating"]
+        ),
+    ]
+}

@@ -37,6 +37,7 @@ enum AppTab: String, CaseIterable, Identifiable {
     case home
     case explore
     case tours
+    case dining
     case profile
 
     var id: String { rawValue }
@@ -46,6 +47,7 @@ enum AppTab: String, CaseIterable, Identifiable {
         case .home: "Home"
         case .explore: "Explore"
         case .tours: "Tours"
+        case .dining: "Dining"
         case .profile: "Profile"
         }
     }
@@ -55,6 +57,7 @@ enum AppTab: String, CaseIterable, Identifiable {
         case .home: "house.fill"
         case .explore: "safari.fill"
         case .tours: "map.fill"
+        case .dining: "fork.knife"
         case .profile: "person.crop.circle.fill"
         }
     }
