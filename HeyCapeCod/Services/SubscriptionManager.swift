@@ -208,7 +208,7 @@ final class SubscriptionManager {
         guard let monthly = monthlyProduct, let annual = annualProduct else { return 0 }
         let monthlyAnnualized = monthly.price * 12
         let savings = (monthlyAnnualized - annual.price) / monthlyAnnualized * 100
-        return Int(savings.rounded())
+        return (savings as NSDecimalNumber).intValue
     }
 
     var currentPlanName: String {
