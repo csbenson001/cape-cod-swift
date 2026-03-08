@@ -8,7 +8,7 @@ import Foundation
 /// - Structured error handling with emoji logging
 @MainActor
 final class APIClient {
-    nonisolated(unsafe) static let shared = APIClient()
+    static let shared = APIClient()
 
     /// Firebase Auth token, set after user signs in.
     var authToken: String?

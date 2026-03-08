@@ -5,7 +5,7 @@ import Foundation
 /// Indexes POIs in Spotlight so users can search for Cape Cod locations
 /// directly from the iOS home screen.
 final class SpotlightIndexer: Sendable {
-    nonisolated(unsafe) static let shared = SpotlightIndexer()
+    static let shared = SpotlightIndexer()
     private let domainIdentifier = "com.heycapecod.pois"
 
     private init() {}

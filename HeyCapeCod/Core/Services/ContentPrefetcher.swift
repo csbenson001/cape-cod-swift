@@ -11,7 +11,7 @@ import CoreLocation
 @MainActor
 @Observable
 final class ContentPrefetcher {
-    nonisolated(unsafe) static let shared = ContentPrefetcher()
+    static let shared = ContentPrefetcher()
 
     private(set) var isPrefetching = false
     private(set) var prefetchedPOICount = 0

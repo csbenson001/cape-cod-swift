@@ -12,7 +12,7 @@ import Foundation
 @MainActor
 @Observable
 final class PaywallManager {
-    nonisolated(unsafe) static let shared = PaywallManager()
+    static let shared = PaywallManager()
 
     // MARK: - Free Tier Limits
 

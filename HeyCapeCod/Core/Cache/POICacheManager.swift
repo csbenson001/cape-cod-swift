@@ -6,7 +6,7 @@ import SwiftData
 @MainActor
 @Observable
 final class POICacheManager {
-    nonisolated(unsafe) static let shared = POICacheManager()
+    static let shared = POICacheManager()
 
     private var modelContainer: ModelContainer?
     private var modelContext: ModelContext?
@@ -14,13 +14,15 @@ final class POICacheManager {
     var lastUpdatedText: String = ""
 
     private init() {
-        do {
-            let schema = Schema([CachedPOI.self, CachedStory.self])
-            let config = ModelConfiguration(isStoredInMemoryOnly: false)
-            modelContainer = try ModelContainer(for: schema, configurations: [config])
-            modelContext = modelContainer.map { ModelContext($0) }
-        } catch {
-            print("❌ SwiftData init failed: \(error)")
+        Task { @MainActor in
+            do {
+                let schema = Schema([CachedPOI.self, CachedStory.self])
+                let config = ModelConfiguration(isStoredInMemoryOnly: false)
+                modelContainer = try ModelContainer(for: schema, configurations: [config])
+                modelContext = modelContainer.map { ModelContext($0) }
+            } catch {
+                print("❌ SwiftData init failed: \(error)")
+            }
         }
     }
 

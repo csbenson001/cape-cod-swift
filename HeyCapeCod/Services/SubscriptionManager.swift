@@ -12,7 +12,7 @@ import StoreKit
 @MainActor
 @Observable
 final class SubscriptionManager {
-    nonisolated(unsafe) static let shared = SubscriptionManager()
+    static let shared = SubscriptionManager()
 
     // MARK: - Product IDs
 
@@ -35,11 +35,13 @@ final class SubscriptionManager {
 
     // MARK: - Private
 
-    private var updateListenerTask: Task<Void, Never>?
+    private nonisolated(unsafe) var updateListenerTask: Task<Void, Never>?
 
     private init() {
-        updateListenerTask = listenForTransactions()
-        Task { await loadProducts() }
+        Task { @MainActor in
+            updateListenerTask = listenForTransactions()
+            await loadProducts()
+        }
     }
 
     deinit {

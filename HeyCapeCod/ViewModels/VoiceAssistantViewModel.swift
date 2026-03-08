@@ -393,8 +393,10 @@ final class VoiceAssistantViewModel {
     }
 
     deinit {
-        cleanUp()
-        webSocket.disconnect()
+        let webSocket = self.webSocket
+        Task { @MainActor in
+            webSocket.disconnect()
+        }
     }
 }
 

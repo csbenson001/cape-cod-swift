@@ -510,8 +510,10 @@ final class StoryPlayerViewModel: NSObject {
     }
 
     deinit {
-        stop()
-        clearNowPlaying()
+        Task { @MainActor [self] in
+            stop()
+            clearNowPlaying()
+        }
     }
 }
 

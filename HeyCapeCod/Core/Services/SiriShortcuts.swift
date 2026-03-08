@@ -5,7 +5,7 @@ import Foundation
 
 /// Siri Shortcut: "Hey Siri, ask Cape Cod about traffic"
 struct AskCapeCodIntent: AppIntent {
-    static var title: LocalizedStringResource = "Ask Cape Cod"
+    static let title: LocalizedStringResource = "Ask Cape Cod"
     static var description = IntentDescription("Ask your AI Cape Cod guide a question")
     static var openAppWhenRun = true
 
@@ -33,7 +33,7 @@ struct AskCapeCodIntent: AppIntent {
 
 /// Siri Shortcut: "Hey Siri, check Cape Cod traffic"
 struct CheckTrafficIntent: AppIntent {
-    static var title: LocalizedStringResource = "Check Cape Cod Traffic"
+    static let title: LocalizedStringResource = "Check Cape Cod Traffic"
     static var description = IntentDescription("Get current bridge and traffic conditions")
     static var openAppWhenRun = false
 
@@ -61,7 +61,7 @@ struct CheckTrafficIntent: AppIntent {
 
 /// Siri Shortcut: "Hey Siri, check Cape Cod tides"
 struct CheckTidesIntent: AppIntent {
-    static var title: LocalizedStringResource = "Check Cape Cod Tides"
+    static let title: LocalizedStringResource = "Check Cape Cod Tides"
     static var description = IntentDescription("Get current tide information")
     static var openAppWhenRun = false
 

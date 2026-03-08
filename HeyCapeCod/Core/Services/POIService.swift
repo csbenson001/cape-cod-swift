@@ -10,7 +10,7 @@ import Foundation
 @MainActor
 @Observable
 final class POIService {
-    nonisolated(unsafe) static let shared = POIService()
+    static let shared = POIService()
 
     private(set) var allPOIs: [POI] = []
     private(set) var nearbyPOIs: [POI] = []
@@ -21,15 +21,17 @@ final class POIService {
     private let cache = POICacheManager.shared
 
     private init() {
-        // Tier 1: Try SwiftData cache first
-        let cached = cache.loadCachedPOIs()
-        if !cached.isEmpty {
-            allPOIs = cached
-            print("💾 Loaded \(cached.count) POIs from cache")
-        } else {
-            // Tier 3: Fall back to bundled content
-            allPOIs = BundledContent.allPOIs.map { $0.toPOI() }
-            print("📦 Using bundled content (\(allPOIs.count) POIs)")
+        Task { @MainActor in
+            // Tier 1: Try SwiftData cache first
+            let cached = cache.loadCachedPOIs()
+            if !cached.isEmpty {
+                allPOIs = cached
+                print("💾 Loaded \(cached.count) POIs from cache")
+            } else {
+                // Tier 3: Fall back to bundled content
+                allPOIs = BundledContent.allPOIs.map { $0.toPOI() }
+                print("📦 Using bundled content (\(allPOIs.count) POIs)")
+            }
         }
     }
 

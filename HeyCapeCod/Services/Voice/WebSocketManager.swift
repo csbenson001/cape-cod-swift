@@ -23,7 +23,7 @@ final class WebSocketManager: NSObject {
 
     // MARK: - Singleton
 
-    nonisolated(unsafe) static let shared = WebSocketManager()
+    static let shared = WebSocketManager()
 
     // MARK: - Public State
 

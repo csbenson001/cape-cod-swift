@@ -6,7 +6,7 @@ import CoreLocation
 @MainActor
 @Observable
 final class ChatService {
-    nonisolated(unsafe) static let shared = ChatService()
+    static let shared = ChatService()
 
     private(set) var isLoading = false
 

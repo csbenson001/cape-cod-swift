@@ -9,7 +9,7 @@ import CryptoKit
 @MainActor
 @Observable
 final class AuthManager: NSObject {
-    nonisolated(unsafe) static let shared = AuthManager()
+    static let shared = AuthManager()
 
     // MARK: - Public State
 
@@ -29,7 +29,9 @@ final class AuthManager: NSObject {
 
     private override init() {
         super.init()
-        restoreSession()
+        Task { @MainActor in
+            restoreSession()
+        }
     }
 
     // MARK: - Auth User Model
