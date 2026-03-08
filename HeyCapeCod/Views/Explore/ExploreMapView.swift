@@ -251,7 +251,7 @@ private struct FilterChip: View {
             }
             .padding(.horizontal, CodSpacing.sm + 4)
             .padding(.vertical, CodSpacing.sm)
-            .background(isSelected ? Color.capeCod.oceanBlue : .ultraThinMaterial)
+            .background(isSelected ? AnyShapeStyle(Color.capeCod.oceanBlue) : AnyShapeStyle(.ultraThinMaterial))
             .foregroundStyle(isSelected ? .white : Color.capeCod.textPrimary)
             .clipShape(Capsule())
             .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
@@ -461,7 +461,7 @@ struct POIDetailSheet: View {
 // MARK: - Make StoryPlayerViewModel Identifiable for sheet
 
 extension StoryPlayerViewModel: Identifiable {
-    var id: ObjectIdentifier { ObjectIdentifier(self) }
+    nonisolated var id: ObjectIdentifier { ObjectIdentifier(self) }
 }
 
 // MARK: - Make PointOfInterest Hashable for Map selection

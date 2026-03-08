@@ -70,7 +70,8 @@ struct CheckTidesIntent: AppIntent {
         let service = await WeatherService()
         await service.fetchTides()
 
-        guard let next = service.tides.first(where: { $0.time > .now }) else {
+        let tides = await service.tides
+        guard let next = tides.first(where: { $0.time > .now }) else {
             return .result(dialog: "Tide data is currently unavailable.")
         }
 
