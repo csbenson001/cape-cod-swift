@@ -102,14 +102,14 @@ final class VoiceAssistantViewModel {
 
     private func setupCallbacks() {
         // Audio capture → WebSocket
-        audioEngine.onAudioChunk = { [weak self] base64Audio, timestamp in
+        audioEngine.onAudioChunk = { base64Audio, timestamp in
             Task { @MainActor [weak self] in
                 self?.webSocket.sendAudio(base64Audio, timestamp: timestamp)
             }
         }
 
         // End of turn (1.5s silence) → notify backend
-        audioEngine.onEndOfTurn = { [weak self] in
+        audioEngine.onEndOfTurn = {
             Task { @MainActor [weak self] in
                 guard self?.state == .listening else { return }
                 self?.webSocket.sendControl(action: "end_turn")
@@ -118,14 +118,14 @@ final class VoiceAssistantViewModel {
         }
 
         // WebSocket → handle inbound messages
-        webSocket.onMessage = { [weak self] message in
+        webSocket.onMessage = { message in
             Task { @MainActor [weak self] in
                 self?.handleInboundMessage(message)
             }
         }
 
         // Connection state tracking
-        webSocket.onConnectionStateChanged = { [weak self] connectionState in
+        webSocket.onConnectionStateChanged = { connectionState in
             Task { @MainActor [weak self] in
                 self?.handleConnectionStateChange(connectionState)
             }
@@ -356,7 +356,7 @@ final class VoiceAssistantViewModel {
     // MARK: - Duration Tracking
 
     private func startDurationTimer() {
-        durationTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+        durationTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
             Task { @MainActor [weak self] in
                 guard let self, let start = self.conversationStartTime else { return }
                 self.conversationDuration = Date().timeIntervalSince(start)

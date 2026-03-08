@@ -408,8 +408,8 @@ final class StoryPlayerViewModel: NSObject {
     // MARK: - Progress Tracking
 
     private func startProgressTimer() {
-        progressTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
-            Task { @MainActor in
+        progressTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
+            Task { @MainActor [weak self] in
                 guard let self, self.isPlaying, self.duration > 0 else { return }
                 self.elapsed += 0.5
                 self.progress = min(1.0, self.elapsed / self.duration)
@@ -477,33 +477,33 @@ final class StoryPlayerViewModel: NSObject {
         let center = MPRemoteCommandCenter.shared()
 
         center.playCommand.isEnabled = true
-        center.playCommand.addTarget { [weak self] _ in
-            Task { @MainActor in self?.play() }
+        center.playCommand.addTarget { _ in
+            Task { @MainActor [weak self] in self?.play() }
             return .success
         }
 
         center.pauseCommand.isEnabled = true
-        center.pauseCommand.addTarget { [weak self] _ in
-            Task { @MainActor in self?.pause() }
+        center.pauseCommand.addTarget { _ in
+            Task { @MainActor [weak self] in self?.pause() }
             return .success
         }
 
         center.togglePlayPauseCommand.isEnabled = true
-        center.togglePlayPauseCommand.addTarget { [weak self] _ in
-            Task { @MainActor in self?.togglePlayPause() }
+        center.togglePlayPauseCommand.addTarget { _ in
+            Task { @MainActor [weak self] in self?.togglePlayPause() }
             return .success
         }
 
         center.skipBackwardCommand.isEnabled = true
         center.skipBackwardCommand.preferredIntervals = [15]
-        center.skipBackwardCommand.addTarget { [weak self] _ in
-            Task { @MainActor in self?.rewind15() }
+        center.skipBackwardCommand.addTarget { _ in
+            Task { @MainActor [weak self] in self?.rewind15() }
             return .success
         }
 
         center.nextTrackCommand.isEnabled = true
-        center.nextTrackCommand.addTarget { [weak self] _ in
-            Task { @MainActor in self?.skip() }
+        center.nextTrackCommand.addTarget { _ in
+            Task { @MainActor [weak self] in self?.skip() }
             return .success
         }
     }

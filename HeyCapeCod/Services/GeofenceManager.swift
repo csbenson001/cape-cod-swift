@@ -60,14 +60,14 @@ final class GeofenceManager {
 
     private func setupLocationCallbacks() {
         // Re-evaluate geofences when user moves 500+ meters
-        locationManager.onSignificantLocationChange = { [weak self] location in
+        locationManager.onSignificantLocationChange = { location in
             Task { @MainActor [weak self] in
                 await self?.fetchAndReEvaluate(around: location)
             }
         }
 
         // Handle region entry
-        locationManager.onRegionEntered = { [weak self] regionID in
+        locationManager.onRegionEntered = { regionID in
             Task { @MainActor [weak self] in
                 self?.handleRegionEntry(regionID: regionID)
             }

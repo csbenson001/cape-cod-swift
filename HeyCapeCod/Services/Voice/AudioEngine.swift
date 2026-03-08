@@ -94,7 +94,7 @@ final class AudioEngine {
         // Calculate the tap buffer size: ~100ms worth of samples at the hardware rate
         let tapBufferSize = AVAudioFrameCount(hardwareFormat.sampleRate * Self.chunkDuration)
 
-        inputNode.installTap(onBus: 0, bufferSize: tapBufferSize, format: hardwareFormat) { [weak self] buffer, time in
+        inputNode.installTap(onBus: 0, bufferSize: tapBufferSize, format: hardwareFormat) { buffer, time in
             Task { @MainActor [weak self] in
                 self?.processInputBuffer(buffer, time: time)
             }

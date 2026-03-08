@@ -61,14 +61,14 @@ final class AudioService: NSObject {
         let inputNode = audioEngine.inputNode
         let recordingFormat = inputNode.outputFormat(forBus: 0)
 
-        inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { [weak self] buffer, _ in
+        inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { buffer, _ in
             Task { @MainActor [weak self] in
                 self?.recognitionRequest?.append(buffer)
                 self?.updateAudioLevel(buffer: buffer)
             }
         }
 
-        recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest) { [weak self] result, error in
+        recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest) { result, error in
             Task { @MainActor [weak self] in
                 if let result {
                     self?.transcribedText = result.bestTranscription.formattedString

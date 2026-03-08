@@ -172,7 +172,7 @@ final class WebSocketManager: NSObject {
     // MARK: - Receive Messages
 
     private func startReceiving() {
-        webSocketTask?.receive { [weak self] result in
+        webSocketTask?.receive { result in
             Task { @MainActor [weak self] in
                 guard let self else { return }
 
@@ -243,7 +243,7 @@ final class WebSocketManager: NSObject {
 
     private func startPinging() {
         pingTimer?.invalidate()
-        pingTimer = Timer.scheduledTimer(withTimeInterval: Self.pingInterval, repeats: true) { [weak self] _ in
+        pingTimer = Timer.scheduledTimer(withTimeInterval: Self.pingInterval, repeats: true) { _ in
             Task { @MainActor [weak self] in
                 self?.webSocketTask?.sendPing { error in
                     if let error {

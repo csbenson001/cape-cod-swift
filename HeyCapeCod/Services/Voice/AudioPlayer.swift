@@ -81,7 +81,7 @@ final class AudioPlayer {
         engine.connect(mixer, to: engine.mainMixerNode, format: playbackFormat)
 
         // Install a tap on the mixer for output level metering
-        mixer.installTap(onBus: 0, bufferSize: 1024, format: playbackFormat) { [weak self] buffer, _ in
+        mixer.installTap(onBus: 0, bufferSize: 1024, format: playbackFormat) { buffer, _ in
             Task { @MainActor [weak self] in
                 self?.updateOutputLevel(buffer: buffer)
             }
@@ -262,7 +262,7 @@ final class AudioPlayer {
 
     private func startLevelTimer() {
         // Reset level when no audio is playing
-        levelTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+        levelTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
             Task { @MainActor [weak self] in
                 guard let self else { return }
                 if !self.isPlaying {
