@@ -138,7 +138,7 @@ final class AudioPlayer {
 
         guard let buf = buffer else { return }
 
-        DispatchQueue.main.async { [weak self] in
+        Task { @MainActor [weak self] in
             self?.isPlaying = true
         }
 
@@ -149,13 +149,12 @@ final class AudioPlayer {
             // Check if we're done
             self?.bufferQueue.sync {
                 if self?.pendingBuffers.isEmpty == true {
-                    DispatchQueue.main.async {
+                    Task { @MainActor [weak self] in
                         // Small delay to confirm no more buffers are incoming
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                            self?.bufferQueue.sync {
-                                if self?.pendingBuffers.isEmpty == true {
-                                    self?.isPlaying = false
-                                }
+                        try? await Task.sleep(for: .seconds(0.1))
+                        self?.bufferQueue.sync {
+                            if self?.pendingBuffers.isEmpty == true {
+                                self?.isPlaying = false
                             }
                         }
                     }
@@ -185,22 +184,22 @@ final class AudioPlayer {
 
         for step in 0...fadeSteps {
             let volume = Float(fadeSteps - step) / Float(fadeSteps)
-            DispatchQueue.main.asyncAfter(deadline: .now() + stepDuration * Double(step)) {
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(stepDuration * Double(step)))
                 mixerNode.outputVolume = volume
             }
         }
 
         // After fade completes, stop and reset
-        DispatchQueue.main.asyncAfter(deadline: .now() + Self.fadeDuration + 0.01) { [weak self] in
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .seconds(Self.fadeDuration + 0.01))
             playerNode.stop()
             self?.clearBuffers()
             mixerNode.outputVolume = 1.0
             playerNode.play() // Re-arm for next response
 
-            DispatchQueue.main.async {
-                self?.isPlaying = false
-                self?.outputLevel = 0
-            }
+            self?.isPlaying = false
+            self?.outputLevel = 0
         }
     }
 
@@ -252,7 +251,7 @@ final class AudioPlayer {
         let smoothed = Self.levelSmoothingFactor * normalized + (1 - Self.levelSmoothingFactor) * smoothedLevel
         smoothedLevel = smoothed
 
-        DispatchQueue.main.async { [weak self] in
+        Task { @MainActor [weak self] in
             self?.outputLevel = smoothed
         }
     }
@@ -260,10 +259,12 @@ final class AudioPlayer {
     private func startLevelTimer() {
         // Reset level when no audio is playing
         levelTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
-            guard let self else { return }
-            if !self.isPlaying {
-                self.smoothedLevel *= 0.8
-                self.outputLevel = self.smoothedLevel
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                if !self.isPlaying {
+                    self.smoothedLevel *= 0.8
+                    self.outputLevel = self.smoothedLevel
+                }
             }
         }
     }

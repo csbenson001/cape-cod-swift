@@ -230,7 +230,7 @@ final class WebSocketManager: NSObject {
             return
         }
 
-        DispatchQueue.main.async { [weak self] in
+        Task { @MainActor [weak self] in
             self?.onMessage?(parsed)
         }
     }
@@ -240,10 +240,14 @@ final class WebSocketManager: NSObject {
     private func startPinging() {
         pingTimer?.invalidate()
         pingTimer = Timer.scheduledTimer(withTimeInterval: Self.pingInterval, repeats: true) { [weak self] _ in
-            self?.webSocketTask?.sendPing { error in
-                if let error {
-                    print("[WebSocket] Ping failed: \(error.localizedDescription)")
-                    self?.handleDisconnection(error: error)
+            Task { @MainActor [weak self] in
+                self?.webSocketTask?.sendPing { error in
+                    if let error {
+                        print("[WebSocket] Ping failed: \(error.localizedDescription)")
+                        Task { @MainActor [weak self] in
+                            self?.handleDisconnection(error: error)
+                        }
+                    }
                 }
             }
         }
@@ -259,7 +263,7 @@ final class WebSocketManager: NSObject {
 
         guard reconnectAttempt < Self.maxReconnectAttempts else {
             updateState(.disconnected)
-            DispatchQueue.main.async { [weak self] in
+            Task { @MainActor [weak self] in
                 self?.onMessage?(.error(message: "Connection lost. Please try again."))
             }
             return
@@ -276,7 +280,7 @@ final class WebSocketManager: NSObject {
     }
 
     private func updateState(_ state: ConnectionState) {
-        DispatchQueue.main.async { [weak self] in
+        Task { @MainActor [weak self] in
             self?.connectionState = state
             self?.onConnectionStateChanged?(state)
         }

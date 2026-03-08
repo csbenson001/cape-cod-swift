@@ -220,7 +220,8 @@ final class VoiceAssistantViewModel {
 
         case .error:
             // Auto-recover after 3 seconds
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+            Task { @MainActor [weak self] in
+                try? await Task.sleep(for: .seconds(3))
                 guard let self else { return }
                 if case .error = self.state {
                     self.transition(to: self.webSocket.connectionState == .connected ? .listening : .idle)
@@ -348,8 +349,10 @@ final class VoiceAssistantViewModel {
 
     private func startDurationTimer() {
         durationTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            guard let self, let start = self.conversationStartTime else { return }
-            self.conversationDuration = Date().timeIntervalSince(start)
+            Task { @MainActor [weak self] in
+                guard let self, let start = self.conversationStartTime else { return }
+                self.conversationDuration = Date().timeIntervalSince(start)
+            }
         }
     }
 

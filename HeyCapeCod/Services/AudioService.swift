@@ -123,7 +123,7 @@ final class AudioService: NSObject {
         let rms = sqrt(sum / Float(frames))
         let db = 20 * log10(max(rms, 0.000001))
         let normalized = max(0, min(1, (db + 50) / 50))
-        DispatchQueue.main.async { [weak self] in
+        Task { @MainActor [weak self] in
             self?.audioLevel = normalized
         }
     }
@@ -132,8 +132,10 @@ final class AudioService: NSObject {
 // MARK: - AVAudioPlayerDelegate
 
 extension AudioService: AVAudioPlayerDelegate {
-    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-        isPlaying = false
+    nonisolated func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        Task { @MainActor in
+            isPlaying = false
+        }
     }
 }
 

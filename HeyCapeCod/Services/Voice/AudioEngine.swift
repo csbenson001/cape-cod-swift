@@ -127,7 +127,7 @@ final class AudioEngine {
         let rmsDB = calculateRMSdB(buffer: buffer)
         let normalizedLevel = normalizeDBToLevel(rmsDB)
 
-        DispatchQueue.main.async { [weak self] in
+        Task { @MainActor [weak self] in
             guard let self else { return }
             self.smoothedLevel = Self.levelSmoothingFactor * normalizedLevel + (1 - Self.levelSmoothingFactor) * self.smoothedLevel
             self.audioLevel = self.smoothedLevel
@@ -137,7 +137,7 @@ final class AudioEngine {
         let speechActive = rmsDB > Self.speechThresholdDB
         let silenceActive = rmsDB < Self.silenceThresholdDB
 
-        DispatchQueue.main.async { [weak self] in
+        Task { @MainActor [weak self] in
             self?.isSpeechDetected = speechActive
         }
 
@@ -150,7 +150,7 @@ final class AudioEngine {
                Date().timeIntervalSince(start) >= Self.endOfTurnSilenceDuration,
                !hasNotifiedEndOfTurn {
                 hasNotifiedEndOfTurn = true
-                DispatchQueue.main.async { [weak self] in
+                Task { @MainActor [weak self] in
                     self?.onEndOfTurn?()
                 }
             }
@@ -176,7 +176,7 @@ final class AudioEngine {
             let base64Chunk = chunk.base64EncodedString()
             let timestamp = Date().timeIntervalSince1970 * 1000
 
-            DispatchQueue.main.async { [weak self] in
+            Task { @MainActor [weak self] in
                 self?.onAudioChunk?(base64Chunk, timestamp)
             }
         }

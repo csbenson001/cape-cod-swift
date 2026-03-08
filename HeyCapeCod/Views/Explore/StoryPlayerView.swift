@@ -240,7 +240,7 @@ struct StoryPlayerView: View {
                         viewModel.setSpeed(Float(speed))
                     } label: {
                         HStack {
-                            Text("\(speed, specifier: speed == 1.0 ? "%.0f" : "%.2g")x")
+                            Text(StoryPlayerViewModel.formatSpeed(Float(speed)))
                             if viewModel.speechRate == Float(speed) {
                                 Image(systemName: "checkmark")
                             }
@@ -248,7 +248,7 @@ struct StoryPlayerView: View {
                     }
                 }
             } label: {
-                Text("\(viewModel.speechRate, specifier: viewModel.speechRate == 1.0 ? "%.0f" : "%.2g")x")
+                Text(viewModel.formattedSpeed)
                     .codTextStyle(.body)
                     .foregroundStyle(.white.opacity(0.5))
                     .padding(.horizontal, CodSpacing.sm + 4)
@@ -256,7 +256,7 @@ struct StoryPlayerView: View {
                     .background(.white.opacity(0.1))
                     .clipShape(Capsule())
             }
-            .codAccessibleButton("Playback speed: \(viewModel.speechRate, specifier: "%.2g")x")
+            .codAccessibleButton("Playback speed: \(viewModel.formattedSpeed)")
 
             Spacer()
 
@@ -293,6 +293,11 @@ final class StoryPlayerViewModel: NSObject {
 
     var formattedElapsed: String { formatTime(elapsed) }
     var formattedRemaining: String { "-\(formatTime(max(0, duration - elapsed)))" }
+    var formattedSpeed: String { Self.formatSpeed(speechRate) }
+
+    static func formatSpeed(_ rate: Float) -> String {
+        rate == 1.0 ? "1x" : "\(String(format: "%.2g", rate))x"
+    }
 
     var miniPlayerData: MiniPlayerData? {
         guard let story = currentStory else { return nil }
@@ -404,12 +409,14 @@ final class StoryPlayerViewModel: NSObject {
 
     private func startProgressTimer() {
         progressTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
-            guard let self, self.isPlaying, self.duration > 0 else { return }
-            self.elapsed += 0.5
-            self.progress = min(1.0, self.elapsed / self.duration)
-            if self.elapsed >= self.duration {
-                self.elapsed = self.duration
-                self.progress = 1.0
+            Task { @MainActor in
+                guard let self, self.isPlaying, self.duration > 0 else { return }
+                self.elapsed += 0.5
+                self.progress = min(1.0, self.elapsed / self.duration)
+                if self.elapsed >= self.duration {
+                    self.elapsed = self.duration
+                    self.progress = 1.0
+                }
             }
         }
     }
@@ -471,32 +478,32 @@ final class StoryPlayerViewModel: NSObject {
 
         center.playCommand.isEnabled = true
         center.playCommand.addTarget { [weak self] _ in
-            self?.play()
+            Task { @MainActor in self?.play() }
             return .success
         }
 
         center.pauseCommand.isEnabled = true
         center.pauseCommand.addTarget { [weak self] _ in
-            self?.pause()
+            Task { @MainActor in self?.pause() }
             return .success
         }
 
         center.togglePlayPauseCommand.isEnabled = true
         center.togglePlayPauseCommand.addTarget { [weak self] _ in
-            self?.togglePlayPause()
+            Task { @MainActor in self?.togglePlayPause() }
             return .success
         }
 
         center.skipBackwardCommand.isEnabled = true
         center.skipBackwardCommand.preferredIntervals = [15]
         center.skipBackwardCommand.addTarget { [weak self] _ in
-            self?.rewind15()
+            Task { @MainActor in self?.rewind15() }
             return .success
         }
 
         center.nextTrackCommand.isEnabled = true
         center.nextTrackCommand.addTarget { [weak self] _ in
-            self?.skip()
+            Task { @MainActor in self?.skip() }
             return .success
         }
     }
@@ -518,20 +525,20 @@ final class StoryPlayerViewModel: NSObject {
 // MARK: - AVSpeechSynthesizerDelegate
 
 extension StoryPlayerViewModel: AVSpeechSynthesizerDelegate {
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
-        DispatchQueue.main.async { [weak self] in
-            self?.isPlaying = false
-            self?.progress = 1.0
-            self?.stopProgressTimer()
-            self?.updateNowPlaying()
+    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
+        Task { @MainActor in
+            isPlaying = false
+            progress = 1.0
+            stopProgressTimer()
+            updateNowPlaying()
             CodHaptic.success()
         }
     }
 
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
-        DispatchQueue.main.async { [weak self] in
-            self?.isPlaying = false
-            self?.stopProgressTimer()
+    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
+        Task { @MainActor in
+            isPlaying = false
+            stopProgressTimer()
         }
     }
 }
