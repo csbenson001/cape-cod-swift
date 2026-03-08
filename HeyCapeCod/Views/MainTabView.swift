@@ -2,7 +2,6 @@ import SwiftUI
 
 struct MainTabView: View {
     @Environment(AppState.self) private var appState
-    @State private var showVoiceAssistant = false
 
     var body: some View {
         @Bindable var appState = appState
@@ -22,8 +21,8 @@ struct MainTabView: View {
                 TrafficView()
                     .opacity(appState.selectedTab == .traffic ? 1 : 0)
 
-                SettingsView()
-                    .opacity(appState.selectedTab == .settings ? 1 : 0)
+                ProfileView()
+                    .opacity(appState.selectedTab == .profile ? 1 : 0)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .animation(CodAnimation.tabSwitch, value: appState.selectedTab)
@@ -34,6 +33,10 @@ struct MainTabView: View {
         .background(Color.capeCod.background)
         .sheet(isPresented: $appState.isVoiceAssistantPresented) {
             VoiceAssistantView()
+                .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $appState.isChatPresented) {
+            ChatView()
                 .presentationDragIndicator(.visible)
         }
         .alert("Error", isPresented: $appState.showingError) {
@@ -52,12 +55,12 @@ struct MainTabView: View {
             tabButton(.home)
             tabButton(.explore)
 
-            // Center raised voice button
-            voiceFAB
+            // Center raised action buttons (voice + chat)
+            centerActions
                 .offset(y: -CodSpacing.md)
 
             tabButton(.weather)
-            tabButton(.traffic)
+            tabButton(.profile)
         }
         .padding(.horizontal, CodSpacing.sm)
         .padding(.top, CodSpacing.sm)
@@ -100,27 +103,48 @@ struct MainTabView: View {
         )
     }
 
-    // MARK: - Voice FAB
+    // MARK: - Center Actions (Voice + Chat)
 
-    private var voiceFAB: some View {
-        Button {
-            CodHaptic.tap()
-            appState.isVoiceAssistantPresented = true
-        } label: {
-            ZStack {
-                Circle()
-                    .fill(Color.capeCod.oceanGradient)
-                    .frame(width: 56, height: 56)
-                    .shadow(color: Color.capeCod.oceanBlue.opacity(0.3), radius: CodSpacing.sm, y: CodSpacing.xs)
+    private var centerActions: some View {
+        HStack(spacing: CodSpacing.sm) {
+            // Chat button
+            Button {
+                CodHaptic.tap()
+                appState.isChatPresented = true
+            } label: {
+                ZStack {
+                    Circle()
+                        .fill(Color.capeCod.cardBackground)
+                        .frame(width: 40, height: 40)
+                        .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
 
-                Image(systemName: "waveform.circle.fill")
-                    .font(.system(size: 26, weight: .semibold))
-                    .foregroundStyle(.white)
+                    Image(systemName: "keyboard")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(Color.capeCod.oceanBlue)
+                }
             }
+            .codAccessibleButton("Text Chat", hint: "Start a text conversation")
+
+            // Voice FAB (primary)
+            Button {
+                CodHaptic.tap()
+                appState.isVoiceAssistantPresented = true
+            } label: {
+                ZStack {
+                    Circle()
+                        .fill(Color.capeCod.oceanGradient)
+                        .frame(width: 56, height: 56)
+                        .shadow(color: Color.capeCod.oceanBlue.opacity(0.3), radius: CodSpacing.sm, y: CodSpacing.xs)
+
+                    Image(systemName: "waveform.circle.fill")
+                        .font(.system(size: 26, weight: .semibold))
+                        .foregroundStyle(.white)
+                }
+            }
+            .buttonStyle(CodButtonPressStyle(variant: .primary))
+            .codAccessibleButton("Voice Assistant", hint: "Start a voice conversation")
         }
-        .buttonStyle(CodButtonPressStyle(variant: .primary))
         .frame(maxWidth: .infinity)
-        .codAccessibleButton("Voice Assistant", hint: "Start a voice conversation")
     }
 }
 

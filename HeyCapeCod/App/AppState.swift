@@ -6,6 +6,7 @@ final class AppState {
     // MARK: - Navigation
     var selectedTab: AppTab = .home
     var isVoiceAssistantPresented = false
+    var isChatPresented = false
 
     // MARK: - User Preferences
     var preferredColorScheme: ColorScheme?
@@ -37,7 +38,7 @@ enum AppTab: String, CaseIterable, Identifiable {
     case explore
     case weather
     case traffic
-    case settings
+    case profile
 
     var id: String { rawValue }
 
@@ -47,7 +48,7 @@ enum AppTab: String, CaseIterable, Identifiable {
         case .explore: "Explore"
         case .weather: "Weather"
         case .traffic: "Traffic"
-        case .settings: "Settings"
+        case .profile: "Profile"
         }
     }
 
@@ -57,7 +58,7 @@ enum AppTab: String, CaseIterable, Identifiable {
         case .explore: "safari.fill"
         case .weather: "cloud.sun.fill"
         case .traffic: "car.fill"
-        case .settings: "gearshape.fill"
+        case .profile: "person.crop.circle.fill"
         }
     }
 }

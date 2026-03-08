@@ -81,14 +81,21 @@ struct HomeView: View {
                 )
             }
 
-            MetricCard(
-                value: viewModel.bridgeSummary,
-                unit: "",
-                label: "Bridge Traffic",
-                icon: "car.fill",
-                tint: Color.capeCod.duneGrass,
-                isLive: true
-            )
+            Button {
+                withAnimation(CodAnimation.tabSwitch) {
+                    appState.selectedTab = .traffic
+                }
+            } label: {
+                MetricCard(
+                    value: viewModel.bridgeSummary,
+                    unit: "",
+                    label: "Bridge Traffic",
+                    icon: "car.fill",
+                    tint: Color.capeCod.duneGrass,
+                    isLive: true
+                )
+            }
+            .buttonStyle(.plain)
         }
     }
 
