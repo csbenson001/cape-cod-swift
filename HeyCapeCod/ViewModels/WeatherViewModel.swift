@@ -1,6 +1,7 @@
 import Foundation
 import CoreLocation
 
+@MainActor
 @Observable
 final class WeatherViewModel {
     var weather: WeatherData?

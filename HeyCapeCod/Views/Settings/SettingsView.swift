@@ -136,9 +136,9 @@ struct SettingsView: View {
                         get: { appState.preferredColorScheme },
                         set: { appState.preferredColorScheme = $0 }
                     )) {
-                        Text("System").tag(ColorScheme?.none)
-                        Text("Light").tag(ColorScheme?.some(.light))
-                        Text("Dark").tag(ColorScheme?.some(.dark))
+                        Text("System").tag(Optional<ColorScheme>.none)
+                        Text("Light").tag(Optional<ColorScheme>.some(.light))
+                        Text("Dark").tag(Optional<ColorScheme>.some(.dark))
                     }
                 }
 
