@@ -3,9 +3,10 @@ import CoreLocation
 
 /// Text chat service for AI conversations when voice isn't available.
 /// Calls POST /api/chat with the user's message, experience mode, and optional location.
+@MainActor
 @Observable
 final class ChatService {
-    static let shared = ChatService()
+    nonisolated(unsafe) static let shared = ChatService()
 
     private(set) var isLoading = false
 

@@ -9,9 +9,10 @@ import StoreKit
 ///
 /// Handles purchasing, restoring, transaction listening, Family Sharing,
 /// and server-side receipt verification.
+@MainActor
 @Observable
 final class SubscriptionManager {
-    static let shared = SubscriptionManager()
+    nonisolated(unsafe) static let shared = SubscriptionManager()
 
     // MARK: - Product IDs
 

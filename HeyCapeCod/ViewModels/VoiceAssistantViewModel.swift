@@ -7,6 +7,7 @@ import SwiftUI
 ///
 /// Coordinates AudioEngine (capture), WebSocketManager (relay), and AudioPlayer (playback)
 /// to deliver a seamless voice conversation experience.
+@MainActor
 @Observable
 final class VoiceAssistantViewModel {
 

@@ -275,6 +275,7 @@ struct StoryPlayerView: View {
 
 // MARK: - Story Player ViewModel
 
+@MainActor
 @Observable
 final class StoryPlayerViewModel: NSObject {
 

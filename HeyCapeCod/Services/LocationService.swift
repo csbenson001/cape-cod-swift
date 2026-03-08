@@ -1,5 +1,6 @@
 import CoreLocation
 
+@MainActor
 @Observable
 final class LocationService: NSObject, CLLocationManagerDelegate {
     var currentLocation: CLLocation?

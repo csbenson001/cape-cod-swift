@@ -150,9 +150,10 @@ final class UserProfile {
 
 // MARK: - UserProfile Manager
 
+@MainActor
 @Observable
 final class UserProfileManager {
-    static let shared = UserProfileManager()
+    nonisolated(unsafe) static let shared = UserProfileManager()
 
     private(set) var currentProfile: UserProfile?
     private var modelContext: ModelContext?

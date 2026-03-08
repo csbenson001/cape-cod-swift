@@ -77,15 +77,15 @@ final class HomeViewModel {
         let coordinate = locationService.currentLocation?.coordinate ?? WeatherService.capeCodCenter
 
         await withTaskGroup(of: Void.self) { group in
-            group.addTask { [self] in
+            group.addTask { @MainActor [self] in
                 do { weather = try await weatherService.fetchWeather(for: coordinate) }
                 catch { self.error = error }
             }
-            group.addTask { [self] in
+            group.addTask { @MainActor [self] in
                 do { tideData = try await tideService.fetchTides(station: .hyannis) }
                 catch { self.error = error }
             }
-            group.addTask { [self] in
+            group.addTask { @MainActor [self] in
                 do { bridgeStatus = try await trafficService.fetchBridgeStatus() }
                 catch { self.error = error }
             }

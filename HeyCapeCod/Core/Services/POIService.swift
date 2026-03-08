@@ -7,9 +7,10 @@ import Foundation
 /// 1. SwiftData cache (fastest — loaded on launch)
 /// 2. API fetch (freshest — replaces cache on success)
 /// 3. BundledContent (always available — never deleted)
+@MainActor
 @Observable
 final class POIService {
-    static let shared = POIService()
+    nonisolated(unsafe) static let shared = POIService()
 
     private(set) var allPOIs: [POI] = []
     private(set) var nearbyPOIs: [POI] = []

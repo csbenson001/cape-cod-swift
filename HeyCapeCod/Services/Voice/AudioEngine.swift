@@ -3,6 +3,7 @@ import Accelerate
 
 /// Captures microphone audio in PCM16 @ 24kHz, performs Voice Activity Detection,
 /// and emits base64-encoded chunks (~100ms) for WebSocket transmission.
+@MainActor
 @Observable
 final class AudioEngine {
 

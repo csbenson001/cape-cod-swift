@@ -22,7 +22,7 @@ final class WebSocketManager: NSObject, @unchecked Sendable {
 
     // MARK: - Singleton
 
-    static let shared = WebSocketManager()
+    nonisolated(unsafe) static let shared = WebSocketManager()
 
     // MARK: - Public State
 

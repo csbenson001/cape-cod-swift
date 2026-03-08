@@ -9,9 +9,10 @@ import Foundation
 /// - Ads shown
 ///
 /// Premium unlocks unlimited everything + offline + no ads.
+@MainActor
 @Observable
 final class PaywallManager {
-    static let shared = PaywallManager()
+    nonisolated(unsafe) static let shared = PaywallManager()
 
     // MARK: - Free Tier Limits
 

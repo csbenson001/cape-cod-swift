@@ -1,5 +1,6 @@
 import Foundation
 
+@MainActor
 @Observable
 final class ConversationViewModel {
     var conversation: Conversation

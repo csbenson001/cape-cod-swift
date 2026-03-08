@@ -3,9 +3,10 @@ import SwiftData
 
 /// Manages the SwiftData cache for POIs and stories.
 /// Used by POIService to provide fast local reads before API refresh.
+@MainActor
 @Observable
 final class POICacheManager {
-    static let shared = POICacheManager()
+    nonisolated(unsafe) static let shared = POICacheManager()
 
     private var modelContainer: ModelContainer?
     private var modelContext: ModelContext?
