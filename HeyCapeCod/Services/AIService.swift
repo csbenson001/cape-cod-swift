@@ -24,120 +24,53 @@ protocol AIServiceProtocol: Sendable {
 @preconcurrency @MainActor
 @Observable
 final class AIService: AIServiceProtocol {
-    private let apiKey: String
     private let session: URLSession
 
-    init(apiKey: String = "") {
-        self.apiKey = apiKey
+    init() {
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 30
         self.session = URLSession(configuration: config)
     }
 
-    // MARK: - Build System Prompt
-
-    func buildSystemPrompt(context: ChatContext) -> String {
-        var prompt = """
-        You are "Hey Cape Cod," a friendly Cape Cod travel assistant.
-
-        **User Profile:**
-        - Name: \(context.userName)
-        - Experience mode: \(context.experienceMode.displayName)
-        - Visit type: \(context.visitType)
-        """
-
-        if !context.interests.isEmpty {
-            prompt += "\n- Interests: \(context.interests.joined(separator: ", "))"
-        }
-
-        // Mode-specific behavior
-        switch context.experienceMode {
-        case .kids:
-            prompt += "\n\n**Mode-specific behavior:**\nUse fun, exciting language! Include pirate facts, animal facts, and adventure hooks. Keep it simple and enthusiastic."
-        case .teen:
-            prompt += "\n\n**Mode-specific behavior:**\nBe chill but informative. Include hidden gems, cool history, local legends, and Instagram-worthy spots."
-        case .adult:
-            prompt += "\n\n**Mode-specific behavior:**\nProvide detailed, sophisticated responses. Include dining recommendations, wine/cocktail spots, historical depth, and practical logistics."
-        case .family:
-            prompt += "\n\n**Mode-specific behavior:**\nBalance fun facts for kids with useful info for parents. Mention kid-friendliness, parking, facilities."
-        }
-
-        // Visit type behavior
-        switch context.visitType {
-        case "local":
-            prompt += "\n\n**Visit type behavior:**\nSkip obvious tourist info. Focus on events, seasonal changes, local-only spots, new openings."
-        case "dayTrip":
-            prompt += "\n\n**Visit type behavior:**\nPrioritize efficiency — cluster nearby attractions, mention drive times, suggest optimal routes."
-        default: // tourist
-            prompt += "\n\n**Visit type behavior:**\nGive full context with directions, parking tips, best times to visit."
-        }
-
-        // Live conditions
-        var liveConditions: [String] = []
-        if let weather = context.currentWeather {
-            liveConditions.append(weather)
-        }
-        if let tide = context.currentTide {
-            liveConditions.append(tide)
-        }
-        if let bridge = context.bridgeStatus {
-            liveConditions.append("Bridge traffic: \(bridge)")
-        }
-        if let waterTemp = context.waterTemp {
-            liveConditions.append("Water temperature: \(waterTemp)")
-        }
-
-        if !liveConditions.isEmpty {
-            prompt += "\n\n**Live Conditions (share when relevant):**\n"
-            prompt += liveConditions.joined(separator: "\n")
-        }
-
-        // Nearby POIs
-        if !context.nearbyPOIs.isEmpty {
-            prompt += "\n\n**Nearby Points of Interest:**\n"
-            prompt += context.nearbyPOIs.joined(separator: ", ")
-        }
-
-        prompt += "\n\nKeep responses concise and actionable. Mention specific places by name. You have deep knowledge of all 15 towns from Bourne to Provincetown."
-
-        return prompt
-    }
+    // MARK: - Send Message (via backend)
 
     func sendMessage(_ text: String, history: [Message], context: ChatContext = ChatContext()) async throws -> String {
-        let systemPrompt = buildSystemPrompt(context: context)
-        let messages = buildMessages(text, history: history, systemPrompt: systemPrompt)
-        let request = try buildRequest(messages: messages, systemPrompt: systemPrompt, stream: false)
+        let request = try buildBackendRequest(text, history: history, context: context)
 
         let (data, response) = try await session.data(for: request)
 
-        guard let httpResponse = response as? HTTPURLResponse,
-              (200...299).contains(httpResponse.statusCode) else {
+        guard let httpResponse = response as? HTTPURLResponse else {
             throw AIServiceError.requestFailed
         }
 
-        return try parseResponse(data)
+        if httpResponse.statusCode == 429 {
+            throw AIServiceError.rateLimited
+        }
+
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw AIServiceError.requestFailed
+        }
+
+        return try parseChatResponse(data)
     }
 
+    // MARK: - Stream Message (simulated via backend)
+
+    /// The backend returns a complete response (not streamed), so we simulate
+    /// a streaming effect by yielding the reply in small chunks.
     func streamMessage(_ text: String, history: [Message], context: ChatContext = ChatContext()) -> AsyncThrowingStream<String, Error> {
-        let systemPrompt = buildSystemPrompt(context: context)
-        return AsyncThrowingStream { continuation in
+        AsyncThrowingStream { continuation in
             Task {
                 do {
-                    let messages = buildMessages(text, history: history, systemPrompt: systemPrompt)
-                    let request = try buildRequest(messages: messages, systemPrompt: systemPrompt, stream: true)
+                    let reply = try await self.sendMessage(text, history: history, context: context)
 
-                    let (bytes, response) = try await session.bytes(for: request)
-
-                    guard let httpResponse = response as? HTTPURLResponse,
-                          (200...299).contains(httpResponse.statusCode) else {
-                        throw AIServiceError.requestFailed
-                    }
-
-                    for try await line in bytes.lines {
-                        if line.hasPrefix("data: "),
-                           let chunk = parseStreamChunk(String(line.dropFirst(6))) {
-                            continuation.yield(chunk)
-                        }
+                    // Simulate streaming by yielding words progressively
+                    let words = reply.split(separator: " ", omittingEmptySubsequences: false)
+                    for (index, word) in words.enumerated() {
+                        let chunk = index == 0 ? String(word) : " " + String(word)
+                        continuation.yield(chunk)
+                        // Small delay between words for natural feel
+                        try await Task.sleep(for: .milliseconds(25))
                     }
                     continuation.finish()
                 } catch {
@@ -149,61 +82,52 @@ final class AIService: AIServiceProtocol {
 
     // MARK: - Private
 
-    private func buildMessages(_ text: String, history: [Message], systemPrompt: String) -> [[String: String]] {
-        var messages: [[String: String]] = [
-            ["role": "system", "content": systemPrompt]
-        ]
-        for msg in history.suffix(20) {
-            messages.append([
-                "role": msg.role.rawValue,
-                "content": msg.content
-            ])
-        }
-        messages.append(["role": "user", "content": text])
-        return messages
-    }
-
-    private func buildRequest(messages: [[String: String]], systemPrompt: String, stream: Bool) throws -> URLRequest {
-        guard let url = URL(string: "https://api.anthropic.com/v1/messages") else {
-            throw AIServiceError.invalidURL
-        }
+    private func buildBackendRequest(_ text: String, history: [Message], context: ChatContext) throws -> URLRequest {
+        let baseURL = APIClient.shared.baseURL
+        let url = baseURL.appendingPathComponent("chat")
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "content-type")
-        request.setValue(apiKey, forHTTPHeaderField: "x-api-key")
-        request.setValue("2023-06-01", forHTTPHeaderField: "anthropic-version")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        let body: [String: Any] = [
-            "model": "claude-sonnet-4-20250514",
-            "max_tokens": 1024,
-            "system": systemPrompt,
-            "messages": messages.filter { $0["role"] != "system" },
-            "stream": stream
+        if let token = APIClient.shared.authToken {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+
+        // Build history array for the backend
+        let historyPayload: [[String: String]] = history
+            .filter { $0.role == .user || $0.role == .assistant }
+            .suffix(20)
+            .map { ["role": $0.role.rawValue, "content": $0.content] }
+
+        var body: [String: Any] = [
+            "message": text,
+            "mode": context.experienceMode.rawValue,
+            "history": historyPayload
         ]
+
+        // Include live context as additional info in the message if available
+        var contextParts: [String] = []
+        if let weather = context.currentWeather { contextParts.append(weather) }
+        if let tide = context.currentTide { contextParts.append(tide) }
+        if let bridge = context.bridgeStatus { contextParts.append("Bridge: \(bridge)") }
+
+        if !contextParts.isEmpty {
+            // Prepend live context to the message so the backend's AI has it
+            let contextNote = "[Live conditions: \(contextParts.joined(separator: "; "))]"
+            body["message"] = "\(contextNote) \(text)"
+        }
+
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
         return request
     }
 
-    private func parseResponse(_ data: Data) throws -> String {
+    private func parseChatResponse(_ data: Data) throws -> String {
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let content = json["content"] as? [[String: Any]],
-              let text = content.first?["text"] as? String else {
+              let message = json["message"] as? String else {
             throw AIServiceError.invalidResponse
         }
-        return text
-    }
-
-    private func parseStreamChunk(_ json: String) -> String? {
-        guard let data = json.data(using: .utf8),
-              let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let type = obj["type"] as? String,
-              type == "content_block_delta",
-              let delta = obj["delta"] as? [String: Any],
-              let text = delta["text"] as? String else {
-            return nil
-        }
-        return text
+        return message
     }
 }
 
