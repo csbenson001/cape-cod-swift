@@ -14,14 +14,20 @@ final class POICacheManager {
     var lastUpdatedText: String = ""
 
     private init() {
+        let schema = Schema([CachedPOI.self, CachedStory.self])
+        let config = ModelConfiguration(isStoredInMemoryOnly: false)
         do {
-            let schema = Schema([CachedPOI.self, CachedStory.self])
-            let config = ModelConfiguration(isStoredInMemoryOnly: false)
             modelContainer = try ModelContainer(for: schema, configurations: [config])
-            modelContext = modelContainer.map { ModelContext($0) }
         } catch {
-            print("❌ SwiftData init failed: \(error)")
+            print("⚠️ SwiftData schema changed, recreating cache: \(error)")
+            // Delete old store files and retry
+            let storeURL = URL.applicationSupportDirectory.appending(path: "default.store")
+            for ext in ["", "-shm", "-wal"] {
+                try? FileManager.default.removeItem(at: URL(fileURLWithPath: storeURL.path + ext))
+            }
+            modelContainer = try? ModelContainer(for: schema, configurations: [config])
         }
+        modelContext = modelContainer.map { ModelContext($0) }
     }
 
     // MARK: - POI Cache
