@@ -133,7 +133,7 @@
 		B8EDB17F7E0D9CE3A5A3B3FA /* SiriShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiriShortcuts.swift; sourceTree = "<group>"; };
 		E050399010270DC2504DF433 /* SpotlightIndexer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotlightIndexer.swift; sourceTree = "<group>"; };
 		C0CED249E5F4FE3C64B2B31E /* BundledContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundledContent.swift; sourceTree = "<group>"; };
-		D3ED8BBA9941544BDC34C73E /* View+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = View+Extensions.swift; sourceTree = "<group>"; };
+		D3ED8BBA9941544BDC34C73E /* View+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Extensions.swift"; sourceTree = "<group>"; };
 		2EB20B42CD8DC8FFB0E81B48 /* APIStory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIStory.swift; sourceTree = "<group>"; };
 		26129CBE7D711C9342F28B9C /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
 		C04DCB939F0385FC7F2B9183 /* Conversation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Conversation.swift; sourceTree = "<group>"; };
