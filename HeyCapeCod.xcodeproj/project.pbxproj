@@ -98,6 +98,8 @@
 		71AC2175B67D195ADB302262 /* Assets.xcassets */ = {isa = PBXBuildFile; fileRef = 686C94A06C4E263B8C39AEE1; };
 		18387B04980747E7DF899786 /* WidgetKit.framework */ = {isa = PBXBuildFile; fileRef = 354402D86CA689872EBE615F; };
 		D43CF9026ED9D277F109E5C1 /* SwiftUI.framework */ = {isa = PBXBuildFile; fileRef = C367390B9D1A74C177797046; };
+		CHAT01A1B2C3D4E5F6A7B8C9D0 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CHAT02A1B2C3D4E5F6A7B8C9D0; };
+		PROF01A1B2C3D4E5F6A7B8C9D0 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = PROF02A1B2C3D4E5F6A7B8C9D0; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -216,6 +218,8 @@
 		971244C9E8888AC956743B0E /* HeyCapeCod.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HeyCapeCod.entitlements; sourceTree = "<group>"; };
 		354402D86CA689872EBE615F /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		C367390B9D1A74C177797046 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		CHAT02A1B2C3D4E5F6A7B8C9D0 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
+		PROF02A1B2C3D4E5F6A7B8C9D0 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -487,15 +491,33 @@
 			children = (
 				C3A93A811AA8FA1B05E7674B,
 				7C369CA22B2C8B8D5105991F,
+				CHATGRPA1B2C3D4E5F6A7B8C9,
 				EB13FEB1C19579B12216072B,
 				983C29E1C16A34C8468F0A87,
 				EC1336E40F9F3EE8E1BBB862,
+				PROFGRPA1B2C3D4E5F6A7B8C9,
 				58862A849C6E29BCA3B8BE17,
 				DA6734CB137DF8CB9AEF0641,
 				BBD9BE5E99E31DED05E90B4A,
 				38533C2C8FD8E2C195A1CC8E,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		CHATGRPA1B2C3D4E5F6A7B8C9 /* Chat */ = {
+			isa = PBXGroup;
+			children = (
+				CHAT02A1B2C3D4E5F6A7B8C9D0,
+			);
+			path = Chat;
+			sourceTree = "<group>";
+		};
+		PROFGRPA1B2C3D4E5F6A7B8C9 /* Profile */ = {
+			isa = PBXGroup;
+			children = (
+				PROF02A1B2C3D4E5F6A7B8C9D0,
+			);
+			path = Profile;
 			sourceTree = "<group>";
 		};
 		EB13FEB1C19579B12216072B /* Conversation */ = {
@@ -731,6 +753,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CHAT01A1B2C3D4E5F6A7B8C9D0,
+				PROF01A1B2C3D4E5F6A7B8C9D0,
 				746F9C8CC41F47C614821E6A,
 				F9A24B1640E4F84B3EC384E2,
 				2F2268FC0102EEA257A129C1,
