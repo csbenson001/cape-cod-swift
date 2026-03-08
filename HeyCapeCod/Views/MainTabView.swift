@@ -15,11 +15,8 @@ struct MainTabView: View {
                 ExploreView()
                     .opacity(appState.selectedTab == .explore ? 1 : 0)
 
-                WeatherDashboardView()
-                    .opacity(appState.selectedTab == .weather ? 1 : 0)
-
-                TrafficView()
-                    .opacity(appState.selectedTab == .traffic ? 1 : 0)
+                TourListView()
+                    .opacity(appState.selectedTab == .tours ? 1 : 0)
 
                 ProfileView()
                     .opacity(appState.selectedTab == .profile ? 1 : 0)
@@ -59,7 +56,7 @@ struct MainTabView: View {
             centerActions
                 .offset(y: -CodSpacing.md)
 
-            tabButton(.weather)
+            tabButton(.tours)
             tabButton(.profile)
         }
         .padding(.horizontal, CodSpacing.sm)

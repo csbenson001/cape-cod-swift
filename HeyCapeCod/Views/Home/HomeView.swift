@@ -86,9 +86,7 @@ struct HomeView: View {
             }
 
             Button {
-                withAnimation(CodAnimation.tabSwitch) {
-                    appState.selectedTab = .traffic
-                }
+                // Bridge traffic info
             } label: {
                 MetricCard(
                     value: viewModel.bridgeSummary,

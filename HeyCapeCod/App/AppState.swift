@@ -36,8 +36,7 @@ final class AppState {
 enum AppTab: String, CaseIterable, Identifiable {
     case home
     case explore
-    case weather
-    case traffic
+    case tours
     case profile
 
     var id: String { rawValue }
@@ -46,8 +45,7 @@ enum AppTab: String, CaseIterable, Identifiable {
         switch self {
         case .home: "Home"
         case .explore: "Explore"
-        case .weather: "Weather"
-        case .traffic: "Traffic"
+        case .tours: "Tours"
         case .profile: "Profile"
         }
     }
@@ -56,8 +54,7 @@ enum AppTab: String, CaseIterable, Identifiable {
         switch self {
         case .home: "house.fill"
         case .explore: "safari.fill"
-        case .weather: "cloud.sun.fill"
-        case .traffic: "car.fill"
+        case .tours: "map.fill"
         case .profile: "person.crop.circle.fill"
         }
     }
