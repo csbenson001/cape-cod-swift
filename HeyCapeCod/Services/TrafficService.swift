@@ -5,7 +5,7 @@ protocol TrafficServiceProtocol: Sendable {
 }
 
 @Observable
-final class TrafficService: TrafficServiceProtocol {
+final class TrafficService: TrafficServiceProtocol, @unchecked Sendable {
     private(set) var currentTraffic: TrafficResponse?
     private(set) var lastReport: TrafficReport?
     private(set) var isStale = false

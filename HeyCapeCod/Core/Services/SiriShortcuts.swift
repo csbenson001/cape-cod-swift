@@ -17,8 +17,7 @@ struct AskCapeCodIntent: AppIntent {
         let response = await ChatService.shared.sendMessage(
             question,
             mode: .adult,
-            latitude: nil,
-            longitude: nil
+            location: nil
         )
 
         let answer = response ?? "I'm not sure about that. Try asking me in the app!"

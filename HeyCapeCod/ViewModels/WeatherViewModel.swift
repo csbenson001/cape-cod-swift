@@ -182,7 +182,7 @@ final class WeatherViewModel {
     func selectStation(_ station: TideStation) async {
         selectedStation = station
         do { tideData = try await tideService.fetchTides(station: station) }
-        catch { error = error }
+        catch { self.error = error }
     }
 
     func refresh() async {

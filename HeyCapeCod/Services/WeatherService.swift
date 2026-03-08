@@ -12,7 +12,7 @@ protocol WeatherServiceProtocol: Sendable {
 /// - Tide predictions from NOAA CO-OPS stations
 /// - Buoy wave data for beach conditions
 @Observable
-final class WeatherService: WeatherServiceProtocol {
+final class WeatherService: WeatherServiceProtocol, @unchecked Sendable {
     private var cachedWeather: WeatherData?
     private(set) var currentWeather: WeatherAPIData?
     private(set) var tides: [TidePrediction] = []
@@ -297,8 +297,8 @@ final class WeatherService: WeatherServiceProtocol {
         }
 
         let currentWeather = CurrentWeather(
-            temperature: (current["temperature"] as? Double) ?? 0,
-            feelsLike: (current["temperature"] as? Double) ?? 0,
+            temperature: (current["temperature"] as? NSNumber)?.doubleValue ?? 0,
+            feelsLike: (current["temperature"] as? NSNumber)?.doubleValue ?? 0,
             condition: mapNOAACondition(current["shortForecast"] as? String ?? ""),
             humidity: parseHumidity(current["relativeHumidity"] as? [String: Any]),
             windSpeed: parseWindSpeed(current["windSpeed"] as? String ?? ""),
@@ -309,7 +309,7 @@ final class WeatherService: WeatherServiceProtocol {
         let hourlyForecasts = hourlyPeriods.prefix(24).map { period -> HourlyForecast in
             HourlyForecast(
                 time: parseISO8601(period["startTime"] as? String ?? "") ?? .now,
-                temperature: (period["temperature"] as? Double) ?? 0,
+                temperature: (period["temperature"] as? NSNumber)?.doubleValue ?? 0,
                 condition: mapNOAACondition(period["shortForecast"] as? String ?? ""),
                 precipChance: (period["probabilityOfPrecipitation"] as? [String: Any])?["value"] as? Int ?? 0,
                 windSpeed: parseWindSpeed(period["windSpeed"] as? String ?? "")
@@ -328,8 +328,8 @@ final class WeatherService: WeatherServiceProtocol {
             let night = dailyPeriods[i + 1]
             dailyForecasts.append(DailyForecast(
                 date: parseISO8601(day["startTime"] as? String ?? "") ?? .now,
-                high: (day["temperature"] as? Double) ?? 0,
-                low: (night["temperature"] as? Double) ?? 0,
+                high: (day["temperature"] as? NSNumber)?.doubleValue ?? 0,
+                low: (night["temperature"] as? NSNumber)?.doubleValue ?? 0,
                 condition: mapNOAACondition(day["shortForecast"] as? String ?? ""),
                 precipChance: (day["probabilityOfPrecipitation"] as? [String: Any])?["value"] as? Int ?? 0,
                 sunrise: .now, sunset: .now, uvIndex: 0

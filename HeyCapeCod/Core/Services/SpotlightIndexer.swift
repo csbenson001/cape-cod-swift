@@ -1,5 +1,5 @@
 import CoreSpotlight
-import MobileCoreServices
+import UniformTypeIdentifiers
 import Foundation
 
 /// Indexes POIs in Spotlight so users can search for Cape Cod locations

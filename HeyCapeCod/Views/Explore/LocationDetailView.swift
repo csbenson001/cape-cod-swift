@@ -101,8 +101,9 @@ struct LocationDetailView: View {
             Text("Location")
                 .codTextStyle(.sectionTitle)
 
-            Map(coordinateRegion: .constant(region), annotationItems: [location]) { loc in
-                MapMarker(coordinate: loc.coordinate, tint: Color.capeCod.oceanBlue)
+            Map(initialPosition: .region(region)) {
+                Marker(location.name, coordinate: location.coordinate)
+                    .tint(Color.capeCod.oceanBlue)
             }
             .frame(height: 180)
             .clipShape(RoundedRectangle(cornerRadius: CodRadius.card))
@@ -112,11 +113,11 @@ struct LocationDetailView: View {
 
     private var actionsSection: some View {
         VStack(spacing: CodSpacing.md) {
-            CodButton(title: "Get Directions", icon: "arrow.triangle.turn.up.right.diamond.fill") {
+            CodButton("Get Directions", icon: "arrow.triangle.turn.up.right.diamond.fill") {
                 openInMaps()
             }
 
-            CodButton(title: "Ask About This Place", icon: "bubble.left.fill", style: .secondary) {
+            CodButton("Ask About This Place", variant: .secondary, icon: "bubble.left.fill") {
                 // Navigate to conversation
             }
         }

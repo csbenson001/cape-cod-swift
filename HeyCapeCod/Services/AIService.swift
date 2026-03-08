@@ -6,7 +6,7 @@ protocol AIServiceProtocol: Sendable {
 }
 
 @Observable
-final class AIService: AIServiceProtocol {
+final class AIService: AIServiceProtocol, @unchecked Sendable {
     private let apiKey: String
     private let session: URLSession
 

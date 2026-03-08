@@ -5,7 +5,7 @@ protocol TideServiceProtocol: Sendable {
 }
 
 @Observable
-final class TideService: TideServiceProtocol {
+final class TideService: TideServiceProtocol, @unchecked Sendable {
     private let session: URLSession
     private let baseURL = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter"
     private var cache: [String: TideData] = [:]

@@ -318,7 +318,7 @@ struct WeatherDashboardView: View {
                         .monospacedDigit()
                         .frame(width: 32)
                 }
-                .codAccessibleGroup(label: "\(day.date.formatted(.dateTime.weekday(.wide))): high \(Int(day.high)) degrees, low \(Int(day.low)) degrees, \(day.condition.description)")
+                .codAccessibleGroup(label: "\(day.date.formatted(.dateTime.weekday(.wide))): high \(Int(day.high)) degrees, low \(Int(day.low)) degrees, \(day.condition.displayName)")
             }
         }
         .padding(CodSpacing.cardPadding)

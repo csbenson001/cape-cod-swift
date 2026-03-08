@@ -20,10 +20,18 @@ import Foundation
 @Observable
 final class WebSocketManager: NSObject, @unchecked Sendable {
 
+    // MARK: - Singleton
+
+    static let shared = WebSocketManager()
+
     // MARK: - Public State
 
     private(set) var connectionState: ConnectionState = .disconnected
     private(set) var lastError: Error?
+
+    var isConnected: Bool {
+        connectionState == .connected
+    }
 
     enum ConnectionState: Equatable {
         case disconnected
@@ -105,8 +113,8 @@ final class WebSocketManager: NSObject, @unchecked Sendable {
 
         startReceiving()
         startPinging()
-        updateState(.connected)
-        reconnectAttempt = 0
+        // State will be set to .connected by the URLSessionWebSocketDelegate
+        // when the handshake completes
     }
 
     func disconnect() {

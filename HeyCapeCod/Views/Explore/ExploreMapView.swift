@@ -45,7 +45,7 @@ struct ExploreMapView: View {
                     ForEach(filteredPOIs) { poi in
                         MapCircle(center: poi.coordinate, radius: poi.geofenceRadius)
                             .foregroundStyle(annotationColor(for: poi.category).opacity(0.08))
-                            .stroke(annotationColor(for: poi.category).opacity(0.25), lineWidth: 1)
+                            .strokeStyle(StrokeStyle(lineWidth: 1))
                     }
                 }
             }

@@ -201,9 +201,9 @@ final class UserProfileManager {
     func syncToCloud() async {
         guard let profile = currentProfile, !AuthManager.shared.isGuest else { return }
 
-        let data = profile.toFirestoreData()
+        let payload = ProfileSyncPayload(from: profile)
         do {
-            let _: EmptyResponse = try await APIClient.shared.put("users/\(profile.uid)", body: data)
+            let _: EmptyResponse = try await APIClient.shared.put("users/\(profile.uid)", body: payload)
             profile.lastSyncedAt = .now
             saveProfile()
             print("☁️ Profile synced to cloud")
@@ -214,3 +214,46 @@ final class UserProfileManager {
 }
 
 private struct EmptyResponse: Codable {}
+
+/// Encodable payload for syncing UserProfile to Firestore via the API.
+private struct ProfileSyncPayload: Encodable {
+    let uid: String
+    let displayName: String
+    let email: String?
+    let photoURL: String?
+    let authProvider: String
+    let currentMode: String
+    let visitType: String
+    let interests: [String]
+    let isPremium: Bool
+    let premiumExpiresAt: Double?
+    let subscriptionProductId: String?
+    let conversationsToday: Int
+    let storiesPlayedToday: Int
+    let totalConversations: Int
+    let totalStoriesPlayed: Int
+    let favoriteBeaches: [String]
+    let createdAt: Double
+    let lastSyncedAt: Double
+
+    init(from profile: UserProfile) {
+        self.uid = profile.uid
+        self.displayName = profile.displayName
+        self.email = profile.email
+        self.photoURL = profile.photoURL
+        self.authProvider = profile.authProvider
+        self.currentMode = profile.currentMode
+        self.visitType = profile.visitType
+        self.interests = profile.interests
+        self.isPremium = profile.isPremium
+        self.premiumExpiresAt = profile.premiumExpiresAt?.timeIntervalSince1970
+        self.subscriptionProductId = profile.subscriptionProductId
+        self.conversationsToday = profile.conversationsToday
+        self.storiesPlayedToday = profile.storiesPlayedToday
+        self.totalConversations = profile.totalConversations
+        self.totalStoriesPlayed = profile.totalStoriesPlayed
+        self.favoriteBeaches = profile.favoriteBeaches
+        self.createdAt = profile.createdAt.timeIntervalSince1970
+        self.lastSyncedAt = Date.now.timeIntervalSince1970
+    }
+}
