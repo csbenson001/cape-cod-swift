@@ -6,8 +6,8 @@ import Foundation
 /// Siri Shortcut: "Hey Siri, ask Cape Cod about traffic"
 struct AskCapeCodIntent: AppIntent {
     static let title: LocalizedStringResource = "Ask Cape Cod"
-    static var description = IntentDescription("Ask your AI Cape Cod guide a question")
-    static var openAppWhenRun = true
+    static let description =IntentDescription("Ask your AI Cape Cod guide a question")
+    static let openAppWhenRun =true
 
     @Parameter(title: "Question")
     var question: String
@@ -34,8 +34,8 @@ struct AskCapeCodIntent: AppIntent {
 /// Siri Shortcut: "Hey Siri, check Cape Cod traffic"
 struct CheckTrafficIntent: AppIntent {
     static let title: LocalizedStringResource = "Check Cape Cod Traffic"
-    static var description = IntentDescription("Get current bridge and traffic conditions")
-    static var openAppWhenRun = false
+    static let description =IntentDescription("Get current bridge and traffic conditions")
+    static let openAppWhenRun =false
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
         let service = TrafficService()
@@ -62,8 +62,8 @@ struct CheckTrafficIntent: AppIntent {
 /// Siri Shortcut: "Hey Siri, check Cape Cod tides"
 struct CheckTidesIntent: AppIntent {
     static let title: LocalizedStringResource = "Check Cape Cod Tides"
-    static var description = IntentDescription("Get current tide information")
-    static var openAppWhenRun = false
+    static let description =IntentDescription("Get current tide information")
+    static let openAppWhenRun =false
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
         let service = WeatherService()

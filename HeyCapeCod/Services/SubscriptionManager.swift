@@ -35,17 +35,14 @@ final class SubscriptionManager {
 
     // MARK: - Private
 
-    private nonisolated(unsafe) var updateListenerTask: Task<Void, Never>?
+    private var updateListenerTask: Task<Void, Never>?
 
     private init() {
-        Task { @MainActor in
-            updateListenerTask = listenForTransactions()
-            await loadProducts()
+        // Defer MainActor-isolated work since init is nonisolated
+        Task { @MainActor [self] in
+            self.updateListenerTask = self.listenForTransactions()
+            await self.loadProducts()
         }
-    }
-
-    deinit {
-        updateListenerTask?.cancel()
     }
 
     // MARK: - Load Products

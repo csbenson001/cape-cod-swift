@@ -17,8 +17,8 @@ final class POIService {
     private(set) var isLoading = false
     var error: String?
 
-    private let api = APIClient.shared
-    private let cache = POICacheManager.shared
+    private var api: APIClient { APIClient.shared }
+    private var cache: POICacheManager { POICacheManager.shared }
 
     private init() {
         Task { @MainActor in

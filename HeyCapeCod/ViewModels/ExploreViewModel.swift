@@ -16,7 +16,7 @@ final class ExploreViewModel {
     var isOffline = false
 
     private let locationService: LocationService
-    private let poiService = POIService.shared
+    private var poiService: POIService { POIService.shared }
 
     init(locationService: LocationService = LocationService()) {
         self.locationService = locationService
