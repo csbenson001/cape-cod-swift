@@ -70,7 +70,7 @@ struct ExploreMapView: View {
                 ForEach(filteredPOIs) { poi in
                     MapCircle(center: poi.coordinate, radius: poi.geofenceRadius)
                         .foregroundStyle(annotationColor(for: poi.category).opacity(0.08))
-                        .strokeStyle(StrokeStyle(lineWidth: 1))
+                        .stroke(style: StrokeStyle(lineWidth: 1))
                 }
             }
         }
