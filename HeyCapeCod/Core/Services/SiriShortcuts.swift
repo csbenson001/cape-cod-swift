@@ -14,7 +14,8 @@ struct AskCapeCodIntent: AppIntent {
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
         // Route the question through ChatService
-        let response = await ChatService.shared.sendMessage(
+        let chatService = await ChatService.shared
+        let response = await chatService.sendMessage(
             question,
             mode: .adult,
             location: nil
@@ -38,7 +39,7 @@ struct CheckTrafficIntent: AppIntent {
     nonisolated static let openAppWhenRun = false
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        let service = TrafficService()
+        let service = await TrafficService()
         do {
             let report = try await service.fetchTrafficReport()
             let sagamore = report.bridgeStatus.sagamoreBridge
@@ -66,7 +67,7 @@ struct CheckTidesIntent: AppIntent {
     nonisolated static let openAppWhenRun = false
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        let service = WeatherService()
+        let service = await WeatherService()
         await service.fetchTides()
 
         guard let next = service.tides.first(where: { $0.time > .now }) else {

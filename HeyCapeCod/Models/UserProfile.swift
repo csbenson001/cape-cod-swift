@@ -1,5 +1,5 @@
 import Foundation
-import SwiftData
+@preconcurrency import SwiftData
 
 /// User profile persisted locally via SwiftData with Firestore sync.
 ///

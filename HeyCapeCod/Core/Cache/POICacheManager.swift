@@ -1,5 +1,5 @@
 import Foundation
-import SwiftData
+@preconcurrency import SwiftData
 
 /// Manages the SwiftData cache for POIs and stories.
 /// Used by POIService to provide fast local reads before API refresh.

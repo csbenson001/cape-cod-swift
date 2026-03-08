@@ -208,7 +208,7 @@ private struct BridgeCard: View {
             isActive: condition?.status == .restricted || condition?.status == .closed
         )
         .codAccessibleGroup(
-            label: "\(name): \(condition?.status.displayName ?? "Loading")\(condition?.delayMinutes.map { $0 > 0 ? ", \($0) minute delay" : "" } ?? "")"
+            label: "\(name): \(condition?.status.displayName ?? "Loading")\((condition?.delayMinutes ?? 0) > 0 ? ", \(condition!.delayMinutes) minute delay" : "")"
         )
     }
 

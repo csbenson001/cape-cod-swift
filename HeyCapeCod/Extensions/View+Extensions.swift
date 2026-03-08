@@ -22,7 +22,7 @@ extension View {
     }
 
     /// Read the view's size via a preference key
-    func readSize(onChange: @escaping (CGSize) -> Void) -> some View {
+    func readSize(onChange: @escaping @Sendable (CGSize) -> Void) -> some View {
         background(
             GeometryReader { geo in
                 Color.clear.preference(key: SizePreferenceKey.self, value: geo.size)
@@ -33,7 +33,7 @@ extension View {
 }
 
 private struct SizePreferenceKey: PreferenceKey {
-    static var defaultValue: CGSize = .zero
+    nonisolated(unsafe) static var defaultValue: CGSize = .zero
     static func reduce(value: inout CGSize, nextValue: () -> CGSize) {
         value = nextValue()
     }
