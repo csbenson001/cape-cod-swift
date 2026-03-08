@@ -251,6 +251,9 @@ struct OnboardingView: View {
                 SignInWithAppleButton {
                     Task {
                         try? await AuthManager.shared.signInWithApple()
+                        if let user = AuthManager.shared.currentUser {
+                            UserProfileManager.shared.loadProfile(for: user)
+                        }
                         completeOnboarding()
                     }
                 }
@@ -259,6 +262,9 @@ struct OnboardingView: View {
 
                 Button {
                     AuthManager.shared.continueAsGuest()
+                    if let user = AuthManager.shared.currentUser {
+                        UserProfileManager.shared.loadProfile(for: user)
+                    }
                     completeOnboarding()
                 } label: {
                     Text("Continue as Guest")

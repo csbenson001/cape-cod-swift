@@ -44,7 +44,17 @@ struct HeyCapeCodApp: App {
         )
 
         // Configure UserProfileManager with SwiftData context
-        if let container = try? ModelContainer(for: UserProfile.self) {
+        let container: ModelContainer? = {
+            if let c = try? ModelContainer(for: UserProfile.self) { return c }
+            // Schema changed — delete old store and recreate
+            let storeURL = URL.applicationSupportDirectory.appending(path: "default.store")
+            try? FileManager.default.removeItem(at: storeURL)
+            try? FileManager.default.removeItem(at: storeURL.appendingPathExtension("shm"))
+            try? FileManager.default.removeItem(at: storeURL.appendingPathExtension("wal"))
+            return try? ModelContainer(for: UserProfile.self)
+        }()
+
+        if let container {
             let context = ModelContext(container)
             UserProfileManager.shared.configure(with: context)
 

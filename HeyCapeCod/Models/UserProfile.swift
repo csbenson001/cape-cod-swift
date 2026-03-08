@@ -17,6 +17,7 @@ final class UserProfile {
     // MARK: - Preferences
     var currentMode: String // ExperienceMode.rawValue
     var visitType: String // "local", "tourist", "dayTrip"
+    @Attribute(.transformable(by: NSSecureUnarchiveFromDataTransformerName))
     var interests: [String] // ["beaches", "history", "food", "nature", "lighthouses"]
 
     // MARK: - Subscription
@@ -35,6 +36,7 @@ final class UserProfile {
     var lastSyncedAt: Date?
     var totalConversations: Int
     var totalStoriesPlayed: Int
+    @Attribute(.transformable(by: NSSecureUnarchiveFromDataTransformerName))
     var favoriteBeaches: [String]
 
     init(

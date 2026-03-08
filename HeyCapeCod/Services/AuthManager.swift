@@ -221,6 +221,7 @@ final class AuthManager: NSObject {
 
         currentUser = user
         isAuthenticated = true
+        saveSession(user)
         print("👤 Continuing as guest: \(guestID)")
     }
 
