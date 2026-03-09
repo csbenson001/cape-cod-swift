@@ -149,7 +149,7 @@ struct TourAchievementsView: View {
 
             // Stats summary
             VStack(spacing: CodSpacing.xs) {
-                Text("\(service.unlockedCount)/\(service.totalAchievements)")
+                Text("\(service.unlockedCount)/\(TourAchievementService.totalAchievements)")
                     .codTextStyle(.heroTitle)
 
                 Text("Achievements Unlocked")

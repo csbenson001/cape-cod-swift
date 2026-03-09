@@ -803,11 +803,7 @@ struct StoryTranscriptView: View {
             .id("chapter-header-\(chapter.id)")
 
             // Paragraphs
-            let paragraphs = chapter.content
-                .components(separatedBy: "\n\n")
-                .flatMap { $0.components(separatedBy: "\n") }
-                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-                .filter { !$0.isEmpty }
+            let paragraphs = splitParagraphs(chapter.content)
 
             ForEach(Array(paragraphs.enumerated()), id: \.offset) { paraIndex, paragraph in
                 let paragraphProgress = estimateParagraphProgress(
@@ -908,6 +904,16 @@ struct StoryTranscriptView: View {
         return result
     }
 
+    // MARK: - Paragraph Parsing
+
+    private func splitParagraphs(_ content: String) -> [String] {
+        content
+            .components(separatedBy: "\n\n")
+            .flatMap { $0.components(separatedBy: "\n") }
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+    }
+
     // MARK: - Progress Estimation
 
     private func estimateParagraphProgress(
@@ -936,10 +942,7 @@ struct StoryTranscriptView: View {
     private func scrollToCurrentParagraph(proxy: ScrollViewProxy, progress: Double) {
         guard let chapter = chapters.first(where: { $0.contains(progress: progress) }) else { return }
 
-        let paragraphs = chapter.content
-            .components(separatedBy: "\n\n")
-            .flatMap { $0.components(separatedBy: "\n") }
-            .filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+        let paragraphs = splitParagraphs(chapter.content)
 
         let chapterSpan = chapter.endProgress - chapter.startProgress
         guard chapterSpan > 0 else { return }
