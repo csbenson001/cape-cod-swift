@@ -418,12 +418,14 @@ private struct TourFilterChip: View {
                 Image(systemName: icon)
                     .font(.caption)
                 Text(label)
-                    .codTextStyle(.label)
+                    .font(.system(size: 11, weight: .medium))
+                    .tracking(1.5)
+                    .textCase(.uppercase)
             }
+            .foregroundStyle(isSelected ? .white : Color.capeCod.textPrimary)
             .padding(.horizontal, CodSpacing.md)
             .padding(.vertical, CodSpacing.sm)
             .background(isSelected ? Color.capeCod.oceanBlue : Color.capeCod.surfaceElevated)
-            .foregroundStyle(isSelected ? .white : Color.capeCod.textPrimary)
             .clipShape(Capsule())
         }
         .buttonStyle(CodButtonPressStyle(variant: .ghost))
