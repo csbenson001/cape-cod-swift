@@ -3,6 +3,8 @@ import SwiftUI
 struct HomeView: View {
     @Environment(AppState.self) private var appState
     @State private var viewModel = HomeViewModel()
+    @State private var showTellMeAStory = false
+    @State private var showAchievements = false
 
     var body: some View {
         NavigationStack {
@@ -16,24 +18,28 @@ struct HomeView: View {
                     quickGlanceSection
                         .staggered(index: 1)
 
+                    // Discover Hub — Tell Me a Story, Chat, Achievements
+                    discoverHubSection
+                        .staggered(index: 2)
+
                     // Today on Cape Cod - personalized insights
                     todaySection
-                        .staggered(index: 2)
+                        .staggered(index: 3)
 
                     // Voice Assistant CTA
                     voiceAssistantCard
-                        .staggered(index: 3)
+                        .staggered(index: 4)
 
                     // Featured Stories
                     if !viewModel.featuredStories.isEmpty {
                         storiesSection
-                            .staggered(index: 4)
+                            .staggered(index: 5)
                     }
 
                     // Recent Conversations
                     if !viewModel.recentConversations.isEmpty {
                         recentSection
-                            .staggered(index: 5)
+                            .staggered(index: 6)
                     }
                 }
                 .padding(.horizontal, CodSpacing.screenEdge)
@@ -46,6 +52,62 @@ struct HomeView: View {
             }
             .task {
                 await viewModel.loadDashboard()
+            }
+            .sheet(isPresented: $showTellMeAStory) {
+                NavigationStack {
+                    TellMeAStoryView()
+                }
+            }
+            .sheet(isPresented: $showAchievements) {
+                NavigationStack {
+                    TourAchievementsView()
+                }
+            }
+        }
+    }
+
+    // MARK: - Discover Hub
+
+    private var discoverHubSection: some View {
+        VStack(alignment: .leading, spacing: CodSpacing.md) {
+            Text("Discover")
+                .codTextStyle(.sectionTitle)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: CodSpacing.md) {
+                    // Tell Me a Story
+                    DiscoverCard(
+                        icon: "book.and.wreath.fill",
+                        title: "Tell Me a Story",
+                        subtitle: "AI Cape Cod tales for all ages",
+                        gradientColors: [Color.capeCod.sunsetOrange, Color(hex: 0xE8B94E)]
+                    ) {
+                        CodHaptic.tap()
+                        showTellMeAStory = true
+                    }
+
+                    // Chat with AI
+                    DiscoverCard(
+                        icon: "bubble.left.and.text.bubble.right.fill",
+                        title: "Chat",
+                        subtitle: "Ask anything about the Cape",
+                        gradientColors: [Color.capeCod.oceanBlue, Color.capeCod.seafoam]
+                    ) {
+                        CodHaptic.tap()
+                        appState.isChatPresented = true
+                    }
+
+                    // Tour Achievements
+                    DiscoverCard(
+                        icon: "trophy.fill",
+                        title: "Achievements",
+                        subtitle: "Track your Cape Cod journey",
+                        gradientColors: [Color.capeCod.duneGrass, Color(hex: 0x7EC8B8)]
+                    ) {
+                        CodHaptic.tap()
+                        showAchievements = true
+                    }
+                }
             }
         }
     }
@@ -314,6 +376,58 @@ private struct ConversationRow: View {
             label: "\(conversation.title), \(conversation.updatedAt.formatted(.relative(presentation: .named)))",
             hint: "Double tap to continue conversation"
         )
+    }
+}
+
+// MARK: - Discover Card
+
+struct DiscoverCard: View {
+    let icon: String
+    let title: String
+    let subtitle: String
+    let gradientColors: [Color]
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: CodSpacing.sm) {
+                ZStack {
+                    Circle()
+                        .fill(.white.opacity(0.2))
+                        .frame(width: 44, height: 44)
+
+                    Image(systemName: icon)
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(.white)
+                }
+
+                Spacer()
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundStyle(.white)
+
+                    Text(subtitle)
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(.white.opacity(0.75))
+                        .lineLimit(2)
+                }
+            }
+            .frame(width: 150, height: 150)
+            .padding(CodSpacing.cardPadding)
+            .background(
+                LinearGradient(
+                    colors: gradientColors,
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .clipShape(RoundedRectangle(cornerRadius: CodRadius.card, style: .continuous))
+            .codShadow(.card)
+        }
+        .buttonStyle(CodButtonPressStyle(variant: .ghost))
+        .codAccessibleButton(title, hint: subtitle)
     }
 }
 

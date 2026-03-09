@@ -12,6 +12,8 @@ struct ActiveTourView: View {
     @State private var showExitConfirmation = false
     @State private var storyPlayer: StoryPlayerViewModel?
     @State private var cameraPosition: MapCameraPosition = .automatic
+    @State private var showQA = false
+    @State private var showInfoCard = false
 
     private var stops: [PointOfInterest] {
         tour.resolvedStops(from: BundledContent.allPOIs)
@@ -77,6 +79,20 @@ struct ActiveTourView: View {
             }
             .sheet(item: $storyPlayer) { player in
                 StoryPlayerView(viewModel: player)
+            }
+            .sheet(isPresented: $showQA) {
+                if let stop = currentStop {
+                    TourStopQAView(poi: stop)
+                        .presentationDetents([.medium, .large])
+                        .presentationDragIndicator(.visible)
+                }
+            }
+            .sheet(isPresented: $showInfoCard) {
+                if let stop = currentStop {
+                    TourStopInfoCard(poi: stop)
+                        .presentationDetents([.medium, .large])
+                        .presentationDragIndicator(.visible)
+                }
             }
             .onChange(of: currentStopIndex) {
                 focusOnCurrentStop()
@@ -213,6 +229,25 @@ struct ActiveTourView: View {
                 .foregroundStyle(Color.capeCod.textSecondary)
                 .lineLimit(3)
 
+            // Quick action chips
+            HStack(spacing: CodSpacing.sm) {
+                stopQuickAction(icon: "questionmark.bubble.fill", label: "Q&A") {
+                    CodHaptic.tap()
+                    showQA = true
+                }
+                stopQuickAction(icon: "info.circle.fill", label: "Info") {
+                    CodHaptic.tap()
+                    showInfoCard = true
+                }
+                if !stop.facts.isEmpty {
+                    stopQuickAction(icon: "lightbulb.fill", label: "Facts") {
+                        CodHaptic.light()
+                        showInfoCard = true
+                    }
+                }
+                Spacer()
+            }
+
             // Action buttons
             HStack(spacing: CodSpacing.md) {
                 CodButton("Get Directions", variant: .secondary, icon: "arrow.triangle.turn.up.right.diamond.fill") {
@@ -242,6 +277,26 @@ struct ActiveTourView: View {
             }
         }
         .padding(CodSpacing.cardPadding)
+    }
+
+    // MARK: - Quick Action Chip
+
+    private func stopQuickAction(icon: String, label: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: CodSpacing.xs) {
+                Image(systemName: icon)
+                    .font(.system(size: 12))
+                Text(label)
+                    .font(.system(size: 11, weight: .medium))
+            }
+            .foregroundStyle(Color.capeCod.oceanBlue)
+            .padding(.horizontal, CodSpacing.sm + 2)
+            .padding(.vertical, CodSpacing.xs + 2)
+            .background(Color.capeCod.oceanBlue.opacity(0.08))
+            .clipShape(Capsule())
+        }
+        .buttonStyle(CodButtonPressStyle(variant: .ghost))
+        .codAccessibleButton(label)
     }
 
     // MARK: - Tour Complete

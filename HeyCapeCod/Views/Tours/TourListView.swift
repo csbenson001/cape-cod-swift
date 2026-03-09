@@ -4,6 +4,8 @@ struct TourListView: View {
     @State private var selectedCategory: TourCategory?
     @State private var searchText = ""
     @State private var showCustomBuilder = false
+    @State private var showAchievements = false
+    @State private var showTellMeAStory = false
 
     /// Categories to show in the filter bar (exclude custom since it's for AI-generated only)
     private var visibleCategories: [TourCategory] {
@@ -39,8 +41,11 @@ struct TourListView: View {
                     // Search
                     tourSearchBar
 
-                    // AI Tour Builder CTA
+                    // Quick actions row
                     if selectedCategory == nil && searchText.isEmpty {
+                        tourQuickActions
+
+                        // AI Tour Builder CTA
                         aiTourBuilderCard
                     }
 
@@ -73,6 +78,16 @@ struct TourListView: View {
             }
             .sheet(isPresented: $showCustomBuilder) {
                 CustomTourBuilderView()
+            }
+            .sheet(isPresented: $showAchievements) {
+                NavigationStack {
+                    TourAchievementsView()
+                }
+            }
+            .sheet(isPresented: $showTellMeAStory) {
+                NavigationStack {
+                    TellMeAStoryView()
+                }
             }
         }
     }
@@ -120,6 +135,51 @@ struct TourListView: View {
             .adaptiveCardStyle()
         }
         .buttonStyle(CodButtonPressStyle(variant: .ghost))
+        .padding(.horizontal, CodSpacing.screenEdge)
+    }
+
+    // MARK: - Quick Actions
+
+    private var tourQuickActions: some View {
+        HStack(spacing: CodSpacing.md) {
+            Button {
+                CodHaptic.tap()
+                showTellMeAStory = true
+            } label: {
+                HStack(spacing: CodSpacing.sm) {
+                    Image(systemName: "book.and.wreath.fill")
+                        .font(.system(size: 16))
+                    Text("Stories")
+                        .codTextStyle(.label)
+                }
+                .foregroundStyle(Color.capeCod.sunsetOrange)
+                .padding(.horizontal, CodSpacing.md)
+                .padding(.vertical, CodSpacing.sm + 2)
+                .background(Color.capeCod.sunsetOrange.opacity(0.1))
+                .clipShape(Capsule())
+            }
+            .buttonStyle(CodButtonPressStyle(variant: .ghost))
+
+            Button {
+                CodHaptic.tap()
+                showAchievements = true
+            } label: {
+                HStack(spacing: CodSpacing.sm) {
+                    Image(systemName: "trophy.fill")
+                        .font(.system(size: 16))
+                    Text("Achievements")
+                        .codTextStyle(.label)
+                }
+                .foregroundStyle(Color.capeCod.duneGrass)
+                .padding(.horizontal, CodSpacing.md)
+                .padding(.vertical, CodSpacing.sm + 2)
+                .background(Color.capeCod.duneGrass.opacity(0.1))
+                .clipShape(Capsule())
+            }
+            .buttonStyle(CodButtonPressStyle(variant: .ghost))
+
+            Spacer()
+        }
         .padding(.horizontal, CodSpacing.screenEdge)
     }
 
