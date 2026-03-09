@@ -29,6 +29,8 @@ struct ProfileView: View {
                 aboutSection
                 signOutSection
             }
+            .scrollContentBackground(.hidden)
+            .background(Color.capeCod.background)
             .navigationTitle("Profile")
             .sheet(isPresented: $showingSubscription) {
                 NavigationStack {

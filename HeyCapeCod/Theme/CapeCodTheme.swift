@@ -34,7 +34,7 @@ struct CapeCodColors {
     let driftwood = Color(light: Color(hex: 0xA69279), dark: Color(hex: 0x8C7E6A))
 
     /// Shell White — primary light background (clean white)
-    let shellWhite = Color(light: .white, dark: Color(hex: 0x111D2B))
+    let shellWhite = Color(light: Color(hex: 0xFFFFFF), dark: Color(hex: 0x111D2B))
 
     /// Fog — secondary light background, card surfaces
     let fog = Color(light: Color(hex: 0xF5F5F7), dark: Color(hex: 0x162233))
@@ -62,7 +62,7 @@ struct CapeCodColors {
     var background: Color { shellWhite }
     var surface: Color { fog }
     var surfaceElevated: Color {
-        Color(light: .white, dark: Color(hex: 0x1C2E42))
+        Color(light: Color(hex: 0xFFFFFF), dark: Color(hex: 0x1C2E42))
     }
 
     var textPrimary: Color {

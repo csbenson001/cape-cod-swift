@@ -36,6 +36,15 @@ struct HeyCapeCodApp: App {
     }
 
     private func configureApp() {
+        // Set navigation bar to white background globally
+        let navAppearance = UINavigationBarAppearance()
+        navAppearance.configureWithOpaqueBackground()
+        navAppearance.backgroundColor = .white
+        navAppearance.shadowColor = UIColor.black.withAlphaComponent(0.04)
+        UINavigationBar.appearance().standardAppearance = navAppearance
+        UINavigationBar.appearance().scrollEdgeAppearance = navAppearance
+        UINavigationBar.appearance().compactAppearance = navAppearance
+
         // Configure URL cache for network responses (50MB memory, 200MB disk)
         URLCache.shared = URLCache(
             memoryCapacity: 50 * 1024 * 1024,

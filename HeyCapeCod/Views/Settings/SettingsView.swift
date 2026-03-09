@@ -198,6 +198,8 @@ struct SettingsView: View {
                 }
                 #endif
             }
+            .scrollContentBackground(.hidden)
+            .background(Color.capeCod.background)
             .navigationTitle("Settings")
             .sheet(isPresented: $showingDesignSystem) {
                 NavigationStack {

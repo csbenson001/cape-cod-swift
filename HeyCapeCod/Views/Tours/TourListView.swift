@@ -197,20 +197,23 @@ struct TourListView: View {
                     .foregroundStyle(Color.capeCod.sandbarYellow)
 
                     Text("Lighthouse Trail")
-                        .codTextStyle(.heroTitle)
+                        .font(.system(size: 34, weight: .bold, design: .rounded))
+                        .tracking(-0.5)
                         .foregroundStyle(.white)
 
                     Text("Visit 3 iconic lighthouses across the Cape")
-                        .codTextStyle(.body)
-                        .foregroundStyle(.white.opacity(0.7))
+                        .font(.system(size: 15, weight: .regular))
+                        .foregroundStyle(.white.opacity(0.8))
 
                     HStack(spacing: CodSpacing.md) {
                         Label("3-4 hrs", systemImage: "clock")
                         Label("65 mi", systemImage: "car")
                         Label("3 stops", systemImage: "mappin.circle")
                     }
-                    .codTextStyle(.label)
-                    .foregroundStyle(.white.opacity(0.6))
+                    .font(.system(size: 11, weight: .medium))
+                    .tracking(1.5)
+                    .textCase(.uppercase)
+                    .foregroundStyle(.white.opacity(0.7))
                 }
                 .padding(CodSpacing.cardPadding + 4)
             }
