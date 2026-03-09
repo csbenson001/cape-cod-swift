@@ -74,7 +74,7 @@ enum StoryChapterService {
         }
 
         // Ensure the last chapter's endProgress is exactly 1.0
-        if var last = chapters.last {
+        if let last = chapters.last {
             chapters[chapters.count - 1] = StoryChapter(
                 id: last.id,
                 title: last.title,
@@ -895,8 +895,8 @@ struct StoryTranscriptView: View {
             // Matched text
             let originalMatch = text[range]
             result = result + Text(originalMatch)
-                .foregroundColor(Color.capeCod.deepNavy)
-                .background(Color.capeCod.sandbarYellow)
+                .foregroundColor(Color.capeCod.sandbarYellow)
+                .bold()
 
             currentIndex = range.upperBound
         }
