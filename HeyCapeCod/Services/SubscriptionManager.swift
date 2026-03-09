@@ -38,8 +38,10 @@ final class SubscriptionManager {
     private var updateListenerTask: Task<Void, Never>?
 
     private init() {
-        updateListenerTask = listenForTransactions()
-        Task { await loadProducts() }
+        Task { @MainActor [weak self] in
+            self?.updateListenerTask = self?.listenForTransactions()
+            await self?.loadProducts()
+        }
     }
 
     // MARK: - Load Products

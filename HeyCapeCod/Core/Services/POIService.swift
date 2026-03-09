@@ -22,15 +22,18 @@ final class POIService {
     private var cache: POICacheManager { POICacheManager.shared }
 
     private init() {
-        // Tier 1: Try SwiftData cache first
-        let cached = cache.loadCachedPOIs()
-        if !cached.isEmpty {
-            allPOIs = cached
-            print("💾 Loaded \(cached.count) POIs from cache")
-        } else {
-            // Tier 3: Fall back to bundled content
-            allPOIs = BundledContent.allPOIs.map { $0.toPOI() }
-            print("📦 Using bundled content (\(allPOIs.count) POIs)")
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            // Tier 1: Try SwiftData cache first
+            let cached = self.cache.loadCachedPOIs()
+            if !cached.isEmpty {
+                self.allPOIs = cached
+                print("💾 Loaded \(cached.count) POIs from cache")
+            } else {
+                // Tier 3: Fall back to bundled content
+                self.allPOIs = BundledContent.allPOIs.map { $0.toPOI() }
+                print("📦 Using bundled content (\(self.allPOIs.count) POIs)")
+            }
         }
     }
 
