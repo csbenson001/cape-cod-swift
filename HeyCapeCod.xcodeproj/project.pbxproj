@@ -100,6 +100,19 @@
 		D43CF9026ED9D277F109E5C1 /* SwiftUI.framework */ = {isa = PBXBuildFile; fileRef = C367390B9D1A74C177797046; };
 		CHAT01A1B2C3D4E5F6A7B8C9D0 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CHAT02A1B2C3D4E5F6A7B8C9D0; };
 		PROF01A1B2C3D4E5F6A7B8C9D0 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = PROF02A1B2C3D4E5F6A7B8C9D0; };
+		TOUR01A1B2C3D4E5F6A7B8C901 /* GuidedTour.swift in Sources */ = {isa = PBXBuildFile; fileRef = TOUR02A1B2C3D4E5F6A7B8C901; };
+		TOUR01A1B2C3D4E5F6A7B8C902 /* TourListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = TOUR02A1B2C3D4E5F6A7B8C902; };
+		TOUR01A1B2C3D4E5F6A7B8C903 /* TourDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = TOUR02A1B2C3D4E5F6A7B8C903; };
+		TOUR01A1B2C3D4E5F6A7B8C904 /* ActiveTourView.swift in Sources */ = {isa = PBXBuildFile; fileRef = TOUR02A1B2C3D4E5F6A7B8C904; };
+		TOUR01A1B2C3D4E5F6A7B8C905 /* CustomTourBuilderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = TOUR02A1B2C3D4E5F6A7B8C905; };
+		TOUR01A1B2C3D4E5F6A7B8C906 /* TourGeneratorService.swift in Sources */ = {isa = PBXBuildFile; fileRef = TOUR02A1B2C3D4E5F6A7B8C906; };
+		REST01A1B2C3D4E5F6A7B8C901 /* Restaurant.swift in Sources */ = {isa = PBXBuildFile; fileRef = REST02A1B2C3D4E5F6A7B8C901; };
+		REST01A1B2C3D4E5F6A7B8C902 /* Review.swift in Sources */ = {isa = PBXBuildFile; fileRef = REST02A1B2C3D4E5F6A7B8C902; };
+		REST01A1B2C3D4E5F6A7B8C903 /* ReviewService.swift in Sources */ = {isa = PBXBuildFile; fileRef = REST02A1B2C3D4E5F6A7B8C903; };
+		REST01A1B2C3D4E5F6A7B8C904 /* BundledRestaurants.swift in Sources */ = {isa = PBXBuildFile; fileRef = REST02A1B2C3D4E5F6A7B8C904; };
+		REST01A1B2C3D4E5F6A7B8C905 /* RestaurantListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = REST02A1B2C3D4E5F6A7B8C905; };
+		REST01A1B2C3D4E5F6A7B8C906 /* RestaurantDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = REST02A1B2C3D4E5F6A7B8C906; };
+		REST01A1B2C3D4E5F6A7B8C907 /* WriteReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = REST02A1B2C3D4E5F6A7B8C907; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -220,6 +233,19 @@
 		C367390B9D1A74C177797046 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		CHAT02A1B2C3D4E5F6A7B8C9D0 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 		PROF02A1B2C3D4E5F6A7B8C9D0 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		TOUR02A1B2C3D4E5F6A7B8C901 /* GuidedTour.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuidedTour.swift; sourceTree = "<group>"; };
+		TOUR02A1B2C3D4E5F6A7B8C902 /* TourListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TourListView.swift; sourceTree = "<group>"; };
+		TOUR02A1B2C3D4E5F6A7B8C903 /* TourDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TourDetailView.swift; sourceTree = "<group>"; };
+		TOUR02A1B2C3D4E5F6A7B8C904 /* ActiveTourView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveTourView.swift; sourceTree = "<group>"; };
+		TOUR02A1B2C3D4E5F6A7B8C905 /* CustomTourBuilderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTourBuilderView.swift; sourceTree = "<group>"; };
+		TOUR02A1B2C3D4E5F6A7B8C906 /* TourGeneratorService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TourGeneratorService.swift; sourceTree = "<group>"; };
+		REST02A1B2C3D4E5F6A7B8C901 /* Restaurant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Restaurant.swift; sourceTree = "<group>"; };
+		REST02A1B2C3D4E5F6A7B8C902 /* Review.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Review.swift; sourceTree = "<group>"; };
+		REST02A1B2C3D4E5F6A7B8C903 /* ReviewService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewService.swift; sourceTree = "<group>"; };
+		REST02A1B2C3D4E5F6A7B8C904 /* BundledRestaurants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundledRestaurants.swift; sourceTree = "<group>"; };
+		REST02A1B2C3D4E5F6A7B8C905 /* RestaurantListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestaurantListView.swift; sourceTree = "<group>"; };
+		REST02A1B2C3D4E5F6A7B8C906 /* RestaurantDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestaurantDetailView.swift; sourceTree = "<group>"; };
+		REST02A1B2C3D4E5F6A7B8C907 /* WriteReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WriteReviewView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -360,6 +386,7 @@
 			isa = PBXGroup;
 			children = (
 				C0CED249E5F4FE3C64B2B31E,
+				REST02A1B2C3D4E5F6A7B8C904,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -378,9 +405,12 @@
 				2EB20B42CD8DC8FFB0E81B48,
 				26129CBE7D711C9342F28B9C,
 				C04DCB939F0385FC7F2B9183,
+				TOUR02A1B2C3D4E5F6A7B8C901,
 				80EB6F2AADDC18590EC2D3F2,
 				DA94715CA09C3B13B8D3036E,
 				B2DA29A836217E9B3CCB9D26,
+				REST02A1B2C3D4E5F6A7B8C901,
+				REST02A1B2C3D4E5F6A7B8C902,
 				DFB129A6AF4B58BAC79A3E85,
 				12B5B59661CDE72E30610113,
 				4B8DCA86CEC341CC1B749ADD,
@@ -404,8 +434,10 @@
 				00B575C9D23C13B6D51842FA,
 				C8887D0F9208AEBDFCEFA25D,
 				D9513DC8DAACBFEAAD431C35,
+				REST02A1B2C3D4E5F6A7B8C903,
 				25D7F2090018BB671A9F3F5A,
 				9026208FE9F7C94AB40A644A,
+				TOUR02A1B2C3D4E5F6A7B8C906,
 				B2652A08523DCCA773419824,
 				F45A2680F9877934BA0FE783,
 				DED916591EFE1DD790219E73,
@@ -493,11 +525,13 @@
 				7C369CA22B2C8B8D5105991F,
 				CHATGRPA1B2C3D4E5F6A7B8C9,
 				EB13FEB1C19579B12216072B,
+				DINEGRPA1B2C3D4E5F6A7B8C9,
 				983C29E1C16A34C8468F0A87,
 				EC1336E40F9F3EE8E1BBB862,
 				PROFGRPA1B2C3D4E5F6A7B8C9,
 				58862A849C6E29BCA3B8BE17,
 				DA6734CB137DF8CB9AEF0641,
+				TOURGRPA1B2C3D4E5F6A7B8C9,
 				BBD9BE5E99E31DED05E90B4A,
 				38533C2C8FD8E2C195A1CC8E,
 			);
@@ -518,6 +552,27 @@
 				PROF02A1B2C3D4E5F6A7B8C9D0,
 			);
 			path = Profile;
+			sourceTree = "<group>";
+		};
+		TOURGRPA1B2C3D4E5F6A7B8C9 /* Tours */ = {
+			isa = PBXGroup;
+			children = (
+				TOUR02A1B2C3D4E5F6A7B8C902,
+				TOUR02A1B2C3D4E5F6A7B8C903,
+				TOUR02A1B2C3D4E5F6A7B8C904,
+				TOUR02A1B2C3D4E5F6A7B8C905,
+			);
+			path = Tours;
+			sourceTree = "<group>";
+		};
+		DINEGRPA1B2C3D4E5F6A7B8C9 /* Dining */ = {
+			isa = PBXGroup;
+			children = (
+				REST02A1B2C3D4E5F6A7B8C905,
+				REST02A1B2C3D4E5F6A7B8C906,
+				REST02A1B2C3D4E5F6A7B8C907,
+			);
+			path = Dining;
 			sourceTree = "<group>";
 		};
 		EB13FEB1C19579B12216072B /* Conversation */ = {
@@ -755,6 +810,19 @@
 			files = (
 				CHAT01A1B2C3D4E5F6A7B8C9D0,
 				PROF01A1B2C3D4E5F6A7B8C9D0,
+				TOUR01A1B2C3D4E5F6A7B8C901,
+				TOUR01A1B2C3D4E5F6A7B8C902,
+				TOUR01A1B2C3D4E5F6A7B8C903,
+				TOUR01A1B2C3D4E5F6A7B8C904,
+				TOUR01A1B2C3D4E5F6A7B8C905,
+				TOUR01A1B2C3D4E5F6A7B8C906,
+				REST01A1B2C3D4E5F6A7B8C901,
+				REST01A1B2C3D4E5F6A7B8C902,
+				REST01A1B2C3D4E5F6A7B8C903,
+				REST01A1B2C3D4E5F6A7B8C904,
+				REST01A1B2C3D4E5F6A7B8C905,
+				REST01A1B2C3D4E5F6A7B8C906,
+				REST01A1B2C3D4E5F6A7B8C907,
 				746F9C8CC41F47C614821E6A,
 				F9A24B1640E4F84B3EC384E2,
 				2F2268FC0102EEA257A129C1,
