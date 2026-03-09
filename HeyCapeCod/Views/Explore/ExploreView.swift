@@ -151,12 +151,14 @@ private struct CategoryChip: View {
                 Image(systemName: category.icon)
                     .font(.caption)
                 Text(category.displayName)
-                    .codTextStyle(.label)
+                    .font(.system(size: 11, weight: .medium))
+                    .tracking(1.5)
+                    .textCase(.uppercase)
             }
+            .foregroundStyle(isSelected ? .white : Color.capeCod.textPrimary)
             .padding(.horizontal, CodSpacing.md)
             .padding(.vertical, CodSpacing.sm)
             .background(isSelected ? Color.capeCod.oceanBlue : Color.capeCod.surfaceElevated)
-            .foregroundStyle(isSelected ? .white : Color.capeCod.textPrimary)
             .clipShape(Capsule())
         }
         .buttonStyle(CodButtonPressStyle(variant: .ghost))

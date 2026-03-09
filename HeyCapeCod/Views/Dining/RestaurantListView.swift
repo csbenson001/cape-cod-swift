@@ -97,11 +97,13 @@ struct RestaurantListView: View {
             CodHaptic.selection()
         } label: {
             Text(label)
-                .codTextStyle(.label)
+                .font(.system(size: 11, weight: .medium))
+                .tracking(1.5)
+                .textCase(.uppercase)
+                .foregroundStyle(selectedCuisine == cuisine ? .white : Color.capeCod.textPrimary)
                 .padding(.horizontal, CodSpacing.md)
                 .padding(.vertical, CodSpacing.sm)
                 .background(selectedCuisine == cuisine ? Color.capeCod.oceanBlue : Color.capeCod.surfaceElevated)
-                .foregroundStyle(selectedCuisine == cuisine ? .white : Color.capeCod.textPrimary)
                 .clipShape(Capsule())
         }
         .buttonStyle(CodButtonPressStyle(variant: .ghost))
