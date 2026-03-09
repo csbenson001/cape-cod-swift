@@ -33,11 +33,11 @@ struct CapeCodColors {
     /// Driftwood — secondary text, subtle borders
     let driftwood = Color(light: Color(hex: 0xA69279), dark: Color(hex: 0x8C7E6A))
 
-    /// Shell White — primary light background (warm, not stark white)
-    let shellWhite = Color(light: Color(hex: 0xFAF6F1), dark: Color(hex: 0x111D2B))
+    /// Shell White — primary light background (clean white)
+    let shellWhite = Color(light: .white, dark: Color(hex: 0x111D2B))
 
     /// Fog — secondary light background, card surfaces
-    let fog = Color(light: Color(hex: 0xF0EDE8), dark: Color(hex: 0x162233))
+    let fog = Color(light: Color(hex: 0xF5F5F7), dark: Color(hex: 0x162233))
 
     // MARK: - Semantic / Nature Colors
 
@@ -79,9 +79,9 @@ struct CapeCodColors {
     var primaryText: Color { textPrimary }
     var secondaryText: Color { textSecondary }
 
-    /// Subtle border for dark mode cards (replaces shadows which don't read well on dark)
+    /// Subtle border for cards (shadow + border in light, border-only in dark)
     var cardBorder: Color {
-        Color(light: Color(hex: 0xA69279).opacity(0.15), dark: .white.opacity(0.08))
+        Color(light: Color(hex: 0x000000).opacity(0.06), dark: .white.opacity(0.08))
     }
 
     /// Image overlay gradient base color — navy instead of pure black for warmth
@@ -195,7 +195,7 @@ struct AdaptiveCardStyle: ViewModifier {
                 .codShadow(shadow)
                 .overlay(
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .strokeBorder(Color.capeCod.driftwood.opacity(0.1), lineWidth: 0.5)
+                        .strokeBorder(Color.black.opacity(0.04), lineWidth: 0.5)
                 )
         }
     }

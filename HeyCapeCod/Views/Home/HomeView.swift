@@ -37,7 +37,7 @@ struct HomeView: View {
                     }
                 }
                 .padding(.horizontal, CodSpacing.screenEdge)
-                .padding(.bottom, CodSpacing.xxl)
+                .padding(.bottom, CodSpacing.tabBarClearance)
             }
             .background(Color.capeCod.background)
             .navigationBarTitleDisplayMode(.inline)

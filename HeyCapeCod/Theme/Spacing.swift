@@ -28,6 +28,8 @@ enum CodSpacing {
     static let sectionSpacing: CGFloat = 32
     /// 16pt — standard card internal padding
     static let cardPadding: CGFloat = 16
+    /// 120pt — bottom padding for tab-level scroll views (clears tab bar + FAB)
+    static let tabBarClearance: CGFloat = 120
 }
 
 // MARK: - Corner Radii

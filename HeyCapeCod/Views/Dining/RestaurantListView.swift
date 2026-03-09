@@ -48,7 +48,7 @@ struct RestaurantListView: View {
                         restaurantList
                     }
                 }
-                .padding(.bottom, CodSpacing.xxl)
+                .padding(.bottom, CodSpacing.tabBarClearance)
             }
             .background(Color.capeCod.background)
             .navigationTitle("Dining")

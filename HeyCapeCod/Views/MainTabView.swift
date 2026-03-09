@@ -51,27 +51,37 @@ struct MainTabView: View {
     // MARK: - Custom Tab Bar
 
     private var customTabBar: some View {
-        HStack(spacing: 0) {
-            tabButton(.home)
-            tabButton(.explore)
-            tabButton(.tours)
+        VStack(spacing: 0) {
+            // Floating voice FAB above the tab bar
+            HStack {
+                Spacer()
+                voiceFAB
+                    .padding(.trailing, CodSpacing.screenEdge)
+                    .padding(.bottom, CodSpacing.sm)
+            }
 
-            // Center raised action buttons (voice + chat)
-            centerActions
-                .offset(y: -CodSpacing.md)
-
-            tabButton(.dining)
-            tabButton(.profile)
+            // Tab bar
+            HStack(spacing: 0) {
+                tabButton(.home)
+                tabButton(.explore)
+                tabButton(.tours)
+                tabButton(.dining)
+                tabButton(.profile)
+            }
+            .padding(.horizontal, CodSpacing.xs)
+            .padding(.top, 10)
+            .padding(.bottom, CodSpacing.xs)
+            .background(
+                Rectangle()
+                    .fill(.ultraThinMaterial)
+                    .overlay(alignment: .top) {
+                        Rectangle()
+                            .fill(Color.capeCod.driftwood.opacity(0.12))
+                            .frame(height: 0.5)
+                    }
+                    .ignoresSafeArea(edges: .bottom)
+            )
         }
-        .padding(.horizontal, CodSpacing.sm)
-        .padding(.top, CodSpacing.sm)
-        .padding(.bottom, CodSpacing.xs)
-        .background(
-            Rectangle()
-                .fill(Color.capeCod.surfaceElevated)
-                .shadow(color: .black.opacity(0.06), radius: 12, y: -CodSpacing.xs)
-                .ignoresSafeArea(edges: .bottom)
-        )
         .codAccessible(label: "Tab bar")
     }
 
@@ -86,15 +96,15 @@ struct MainTabView: View {
             }
             CodHaptic.selection()
         } label: {
-            VStack(spacing: CodSpacing.xs) {
+            VStack(spacing: 3) {
                 Image(systemName: tab.icon)
                     .font(.system(size: 20, weight: isSelected ? .semibold : .regular))
                     .symbolVariant(isSelected ? .fill : .none)
 
                 Text(tab.title)
-                    .codTextStyle(.tabLabel)
+                    .font(.system(size: 10, weight: isSelected ? .semibold : .medium))
             }
-            .foregroundStyle(isSelected ? Color.capeCod.primary : Color.capeCod.driftwood)
+            .foregroundStyle(isSelected ? Color.capeCod.oceanBlue : Color.capeCod.driftwood)
             .frame(maxWidth: .infinity)
             .frame(minHeight: 44)
         }
@@ -104,48 +114,39 @@ struct MainTabView: View {
         )
     }
 
-    // MARK: - Center Actions (Voice + Chat)
+    // MARK: - Voice FAB
 
-    private var centerActions: some View {
-        HStack(spacing: CodSpacing.sm) {
-            // Chat button
-            Button {
-                CodHaptic.tap()
-                appState.isChatPresented = true
-            } label: {
-                ZStack {
-                    Circle()
-                        .fill(Color.capeCod.cardBackground)
-                        .frame(width: 40, height: 40)
-                        .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
-
-                    Image(systemName: "keyboard")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(Color.capeCod.oceanBlue)
-                }
-            }
-            .codAccessibleButton("Text Chat", hint: "Start a text conversation")
-
-            // Voice FAB (primary)
+    private var voiceFAB: some View {
+        Menu {
             Button {
                 CodHaptic.tap()
                 appState.isVoiceAssistantPresented = true
             } label: {
-                ZStack {
-                    Circle()
-                        .fill(Color.capeCod.oceanGradient)
-                        .frame(width: 56, height: 56)
-                        .shadow(color: Color.capeCod.oceanBlue.opacity(0.3), radius: CodSpacing.sm, y: CodSpacing.xs)
-
-                    Image(systemName: "waveform.circle.fill")
-                        .font(.system(size: 26, weight: .semibold))
-                        .foregroundStyle(.white)
-                }
+                Label("Voice Assistant", systemImage: "waveform")
             }
-            .buttonStyle(CodButtonPressStyle(variant: .primary))
-            .codAccessibleButton("Voice Assistant", hint: "Start a voice conversation")
+
+            Button {
+                CodHaptic.tap()
+                appState.isChatPresented = true
+            } label: {
+                Label("Text Chat", systemImage: "keyboard")
+            }
+        } label: {
+            ZStack {
+                Circle()
+                    .fill(Color.capeCod.oceanGradient)
+                    .frame(width: 52, height: 52)
+                    .shadow(color: Color.capeCod.oceanBlue.opacity(0.25), radius: 10, y: 4)
+
+                Image(systemName: "message.fill")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(.white)
+            }
+        } primaryAction: {
+            CodHaptic.tap()
+            appState.isVoiceAssistantPresented = true
         }
-        .frame(maxWidth: .infinity)
+        .codAccessibleButton("AI Assistant", hint: "Tap for voice, hold for options")
     }
 }
 

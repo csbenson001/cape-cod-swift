@@ -28,7 +28,7 @@ struct ExploreView: View {
                         locationsList
                     }
                 }
-                .padding(.bottom, CodSpacing.xxl)
+                .padding(.bottom, CodSpacing.tabBarClearance)
             }
             .background(Color.capeCod.background)
             .navigationTitle("Explore")

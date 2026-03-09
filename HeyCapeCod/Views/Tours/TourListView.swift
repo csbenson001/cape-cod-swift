@@ -64,7 +64,7 @@ struct TourListView: View {
                         toursList
                     }
                 }
-                .padding(.bottom, CodSpacing.xxl)
+                .padding(.bottom, CodSpacing.tabBarClearance)
             }
             .background(Color.capeCod.background)
             .navigationTitle("Tours")
