@@ -89,9 +89,31 @@ struct ActiveTourView: View {
             }
             .sheet(isPresented: $showInfoCard) {
                 if let stop = currentStop {
-                    TourStopInfoCard(poi: stop)
-                        .presentationDetents([.medium, .large])
-                        .presentationDragIndicator(.visible)
+                    TourStopInfoCard(
+                        stop: stop,
+                        stopNumber: currentStopIndex + 1,
+                        onListenTapped: {
+                            showInfoCard = false
+                            if let story = storyForCurrentMode(stop: stop) {
+                                CodHaptic.tap()
+                                let player = StoryPlayerViewModel()
+                                player.loadAndPlay(poi: stop, story: story)
+                                storyPlayer = player
+                            }
+                        },
+                        onAskTapped: {
+                            showInfoCard = false
+                            showQA = true
+                        },
+                        onDirectionsTapped: {
+                            openInMaps(stop: stop)
+                        },
+                        onShareTapped: {
+                            // Share handled by system share sheet
+                        }
+                    )
+                    .presentationDetents([.medium, .large])
+                    .presentationDragIndicator(.visible)
                 }
             }
             .onChange(of: currentStopIndex) {
