@@ -287,7 +287,7 @@ struct TourAchievementServiceTests {
     @Test("Total achievements count matches allCases")
     func testTotalAchievements() {
         let service = TourAchievementService.shared
-        #expect(service.totalAchievements == TourAchievement.allCases.count)
+        #expect(TourAchievementService.totalAchievements == TourAchievement.allCases.count)
     }
 
     @Test("Overall progress is bounded 0..1")

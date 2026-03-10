@@ -74,7 +74,7 @@ enum StoryChapterService {
         }
 
         // Ensure the last chapter's endProgress is exactly 1.0
-        if var last = chapters.last {
+        if let last = chapters.last {
             chapters[chapters.count - 1] = StoryChapter(
                 id: last.id,
                 title: last.title,
@@ -803,11 +803,7 @@ struct StoryTranscriptView: View {
             .id("chapter-header-\(chapter.id)")
 
             // Paragraphs
-            let paragraphs = chapter.content
-                .components(separatedBy: "\n\n")
-                .flatMap { $0.components(separatedBy: "\n") }
-                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-                .filter { !$0.isEmpty }
+            let paragraphs = splitParagraphs(chapter.content)
 
             ForEach(Array(paragraphs.enumerated()), id: \.offset) { paraIndex, paragraph in
                 let paragraphProgress = estimateParagraphProgress(
@@ -895,8 +891,8 @@ struct StoryTranscriptView: View {
             // Matched text
             let originalMatch = text[range]
             result = result + Text(originalMatch)
-                .foregroundColor(Color.capeCod.deepNavy)
-                .background(Color.capeCod.sandbarYellow)
+                .foregroundColor(Color.capeCod.sandbarYellow)
+                .bold()
 
             currentIndex = range.upperBound
         }
@@ -906,6 +902,16 @@ struct StoryTranscriptView: View {
         result = result + Text(remaining).foregroundColor(.white.opacity(0.55))
 
         return result
+    }
+
+    // MARK: - Paragraph Parsing
+
+    private func splitParagraphs(_ content: String) -> [String] {
+        content
+            .components(separatedBy: "\n\n")
+            .flatMap { $0.components(separatedBy: "\n") }
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
     }
 
     // MARK: - Progress Estimation
@@ -936,10 +942,7 @@ struct StoryTranscriptView: View {
     private func scrollToCurrentParagraph(proxy: ScrollViewProxy, progress: Double) {
         guard let chapter = chapters.first(where: { $0.contains(progress: progress) }) else { return }
 
-        let paragraphs = chapter.content
-            .components(separatedBy: "\n\n")
-            .flatMap { $0.components(separatedBy: "\n") }
-            .filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+        let paragraphs = splitParagraphs(chapter.content)
 
         let chapterSpan = chapter.endProgress - chapter.startProgress
         guard chapterSpan > 0 else { return }

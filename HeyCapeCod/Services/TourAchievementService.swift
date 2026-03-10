@@ -159,7 +159,7 @@ final class TourAchievementService {
     private(set) var unlockedAchievements: Set<String> = []
     var recentUnlock: TourAchievement?
 
-    private(set) var totalPOIsVisited: Int = 0
+    var totalPOIsVisited: Int { visitedPOIIds.count }
     private(set) var totalStoriesPlayed: Int = 0
     private(set) var totalToursCompleted: Int = 0
     private(set) var regionsVisited: Set<String> = []
@@ -176,7 +176,6 @@ final class TourAchievementService {
 
     private enum Keys {
         static let unlocked = "tour_achievements_unlocked"
-        static let poisVisited = "tour_achievements_pois_visited"
         static let storiesPlayed = "tour_achievements_stories_played"
         static let toursCompleted = "tour_achievements_tours_completed"
         static let regions = "tour_achievements_regions"
@@ -203,7 +202,6 @@ final class TourAchievementService {
         if let saved = defaults.stringArray(forKey: Keys.unlocked) {
             unlockedAchievements = Set(saved)
         }
-        totalPOIsVisited = defaults.integer(forKey: Keys.poisVisited)
         totalStoriesPlayed = defaults.integer(forKey: Keys.storiesPlayed)
         totalToursCompleted = defaults.integer(forKey: Keys.toursCompleted)
         if let savedRegions = defaults.stringArray(forKey: Keys.regions) {
@@ -226,7 +224,6 @@ final class TourAchievementService {
     private func saveToDefaults() {
         let defaults = UserDefaults.standard
         defaults.set(Array(unlockedAchievements), forKey: Keys.unlocked)
-        defaults.set(totalPOIsVisited, forKey: Keys.poisVisited)
         defaults.set(totalStoriesPlayed, forKey: Keys.storiesPlayed)
         defaults.set(totalToursCompleted, forKey: Keys.toursCompleted)
         defaults.set(Array(regionsVisited), forKey: Keys.regions)
@@ -246,7 +243,6 @@ final class TourAchievementService {
         guard !visitedPOIIds.contains(poiId) else { return }
 
         visitedPOIIds.insert(poiId)
-        totalPOIsVisited = visitedPOIIds.count
         regionsVisited.insert(region.rawValue)
         categoriesVisited.insert(category.rawValue)
 
@@ -381,13 +377,11 @@ final class TourAchievementService {
         unlockedAchievements.count
     }
 
-    var totalAchievements: Int {
-        TourAchievement.allCases.count
-    }
+    static let totalAchievements: Int = TourAchievement.allCases.count
 
     var overallProgress: Double {
-        guard totalAchievements > 0 else { return 0 }
-        return Double(unlockedCount) / Double(totalAchievements)
+        guard Self.totalAchievements > 0 else { return 0 }
+        return Double(unlockedCount) / Double(Self.totalAchievements)
     }
 
     func isUnlocked(_ achievement: TourAchievement) -> Bool {

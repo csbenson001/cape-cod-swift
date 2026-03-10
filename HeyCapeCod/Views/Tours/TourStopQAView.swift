@@ -95,7 +95,7 @@ final class TourStopQAViewModel {
             questions.append("Are there local artisan goods?")
             questions.append("What are the store hours?")
             questions.append("Any must-visit shops?")
-        case .town, .landmark, .lodging:
+        case .lodging:
             questions.append("What's the history of this place?")
             questions.append("What should I not miss here?")
             questions.append("Any local insider tips?")

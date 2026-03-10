@@ -23,11 +23,37 @@ final class TourIntegrationViewModel {
 
     // MARK: - Sub-Feature Sheet / Overlay States
 
-    var showQA: Bool = false
-    var showInfoCard: Bool = false
-    var showAchievements: Bool = false
-    var showChapters: Bool = false
-    var showStoryPicker: Bool = false
+    enum OverlayState: Equatable {
+        case none
+        case qa
+        case infoCard
+        case achievements
+        case chapters
+        case storyPicker
+    }
+
+    var activeOverlay: OverlayState = .none
+
+    var showQA: Bool {
+        get { activeOverlay == .qa }
+        set { activeOverlay = newValue ? .qa : .none }
+    }
+    var showInfoCard: Bool {
+        get { activeOverlay == .infoCard }
+        set { activeOverlay = newValue ? .infoCard : .none }
+    }
+    var showAchievements: Bool {
+        get { activeOverlay == .achievements }
+        set { activeOverlay = newValue ? .achievements : .none }
+    }
+    var showChapters: Bool {
+        get { activeOverlay == .chapters }
+        set { activeOverlay = newValue ? .chapters : .none }
+    }
+    var showStoryPicker: Bool {
+        get { activeOverlay == .storyPicker }
+        set { activeOverlay = newValue ? .storyPicker : .none }
+    }
 
     // MARK: - Story Player Integration
 
@@ -299,11 +325,7 @@ final class TourIntegrationViewModel {
         questionsAskedCount = 0
         totalDistanceTraveled = 0
         newlyUnlockedAchievements = []
-        showQA = false
-        showInfoCard = false
-        showAchievements = false
-        showChapters = false
-        showStoryPicker = false
+        activeOverlay = .none
     }
 
     // MARK: - Private Helpers
