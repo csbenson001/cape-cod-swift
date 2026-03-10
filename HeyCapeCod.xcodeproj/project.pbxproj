@@ -29,6 +29,8 @@
 		0F83900F2F5F15D80005F926 /* TourDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F8390052F5F15D80005F926 /* TourDetailView.swift */; };
 		0F8390102F5F15D80005F926 /* StoryChapterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F8390032F5F15D80005F926 /* StoryChapterView.swift */; };
 		0F8390112F5F15D80005F926 /* TourStopInfoCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F8390072F5F15D80005F926 /* TourStopInfoCard.swift */; };
+		0F8390132F5F33330005F926 /* TourAchievementService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F8390122F5F33330005F926 /* TourAchievementService.swift */; };
+		0F8390152F5F33760005F926 /* StoryPersonaService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F8390142F5F33760005F926 /* StoryPersonaService.swift */; };
 		158A26965EFCAF769A9CD960 /* Tide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12B5B59661CDE72E30610113 /* Tide.swift */; };
 		18387B04980747E7DF899786 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 354402D86CA689872EBE615F /* WidgetKit.framework */; };
 		1A2B3C4D5E6F7A8B9C0D1E2F /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F1E0D9C8B7A6F5E4D3C2B1A /* ChatView.swift */; };
@@ -157,6 +159,8 @@
 		0F8390062F5F15D80005F926 /* TourListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TourListView.swift; sourceTree = "<group>"; };
 		0F8390072F5F15D80005F926 /* TourStopInfoCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TourStopInfoCard.swift; sourceTree = "<group>"; };
 		0F8390082F5F15D80005F926 /* TourStopQAView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TourStopQAView.swift; sourceTree = "<group>"; };
+		0F8390122F5F33330005F926 /* TourAchievementService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TourAchievementService.swift; sourceTree = "<group>"; };
+		0F8390142F5F33760005F926 /* StoryPersonaService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryPersonaService.swift; sourceTree = "<group>"; };
 		10BFF3231003541A17880F8C /* HeyCapeCodTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeyCapeCodTests.swift; sourceTree = "<group>"; };
 		110A337324771C02F46E610E /* HeyCapeCodUITestsExpanded.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeyCapeCodUITestsExpanded.swift; sourceTree = "<group>"; };
 		12B5B59661CDE72E30610113 /* Tide.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tide.swift; sourceTree = "<group>"; };
@@ -691,8 +695,10 @@
 				00B575C9D23C13B6D51842FA /* LocationManager.swift */,
 				C8887D0F9208AEBDFCEFA25D /* LocationService.swift */,
 				D9513DC8DAACBFEAAD431C35 /* PaywallManager.swift */,
+				0F8390142F5F33760005F926 /* StoryPersonaService.swift */,
 				25D7F2090018BB671A9F3F5A /* SubscriptionManager.swift */,
 				9026208FE9F7C94AB40A644A /* TideService.swift */,
+				0F8390122F5F33330005F926 /* TourAchievementService.swift */,
 				B2652A08523DCCA773419824 /* TrafficService.swift */,
 				F45A2680F9877934BA0FE783 /* WeatherService.swift */,
 				DED916591EFE1DD790219E73 /* Voice */,
@@ -882,6 +888,7 @@
 				50FC99E3228CDCFDD98F429D /* SubscriptionManager.swift in Sources */,
 				5CCA7798FB38D1F7ED351735 /* TideService.swift in Sources */,
 				0F83900A2F5F15D80005F926 /* ActiveTourView.swift in Sources */,
+				0F8390152F5F33760005F926 /* StoryPersonaService.swift in Sources */,
 				0F83900B2F5F15D80005F926 /* TourAchievementsView.swift in Sources */,
 				0F83900C2F5F15D80005F926 /* TourStopQAView.swift in Sources */,
 				0F83900D2F5F15D80005F926 /* CustomTourBuilderView.swift in Sources */,
@@ -933,6 +940,7 @@
 				8077AA4ADB6AB6199ED9081B /* SettingsView.swift in Sources */,
 				F74F1E3F8295397629EC4D70 /* SubscriptionView.swift in Sources */,
 				06970492E07D5BE4DAEF2798 /* SplashScreenView.swift in Sources */,
+				0F8390132F5F33330005F926 /* TourAchievementService.swift in Sources */,
 				2C5D77198E04990871020E8C /* TrafficView.swift in Sources */,
 				4A64A38A071350418E32C499 /* BeachConditionsView.swift in Sources */,
 				1E055F2936974821F4B289B6 /* TideChartView.swift in Sources */,
