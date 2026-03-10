@@ -82,7 +82,7 @@ struct ActiveTourView: View {
             }
             .sheet(isPresented: $showQA) {
                 if let stop = currentStop {
-                    TourStopQAView(poi: stop)
+                    TourStopQAView(viewModel: TourStopQAViewModel(poi: stop))
                         .presentationDetents([.medium, .large])
                         .presentationDragIndicator(.visible)
                 }
