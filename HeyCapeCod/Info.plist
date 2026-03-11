@@ -44,6 +44,12 @@
 	<string>Hey Cape Cod uses the microphone for voice conversations with your AI travel assistant.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Hey Cape Cod uses speech recognition to understand your voice questions about Cape Cod.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>instagram-stories</string>
+		<string>fb</string>
+		<string>snssdk1233</string>
+	</array>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>UIBackgroundModes</key>

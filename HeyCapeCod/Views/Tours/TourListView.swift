@@ -147,7 +147,7 @@ struct TourListView: View {
                 showTellMeAStory = true
             } label: {
                 HStack(spacing: CodSpacing.sm) {
-                    Image(systemName: "book.and.wreath.fill")
+                    Image(systemName: "book.closed.fill")
                         .font(.system(size: 16))
                     Text("Stories")
                         .codTextStyle(.label)

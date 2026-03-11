@@ -8,6 +8,8 @@ final class ConversationViewModel {
     var isProcessing = false
     var isListening = false
     var error: Error?
+    var detectedPreference: DetectedPreference?
+    var showMemorySuggestion = false
 
     // Live context summaries
     var weatherSummary: String?
@@ -110,6 +112,7 @@ final class ConversationViewModel {
             }
             conversation.messages[streamIndex].isStreaming = false
             conversation.updatedAt = .now
+            checkForMemoryExtraction()
         } catch {
             conversation.messages.removeLast()
             self.error = error
@@ -154,5 +157,29 @@ final class ConversationViewModel {
 
     var audioLevel: Float {
         audioService.audioLevel
+    }
+
+    // MARK: - Memory Extraction
+
+    private func checkForMemoryExtraction() {
+        let manager = ChatMemoryManager.shared
+        guard manager.isEnabled else { return }
+
+        let detected = manager.extractMemoryFromConversation(conversation.messages)
+        if let first = detected.first {
+            detectedPreference = first
+            showMemorySuggestion = true
+        }
+    }
+
+    func acceptDetectedPreference() {
+        guard let pref = detectedPreference else { return }
+        ChatMemoryManager.shared.addPreference(category: pref.category, value: pref.value)
+        dismissDetectedPreference()
+    }
+
+    func dismissDetectedPreference() {
+        detectedPreference = nil
+        showMemorySuggestion = false
     }
 }

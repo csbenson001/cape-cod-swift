@@ -130,6 +130,30 @@ struct SettingsView: View {
                     Text("Subscription")
                 }
 
+                // AI Memory
+                Section("Assistant") {
+                    NavigationLink {
+                        ChatMemoryView()
+                    } label: {
+                        HStack(spacing: CodSpacing.sm) {
+                            Image(systemName: "brain")
+                                .font(.title3)
+                                .foregroundStyle(Color.capeCod.oceanBlue)
+                                .frame(width: 32)
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("AI Memory")
+                                    .codTextStyle(.body)
+                                Text(ChatMemoryManager.shared.isEnabled
+                                    ? "\(ChatMemoryManager.shared.totalPreferenceCount) saved preferences"
+                                    : "Off")
+                                    .codTextStyle(.caption)
+                                    .foregroundStyle(Color.capeCod.textSecondary)
+                            }
+                        }
+                    }
+                }
+
                 // Appearance
                 Section("Appearance") {
                     Picker("Theme", selection: Binding(
@@ -139,6 +163,34 @@ struct SettingsView: View {
                         Text("System").tag(Optional<ColorScheme>.none)
                         Text("Light").tag(Optional<ColorScheme>.some(.light))
                         Text("Dark").tag(Optional<ColorScheme>.some(.dark))
+                    }
+                }
+
+                // Offline Mode
+                Section("Offline") {
+                    NavigationLink {
+                        OfflineStatusView()
+                    } label: {
+                        HStack(spacing: CodSpacing.sm) {
+                            Image(systemName: OfflineCacheManager.shared.isOnline ? "wifi" : "wifi.slash")
+                                .font(.title3)
+                                .foregroundStyle(
+                                    OfflineCacheManager.shared.isOnline
+                                        ? Color.capeCod.duneGrass
+                                        : Color.capeCod.sunsetOrange
+                                )
+                                .frame(width: 32)
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Offline Mode")
+                                    .codTextStyle(.body)
+                                Text(OfflineCacheManager.shared.isOnline
+                                    ? "Connected"
+                                    : "Offline — using cached data")
+                                    .codTextStyle(.caption)
+                                    .foregroundStyle(Color.capeCod.textSecondary)
+                            }
+                        }
                     }
                 }
 

@@ -5,6 +5,18 @@ struct HomeView: View {
     @State private var viewModel = HomeViewModel()
     @State private var showTellMeAStory = false
     @State private var showAchievements = false
+    @State private var showBingo = false
+    @State private var showBestBeach = false
+    @State private var showBridgeTiming = false
+    @State private var showRainyDay = false
+    @State private var showPhotoStudio = false
+    @State private var showBeachStatus = false
+    @State private var showPackingList = false
+    @State private var showPassport = false
+    @State private var showHiddenGems = false
+    @State private var showTidePlanner = false
+    @State private var showTripSummary = false
+    @State private var showSharkAlert = false
 
     var body: some View {
         NavigationStack {
@@ -18,28 +30,36 @@ struct HomeView: View {
                     quickGlanceSection
                         .staggered(index: 1)
 
-                    // Discover Hub — Tell Me a Story, Chat, Achievements
-                    discoverHubSection
+                    // Shark Alert Banner
+                    SharkAlertBanner()
                         .staggered(index: 2)
+
+                    // Quick Actions — Best Beach, Bridge, Rainy Day
+                    quickActionsSection
+                        .staggered(index: 3)
+
+                    // Discover Hub — Tell Me a Story, Chat, Bingo, Achievements
+                    discoverHubSection
+                        .staggered(index: 4)
 
                     // Today on Cape Cod - personalized insights
                     todaySection
-                        .staggered(index: 3)
+                        .staggered(index: 5)
 
                     // Voice Assistant CTA
                     voiceAssistantCard
-                        .staggered(index: 4)
+                        .staggered(index: 6)
 
                     // Featured Stories
                     if !viewModel.featuredStories.isEmpty {
                         storiesSection
-                            .staggered(index: 5)
+                            .staggered(index: 7)
                     }
 
                     // Recent Conversations
                     if !viewModel.recentConversations.isEmpty {
                         recentSection
-                            .staggered(index: 6)
+                            .staggered(index: 8)
                     }
                 }
                 .padding(.horizontal, CodSpacing.screenEdge)
@@ -63,6 +83,123 @@ struct HomeView: View {
                     TourAchievementsView()
                 }
             }
+            .sheet(isPresented: $showBingo) {
+                NavigationStack {
+                    CapeCodBingoView()
+                }
+            }
+            .sheet(isPresented: $showBestBeach) {
+                NavigationStack {
+                    BestBeachNowView(
+                        weather: viewModel.weather,
+                        tideData: viewModel.tideData
+                    )
+                }
+            }
+            .sheet(isPresented: $showBridgeTiming) {
+                NavigationStack {
+                    BridgeTimingView()
+                }
+            }
+            .sheet(isPresented: $showRainyDay) {
+                NavigationStack {
+                    RainyDayView()
+                }
+            }
+            .sheet(isPresented: $showPhotoStudio) {
+                NavigationStack {
+                    PhotoStudioView()
+                }
+            }
+            .sheet(isPresented: $showBeachStatus) {
+                NavigationStack {
+                    BeachStatusView()
+                }
+            }
+            .sheet(isPresented: $showPackingList) {
+                NavigationStack {
+                    PackingListView()
+                }
+            }
+            .sheet(isPresented: $showPassport) {
+                NavigationStack {
+                    DigitalPassportView()
+                }
+            }
+            .sheet(isPresented: $showHiddenGems) {
+                NavigationStack {
+                    HiddenGemsView()
+                }
+            }
+            .sheet(isPresented: $showTidePlanner) {
+                NavigationStack {
+                    TidePlannerView()
+                }
+            }
+            .sheet(isPresented: $showTripSummary) {
+                NavigationStack {
+                    TripSummaryView()
+                }
+            }
+        }
+    }
+
+    // MARK: - Quick Actions
+
+    private var quickActionsSection: some View {
+        VStack(alignment: .leading, spacing: CodSpacing.md) {
+            Text("Right Now")
+                .codTextStyle(.sectionTitle)
+                .codAccessibleHeader("Right Now")
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: CodSpacing.sm) {
+                    QuickActionButton(
+                        icon: "beach.umbrella",
+                        title: "Best Beach",
+                        tint: Color.capeCod.oceanBlue
+                    ) {
+                        CodHaptic.tap()
+                        showBestBeach = true
+                    }
+
+                    QuickActionButton(
+                        icon: "parkingsign.circle.fill",
+                        title: "Beach Status",
+                        tint: Color.capeCod.seafoam
+                    ) {
+                        CodHaptic.tap()
+                        showBeachStatus = true
+                    }
+
+                    QuickActionButton(
+                        icon: "water.waves",
+                        title: "Tide Planner",
+                        tint: Color.capeCod.oceanBlue
+                    ) {
+                        CodHaptic.tap()
+                        showTidePlanner = true
+                    }
+
+                    QuickActionButton(
+                        icon: "car.fill",
+                        title: "Bridge",
+                        tint: Color.capeCod.duneGrass
+                    ) {
+                        CodHaptic.tap()
+                        showBridgeTiming = true
+                    }
+
+                    QuickActionButton(
+                        icon: "cloud.rain.fill",
+                        title: "Rainy Day",
+                        tint: Color.capeCod.driftwood
+                    ) {
+                        CodHaptic.tap()
+                        showRainyDay = true
+                    }
+                }
+            }
         }
     }
 
@@ -75,9 +212,20 @@ struct HomeView: View {
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: CodSpacing.md) {
+                    // Cape Cod Bingo
+                    DiscoverCard(
+                        icon: "checklist",
+                        title: "Cape Cod Bingo",
+                        subtitle: "Check off Cape Cod classics!",
+                        gradientColors: [Color.capeCod.cranberry, Color.capeCod.sunsetOrange]
+                    ) {
+                        CodHaptic.tap()
+                        showBingo = true
+                    }
+
                     // Tell Me a Story
                     DiscoverCard(
-                        icon: "book.and.wreath.fill",
+                        icon: "book.closed.fill",
                         title: "Tell Me a Story",
                         subtitle: "AI Cape Cod tales for all ages",
                         gradientColors: [Color.capeCod.sunsetOrange, Color(hex: 0xE8B94E)]
@@ -106,6 +254,61 @@ struct HomeView: View {
                     ) {
                         CodHaptic.tap()
                         showAchievements = true
+                    }
+
+                    // Photo Studio
+                    DiscoverCard(
+                        icon: "camera.fill",
+                        title: "Photo Studio",
+                        subtitle: "Cape Cod frames & stickers",
+                        gradientColors: [Color(hex: 0xE91E63), Color(hex: 0xFF6B35)]
+                    ) {
+                        CodHaptic.tap()
+                        showPhotoStudio = true
+                    }
+
+                    // Digital Passport
+                    DiscoverCard(
+                        icon: "mappin.and.ellipse",
+                        title: "Passport",
+                        subtitle: "Earn stamps & badges",
+                        gradientColors: [Color(hex: 0x9C27B0), Color(hex: 0x3F51B5)]
+                    ) {
+                        CodHaptic.tap()
+                        showPassport = true
+                    }
+
+                    // Hidden Gems
+                    DiscoverCard(
+                        icon: "sparkles",
+                        title: "Hidden Gems",
+                        subtitle: "Locals-only secrets",
+                        gradientColors: [Color(hex: 0xFFD700), Color.capeCod.sunsetOrange]
+                    ) {
+                        CodHaptic.tap()
+                        showHiddenGems = true
+                    }
+
+                    // Trip Summary
+                    DiscoverCard(
+                        icon: "square.and.arrow.up.fill",
+                        title: "Trip Summary",
+                        subtitle: "Share your Cape Cod week",
+                        gradientColors: [Color.capeCod.deepNavy, Color.capeCod.oceanBlue]
+                    ) {
+                        CodHaptic.tap()
+                        showTripSummary = true
+                    }
+
+                    // Packing List
+                    DiscoverCard(
+                        icon: "suitcase.fill",
+                        title: "Packing List",
+                        subtitle: "Smart Cape Cod packing",
+                        gradientColors: [Color(hex: 0x795548), Color(hex: 0xBCAAA4)]
+                    ) {
+                        CodHaptic.tap()
+                        showPackingList = true
                     }
                 }
             }
@@ -428,6 +631,40 @@ struct DiscoverCard: View {
         }
         .buttonStyle(CodButtonPressStyle(variant: .ghost))
         .codAccessibleButton(title, hint: subtitle)
+    }
+}
+
+// MARK: - Quick Action Button
+
+struct QuickActionButton: View {
+    let icon: String
+    let title: String
+    let tint: Color
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: CodSpacing.sm) {
+                Image(systemName: icon)
+                    .font(.system(size: 22, weight: .medium))
+                    .foregroundStyle(tint)
+                    .frame(width: 44, height: 44)
+                    .background(tint.opacity(0.12))
+                    .clipShape(RoundedRectangle(cornerRadius: CodRadius.chip, style: .continuous))
+
+                Text(title)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(Color.capeCod.textPrimary)
+                    .lineLimit(1)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, CodSpacing.md)
+            .background(Color.capeCod.surfaceElevated)
+            .clipShape(RoundedRectangle(cornerRadius: CodRadius.card, style: .continuous))
+            .adaptiveCardStyle()
+        }
+        .buttonStyle(CodButtonPressStyle(variant: .ghost))
+        .codAccessibleButton(title)
     }
 }
 

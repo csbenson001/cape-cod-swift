@@ -1149,13 +1149,13 @@ struct FeatureDiscoveryTooltip: View {
                     .rotationEffect(.degrees(0))
             }
 
-            if arrowEdge == .left {
+            if arrowEdge == .leading {
                 HStack(spacing: 0) {
                     arrowView
                         .rotationEffect(.degrees(-90))
                     cardContent
                 }
-            } else if arrowEdge == .right {
+            } else if arrowEdge == .trailing {
                 HStack(spacing: 0) {
                     cardContent
                     arrowView
@@ -1287,20 +1287,6 @@ struct IntegrationMiniPlayerBar: View {
         .onAppear {
             isVisible = viewModel.currentStory != nil
         }
-    }
-}
-
-// MARK: - TellMeAStoryView (Stub)
-
-/// Placeholder for the Tell Me a Story feature.
-/// This view is expected to exist elsewhere; this stub allows navigation compilation.
-struct TellMeAStoryView: View {
-    var body: some View {
-        Text("Tell Me a Story")
-            .codTextStyle(.heroTitle)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.capeCod.background)
-            .navigationTitle("Stories")
     }
 }
 

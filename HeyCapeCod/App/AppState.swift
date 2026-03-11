@@ -13,6 +13,20 @@ final class AppState {
     var hasCompletedOnboarding: Bool = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding") {
         didSet { UserDefaults.standard.set(hasCompletedOnboarding, forKey: "hasCompletedOnboarding") }
     }
+    var experienceMode: ExperienceMode = {
+        let raw = UserDefaults.standard.string(forKey: "experienceMode") ?? "adult"
+        return ExperienceMode(rawValue: raw) ?? .adult
+    }() {
+        didSet { UserDefaults.standard.set(experienceMode.rawValue, forKey: "experienceMode") }
+    }
+
+    /// The tabs visible for the current experience mode
+    var visibleTabs: [AppTab] { experienceMode.tabs }
+
+    /// Whether the current mode surfaces kid-friendly content
+    var isKidFriendlyContent: Bool {
+        experienceMode == .kids || experienceMode == .family
+    }
 
     // MARK: - Active State
     var activeConversation: Conversation?
@@ -38,6 +52,10 @@ enum AppTab: String, CaseIterable, Identifiable {
     case explore
     case tours
     case dining
+    case stories
+    case funZone
+    case social
+    case events
     case profile
 
     var id: String { rawValue }
@@ -48,6 +66,10 @@ enum AppTab: String, CaseIterable, Identifiable {
         case .explore: "Explore"
         case .tours: "Tours"
         case .dining: "Dining"
+        case .stories: "Stories"
+        case .funZone: "Fun Zone"
+        case .social: "Social"
+        case .events: "Events"
         case .profile: "Profile"
         }
     }
@@ -58,6 +80,10 @@ enum AppTab: String, CaseIterable, Identifiable {
         case .explore: "safari.fill"
         case .tours: "map.fill"
         case .dining: "fork.knife"
+        case .stories: "book.fill"
+        case .funZone: "star.circle.fill"
+        case .social: "camera.fill"
+        case .events: "calendar.circle.fill"
         case .profile: "person.crop.circle.fill"
         }
     }

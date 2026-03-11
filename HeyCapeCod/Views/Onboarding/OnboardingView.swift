@@ -1,16 +1,15 @@
 import SwiftUI
 
 /// 4-page onboarding flow:
-/// 1. Welcome animation with app branding
+/// 1. Welcome hero with app branding
 /// 2. Choose experience mode (kids/teen/adult/family)
-/// 3. Select interests (beaches, history, food, etc.)
-/// 4. Optional sign-in with skip
+/// 3. Select interests filtered by mode
+/// 4. Summary + ready to explore
 struct OnboardingView: View {
     @Environment(AppState.self) private var appState
     @State private var currentPage = 0
     @State private var selectedMode: ExperienceMode = .adult
     @State private var selectedInterests: Set<String> = []
-    @State private var showSignIn = false
 
     private let totalPages = 4
 
@@ -19,11 +18,27 @@ struct OnboardingView: View {
             Color.capeCod.background.ignoresSafeArea()
 
             VStack(spacing: 0) {
+                // Skip button
+                skipButton
+
+                // Page content
                 TabView(selection: $currentPage) {
-                    welcomePage.tag(0)
-                    modePage.tag(1)
-                    interestsPage.tag(2)
-                    signInPage.tag(3)
+                    OnboardingWelcomePage()
+                        .tag(0)
+                    OnboardingModePage(selectedMode: $selectedMode)
+                        .tag(1)
+                    OnboardingInterestsPage(
+                        selectedMode: selectedMode,
+                        selectedInterests: $selectedInterests
+                    )
+                    .tag(2)
+                    OnboardingReadyPage(
+                        selectedMode: selectedMode,
+                        selectedInterests: selectedInterests,
+                        onSignIn: { completeOnboarding() },
+                        onStart: { completeOnboarding() }
+                    )
+                    .tag(3)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.capeCodSpring, value: currentPage)
@@ -35,345 +50,103 @@ struct OnboardingView: View {
         }
     }
 
-    // MARK: - Page 1: Welcome
+    // MARK: - Skip Button
 
-    private var welcomePage: some View {
-        VStack(spacing: CodSpacing.xl) {
+    private var skipButton: some View {
+        HStack {
             Spacer()
-
-            Image(systemName: "beach.umbrella.fill")
-                .font(.system(size: 80))
-                .foregroundStyle(Color.capeCod.oceanGradient)
-
-            VStack(spacing: CodSpacing.md) {
-                Text("Hey Cape Cod")
-                    .codTextStyle(.heroTitle)
-
-                Text("Your AI-powered Cape Cod companion.\nDiscover stories, check tides, find the perfect beach \u{2014} all hands-free.")
-                    .codTextStyle(.body)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, CodSpacing.xl)
-            }
-
-            VStack(alignment: .leading, spacing: CodSpacing.md) {
-                featureHighlight(icon: "mic.fill", color: Color.capeCod.sunsetOrange, text: "Voice-powered conversations about Cape Cod")
-                    .staggered(index: 0, interval: 0.1)
-                featureHighlight(icon: "location.fill", color: Color.capeCod.oceanBlue, text: "GPS-triggered stories as you explore")
-                    .staggered(index: 1, interval: 0.1)
-                featureHighlight(icon: "water.waves", color: Color.capeCod.seafoam, text: "Live tides, weather, and beach conditions")
-                    .staggered(index: 2, interval: 0.1)
-                featureHighlight(icon: "car.fill", color: Color.capeCod.duneGrass, text: "Real-time bridge and traffic updates")
-                    .staggered(index: 3, interval: 0.1)
-            }
-            .padding(.horizontal, CodSpacing.xl)
-
-            Spacer()
-        }
-    }
-
-    private func featureHighlight(icon: String, color: Color, text: String) -> some View {
-        HStack(spacing: CodSpacing.md) {
-            Image(systemName: icon)
-                .font(.body)
-                .foregroundStyle(color)
-                .frame(width: 28)
-            Text(text)
-                .codTextStyle(.body)
-        }
-    }
-
-    // MARK: - Page 2: Choose Mode
-
-    private var modePage: some View {
-        VStack(spacing: CodSpacing.lg) {
-            Spacer()
-
-            VStack(spacing: CodSpacing.sm) {
-                Text("Who's exploring today?")
-                    .codTextStyle(.heroTitle)
-
-                Text("We'll tailor stories and recommendations to your group.")
-                    .codTextStyle(.body)
-                    .multilineTextAlignment(.center)
-            }
-
-            VStack(spacing: CodSpacing.md) {
-                ForEach(ExperienceMode.allCases) { mode in
-                    modeCard(mode)
-                }
-            }
-            .padding(.horizontal, CodSpacing.screenEdge)
-
-            Spacer()
-        }
-    }
-
-    private func modeCard(_ mode: ExperienceMode) -> some View {
-        let isSelected = selectedMode == mode
-
-        return HStack(spacing: CodSpacing.md) {
-            Image(systemName: modeIcon(mode))
-                .font(.title2)
-                .foregroundStyle(isSelected ? Color.capeCod.oceanBlue : Color.capeCod.driftwood)
-                .frame(width: 40)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(mode.displayName)
-                    .codTextStyle(.cardTitle)
-                Text(modeDescription(mode))
-                    .codTextStyle(.caption)
-            }
-
-            Spacer()
-
-            if isSelected {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(Color.capeCod.oceanBlue)
-                    .contentTransition(.symbolEffect(.replace))
-            }
-        }
-        .padding(CodSpacing.cardPadding)
-        .background(isSelected ? Color.capeCod.oceanBlue.opacity(0.08) : Color.capeCod.surfaceElevated)
-        .clipShape(RoundedRectangle(cornerRadius: CodRadius.card, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: CodRadius.card, style: .continuous)
-                .stroke(isSelected ? Color.capeCod.oceanBlue : .clear, lineWidth: 2)
-        )
-        .onTapGesture {
-            withAnimation(CodAnimation.quick) { selectedMode = mode }
-            CodHaptic.selection()
-        }
-        .codAccessibleCard(
-            label: "\(mode.displayName): \(modeDescription(mode))",
-            hint: isSelected ? "Currently selected" : "Double tap to select"
-        )
-    }
-
-    private func modeIcon(_ mode: ExperienceMode) -> String {
-        switch mode {
-        case .kids: "figure.child"
-        case .teen: "figure.wave"
-        case .adult: "figure.hiking"
-        case .family: "figure.2.and.child.holdinghands"
-        }
-    }
-
-    private func modeDescription(_ mode: ExperienceMode) -> String {
-        switch mode {
-        case .kids: "Fun facts, pirate stories, and nature adventures"
-        case .teen: "Cool history, local legends, and hidden gems"
-        case .adult: "In-depth history, dining tips, and local insights"
-        case .family: "Something for everyone \u{2014} balanced and engaging"
-        }
-    }
-
-    // MARK: - Page 3: Select Interests
-
-    private var interestsPage: some View {
-        VStack(spacing: CodSpacing.lg) {
-            Spacer()
-
-            VStack(spacing: CodSpacing.sm) {
-                Text("What interests you?")
-                    .codTextStyle(.heroTitle)
-
-                Text("Pick a few topics and we'll highlight what matters to you.")
-                    .codTextStyle(.body)
-                    .multilineTextAlignment(.center)
-            }
-
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: CodSpacing.sm)], spacing: CodSpacing.sm) {
-                ForEach(Interest.allCases) { interest in
-                    interestPill(interest)
-                }
-            }
-            .padding(.horizontal, CodSpacing.screenEdge)
-
-            Spacer()
-        }
-    }
-
-    private func interestPill(_ interest: Interest) -> some View {
-        let isSelected = selectedInterests.contains(interest.rawValue)
-
-        return VStack(spacing: CodSpacing.xs) {
-            Image(systemName: interest.icon)
-                .font(.title3)
-            Text(interest.displayName)
-                .codTextStyle(.label)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, CodSpacing.md)
-        .foregroundStyle(isSelected ? Color.capeCod.oceanBlue : Color.capeCod.textSecondary)
-        .background(isSelected ? Color.capeCod.oceanBlue.opacity(0.1) : Color.capeCod.surfaceElevated)
-        .clipShape(RoundedRectangle(cornerRadius: CodRadius.card, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: CodRadius.card, style: .continuous)
-                .stroke(isSelected ? Color.capeCod.oceanBlue : .clear, lineWidth: 1.5)
-        )
-        .scaleEffect(isSelected ? 1.02 : 1.0)
-        .animation(CodAnimation.bouncy, value: isSelected)
-        .onTapGesture {
-            if isSelected {
-                selectedInterests.remove(interest.rawValue)
-            } else {
-                selectedInterests.insert(interest.rawValue)
-            }
-            CodHaptic.selection()
-        }
-        .codAccessibleButton(
-            "\(interest.displayName)",
-            hint: isSelected ? "Selected. Double tap to remove." : "Double tap to add."
-        )
-    }
-
-    // MARK: - Page 4: Sign In
-
-    private var signInPage: some View {
-        VStack(spacing: CodSpacing.lg) {
-            Spacer()
-
-            Image(systemName: "person.crop.circle.badge.plus")
-                .font(.system(size: 56))
-                .foregroundStyle(Color.capeCod.oceanBlue)
-
-            VStack(spacing: CodSpacing.sm) {
-                Text("Create an Account")
-                    .codTextStyle(.heroTitle)
-
-                Text("Save your preferences, sync across devices, and track your Cape Cod adventures.")
-                    .codTextStyle(.body)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, CodSpacing.xl)
-            }
-
-            VStack(spacing: CodSpacing.md) {
-                SignInWithAppleButton {
-                    Task {
-                        try? await AuthManager.shared.signInWithApple()
-                        if let user = AuthManager.shared.currentUser {
-                            UserProfileManager.shared.loadProfile(for: user)
-                        }
-                        completeOnboarding()
-                    }
-                }
-                .frame(height: 50)
-                .clipShape(RoundedRectangle(cornerRadius: CodRadius.button, style: .continuous))
-
+            if currentPage < totalPages - 1 {
                 Button {
-                    AuthManager.shared.continueAsGuest()
-                    if let user = AuthManager.shared.currentUser {
-                        UserProfileManager.shared.loadProfile(for: user)
-                    }
-                    completeOnboarding()
+                    withAnimation(.capeCodSpring) { currentPage = totalPages - 1 }
+                    CodHaptic.light()
                 } label: {
-                    Text("Continue as Guest")
+                    Text("Skip")
                         .codTextStyle(.body)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 50)
-                        .foregroundStyle(Color.capeCod.oceanBlue)
-                        .background(Color.capeCod.surfaceElevated)
-                        .clipShape(RoundedRectangle(cornerRadius: CodRadius.button, style: .continuous))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: CodRadius.button, style: .continuous)
-                                .stroke(Color.capeCod.oceanBlue, lineWidth: 1.5)
-                        )
+                        .foregroundStyle(Color.capeCod.driftwood)
+                        .padding(.horizontal, CodSpacing.md)
+                        .padding(.vertical, CodSpacing.xs)
                 }
             }
-            .padding(.horizontal, CodSpacing.xl)
-
-            Text("You can always sign in later from Settings.")
-                .codTextStyle(.caption)
-
-            Spacer()
         }
+        .padding(.horizontal, CodSpacing.screenEdge)
+        .padding(.top, CodSpacing.xs)
+        .frame(height: 36)
     }
 
     // MARK: - Bottom Controls
 
     private var bottomControls: some View {
         HStack {
-            HStack(spacing: CodSpacing.xs) {
-                ForEach(0..<totalPages, id: \.self) { index in
-                    Capsule()
-                        .fill(index == currentPage ? Color.capeCod.oceanBlue : Color.capeCod.driftwood.opacity(0.3))
-                        .frame(width: index == currentPage ? 20 : 6, height: 6)
-                        .animation(.capeCodQuick, value: currentPage)
-                }
-            }
-            .codAccessible(label: "Page \(currentPage + 1) of \(totalPages)")
+            pageIndicator
 
             Spacer()
 
             if currentPage < totalPages - 1 {
-                HStack(spacing: CodSpacing.md) {
-                    if currentPage > 0 {
-                        Button("Skip") {
-                            withAnimation { currentPage = totalPages - 1 }
-                        }
-                        .codTextStyle(.body)
-                        .foregroundStyle(Color.capeCod.driftwood)
-                    }
-
-                    Button {
-                        withAnimation(.capeCodSpring) { currentPage += 1 }
-                        CodHaptic.light()
-                    } label: {
-                        HStack(spacing: CodSpacing.xs) {
-                            Text("Next")
-                                .codTextStyle(.cardTitle)
-                            Image(systemName: "arrow.right")
-                                .font(.system(size: 14, weight: .semibold))
-                        }
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, CodSpacing.lg)
-                        .padding(.vertical, CodSpacing.sm + 2)
-                        .background(Color.capeCod.oceanBlue)
-                        .clipShape(Capsule())
-                    }
-                    .buttonStyle(CodButtonPressStyle(variant: .primary))
-                }
+                nextButton
             }
         }
     }
 
-    // MARK: - Helpers
+    private var pageIndicator: some View {
+        HStack(spacing: CodSpacing.xs) {
+            ForEach(0..<totalPages, id: \.self) { index in
+                Capsule()
+                    .fill(index == currentPage
+                          ? Color.capeCod.oceanBlue
+                          : Color.capeCod.driftwood.opacity(0.3))
+                    .frame(width: index == currentPage ? 20 : 6, height: 6)
+                    .animation(.capeCodQuick, value: currentPage)
+            }
+        }
+        .codAccessible(label: "Page \(currentPage + 1) of \(totalPages)")
+    }
+
+    private var nextButton: some View {
+        Button {
+            withAnimation(.capeCodSpring) { currentPage += 1 }
+            CodHaptic.light()
+        } label: {
+            HStack(spacing: CodSpacing.xs) {
+                Text(currentPage == 0 ? "Get Started" : "Next")
+                    .codTextStyle(.cardTitle)
+                Image(systemName: "arrow.right")
+                    .font(.system(size: 14, weight: .semibold))
+            }
+            .foregroundStyle(.white)
+            .padding(.horizontal, CodSpacing.lg)
+            .padding(.vertical, CodSpacing.sm + 2)
+            .background(Color.capeCod.oceanBlue)
+            .clipShape(Capsule())
+        }
+        .buttonStyle(CodButtonPressStyle(variant: .primary))
+    }
+
+    // MARK: - Completion
 
     private func completeOnboarding() {
-        CodHaptic.success()
+        // Save mode to UserDefaults
+        UserDefaults.standard.set(selectedMode.rawValue, forKey: "experienceMode")
+        appState.experienceMode = selectedMode
+
+        // Save interests to UserDefaults
+        UserDefaults.standard.set(Array(selectedInterests), forKey: "selectedInterests")
+
+        // Sync to user profile if available
         if let profile = UserProfileManager.shared.currentProfile {
             profile.experienceMode = selectedMode
             profile.interests = Array(selectedInterests)
             UserProfileManager.shared.saveProfile()
         }
+
+        CodHaptic.success()
         appState.hasCompletedOnboarding = true
     }
 }
 
-// MARK: - Sign In with Apple Button
+// MARK: - Interest (legacy, used by ProfileView)
 
-private struct SignInWithAppleButton: View {
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: CodSpacing.sm) {
-                Image(systemName: "apple.logo")
-                    .font(.title3)
-                Text("Sign in with Apple")
-                    .codTextStyle(.cardTitle)
-            }
-            .frame(maxWidth: .infinity)
-            .frame(height: 50)
-            .foregroundStyle(.white)
-            .background(.black)
-        }
-        .codAccessibleButton("Sign in with Apple")
-    }
-}
-
-// MARK: - Interest
-
+/// Basic interest categories used in profile editing.
+/// For the onboarding flow, see `OnboardingInterest` in OnboardingInterestsPage.swift.
 enum Interest: String, CaseIterable, Identifiable {
     case beaches
     case history

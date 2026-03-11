@@ -4,7 +4,7 @@
   "private": true,
   "description": "Backend API for Hey Cape Cod iOS app — POIs, stories, traffic, weather, tides, AI chat, and voice relay",
   "scripts": {
-    "dev": "vercel dev",
+    
     "seed": "node scripts/seed-database.js",
     "test": "node --test tests/**/*.test.js",
     "deploy": "vercel --prod",

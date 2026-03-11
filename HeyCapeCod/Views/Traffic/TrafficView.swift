@@ -35,6 +35,10 @@ struct TrafficView: View {
                             incidentsSection(report.incidents)
                                 .staggered(index: 2)
                         }
+
+                        // Departure Advisor Link
+                        departureAdvisorLink
+                            .staggered(index: 3)
                     }
                 }
                 .padding(.horizontal, CodSpacing.screenEdge)
@@ -145,6 +149,43 @@ struct TrafficView: View {
                 .codAccessibleGroup(label: "Incident: \(incident.title). \(incident.description)")
             }
         }
+    }
+
+    // MARK: - Departure Advisor Link
+
+    private var departureAdvisorLink: some View {
+        NavigationLink {
+            DepartureAdvisorView()
+        } label: {
+            HStack(spacing: CodSpacing.md) {
+                Image(systemName: "clock.arrow.circlepath")
+                    .font(.title2)
+                    .foregroundStyle(Color.capeCod.oceanBlue)
+                    .frame(width: 44, height: 44)
+                    .background(Color.capeCod.oceanBlue.opacity(0.1))
+                    .clipShape(Circle())
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Departure Advisor")
+                        .codTextStyle(.cardTitle)
+                        .foregroundStyle(Color.capeCod.textPrimary)
+                    Text("Find the best time to leave and beat bridge traffic")
+                        .codTextStyle(.caption)
+                        .foregroundStyle(Color.capeCod.textSecondary)
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(Color.capeCod.driftwood)
+            }
+            .padding(CodSpacing.cardPadding)
+            .background(Color.capeCod.surfaceElevated)
+            .clipShape(RoundedRectangle(cornerRadius: CodRadius.card, style: .continuous))
+            .adaptiveCardStyle()
+        }
+        .buttonStyle(.plain)
     }
 
     private func congestionColor(_ level: CongestionLevel) -> Color {

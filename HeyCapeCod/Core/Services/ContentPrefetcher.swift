@@ -91,12 +91,4 @@ final class ContentPrefetcher {
     }
 }
 
-// MARK: - Cache TTL Configuration
-
-enum CacheTTL {
-    static let weather: TimeInterval = 900  // 15 minutes
-    static let traffic: TimeInterval = 300  // 5 minutes
-    static let tides: TimeInterval = 3600   // 1 hour
-    static let poi: TimeInterval = 86400    // 24 hours
-    static let buoy: TimeInterval = 1800    // 30 minutes
-}
+// MARK: - Cache TTL Configuration (moved to OfflineCacheManager.swift)

@@ -1,0 +1,252 @@
+<h2>7 Viral Features — Build Plan</h2>
+<p class="subtitle">All 6 selections + Cape Cod Photo Studio. Here's how each feature works.</p>
+
+<div class="section">
+  <h3>1. Cape Cod Photo Studio</h3>
+  <div class="mockup">
+    <div class="mockup-header">PhotoStudioView.swift</div>
+    <div class="mockup-body" style="background:#1a1a2e;color:white;padding:24px;text-align:center;">
+      <div style="background:#2a2a4a;border-radius:16px;padding:40px 20px;margin-bottom:16px;">
+        <div style="font-size:48px;margin-bottom:8px;">📸</div>
+        <div style="font-size:14px;opacity:0.7;">Your photo here</div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:16px;">
+        <div style="background:#ff6b35;padding:6px 14px;border-radius:20px;font-size:12px;">🦞 Lobster Frame</div>
+        <div style="background:#2196F3;padding:6px 14px;border-radius:20px;font-size:12px;">🌊 Beach Vibes</div>
+        <div style="background:#e91e63;padding:6px 14px;border-radius:20px;font-size:12px;">🌅 Golden Hour</div>
+        <div style="background:#4caf50;padding:6px 14px;border-radius:20px;font-size:12px;">⛵ Nautical</div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:16px;">
+        <div style="background:#333;padding:6px 14px;border-radius:20px;font-size:12px;">🏴‍☠️ Pirate</div>
+        <div style="background:#333;padding:6px 14px;border-radius:20px;font-size:12px;">🦈 Shark Week</div>
+        <div style="background:#333;padding:6px 14px;border-radius:20px;font-size:12px;">🐚 Seashell</div>
+        <div style="background:#333;padding:6px 14px;border-radius:20px;font-size:12px;">🔥 Cape Cod Text</div>
+      </div>
+      <p style="font-size:11px;opacity:0.5;">Stickers: lighthouse, seal, whale, lobster, cranberry, shark fin, seagull, ice cream cone, flip flops, sand castle</p>
+      <div style="display:flex;gap:12px;justify-content:center;margin-top:16px;">
+        <div style="background:#2196F3;padding:10px 24px;border-radius:12px;font-size:14px;">Share</div>
+        <div style="background:#444;padding:10px 24px;border-radius:12px;font-size:14px;">Save</div>
+      </div>
+    </div>
+  </div>
+  <p>Pick photo from camera/library → choose frame/filter → drag-and-drop stickers → add "Cape Cod 2026" text stamp → share to social. <strong>Every shared photo = free app marketing.</strong></p>
+</div>
+
+<div class="section">
+  <h3>2. Shareable Trip Summary Cards</h3>
+  <div class="mockup">
+    <div class="mockup-header">TripSummaryView.swift</div>
+    <div class="mockup-body" style="background:linear-gradient(135deg,#1e3a5f,#2196F3);color:white;padding:24px;border-radius:12px;">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:2px;opacity:0.7;">Our Cape Cod Week</div>
+      <div style="font-size:24px;font-weight:bold;margin:8px 0;">The Benson Family</div>
+      <div style="display:flex;gap:16px;margin:16px 0;">
+        <div style="text-align:center;"><div style="font-size:24px;font-weight:bold;">7</div><div style="font-size:11px;opacity:0.7;">Days</div></div>
+        <div style="text-align:center;"><div style="font-size:24px;font-weight:bold;">12</div><div style="font-size:11px;opacity:0.7;">Beaches</div></div>
+        <div style="text-align:center;"><div style="font-size:24px;font-weight:bold;">5</div><div style="font-size:11px;opacity:0.7;">Towns</div></div>
+        <div style="text-align:center;"><div style="font-size:24px;font-weight:bold;">18</div><div style="font-size:11px;opacity:0.7;">Bingo Squares</div></div>
+      </div>
+      <div style="border-top:1px solid rgba(255,255,255,0.2);padding-top:12px;font-size:12px;">
+        <div>🏖 Favorite Beach: Skaket Beach</div>
+        <div>🦞 Best Meal: Arnold's Lobster & Clam Bar</div>
+        <div>📍 Most Visited Town: Chatham</div>
+      </div>
+      <div style="margin-top:12px;font-size:10px;opacity:0.5;">Made with Hey Cape Cod · heycapecod.app</div>
+    </div>
+  </div>
+  <p>Auto-generated from app usage data. Tracks beaches visited, restaurants tried, bingo progress, towns explored. Beautiful card designed for Instagram stories.</p>
+</div>
+
+<div class="section">
+  <h3>3. Live Beach Status</h3>
+  <div class="mockup">
+    <div class="mockup-header">BeachStatusView.swift</div>
+    <div class="mockup-body" style="padding:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:#f0f7ff;border-radius:12px;margin-bottom:8px;">
+        <div>
+          <div style="font-weight:bold;">Nauset Beach</div>
+          <div style="font-size:12px;color:#666;">Orleans · Updated 12 min ago</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="color:#e53935;font-weight:bold;font-size:13px;">🔴 Parking Full</div>
+          <div style="font-size:11px;color:#666;">Crowd: Heavy</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:#f0fff0;border-radius:12px;margin-bottom:8px;">
+        <div>
+          <div style="font-weight:bold;">Skaket Beach</div>
+          <div style="font-size:12px;color:#666;">Orleans · Updated 8 min ago</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="color:#4caf50;font-weight:bold;font-size:13px;">🟢 Spots Available</div>
+          <div style="font-size:11px;color:#666;">Crowd: Light</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:#fffff0;border-radius:12px;">
+        <div>
+          <div style="font-weight:bold;">Coast Guard Beach</div>
+          <div style="font-size:12px;color:#666;">Eastham · Updated 22 min ago</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="color:#ff9800;font-weight:bold;font-size:13px;">🟡 Filling Up</div>
+          <div style="font-size:11px;color:#666;">Crowd: Moderate</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;text-align:center;padding:10px;background:#e3f2fd;border-radius:8px;font-size:13px;">
+        📍 <strong>Report conditions</strong> — help fellow beachgoers!
+      </div>
+    </div>
+  </div>
+  <p>Time-of-day predictions + crowdsourced reports. Users can tap "Report" to share parking/crowd status. Builds community and solves the #1 morning question.</p>
+</div>
+
+<div class="section">
+  <h3>4. Cape Cod Digital Passport</h3>
+  <div class="mockup">
+    <div class="mockup-header">DigitalPassportView.swift</div>
+    <div class="mockup-body" style="padding:16px;">
+      <div style="text-align:center;margin-bottom:16px;">
+        <div style="font-size:36px;">🛂</div>
+        <div style="font-weight:bold;font-size:18px;">Cape Cod Passport</div>
+        <div style="font-size:13px;color:#666;">Level 3 · Cape Explorer</div>
+        <div style="background:#e8e8e8;border-radius:8px;height:8px;margin-top:8px;"><div style="background:linear-gradient(90deg,#2196F3,#4caf50);width:65%;height:100%;border-radius:8px;"></div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="background:#e8f5e9;padding:12px;border-radius:12px;text-align:center;">
+          <div style="font-size:24px;">🏖</div>
+          <div style="font-size:11px;font-weight:bold;">Beach Bum</div>
+          <div style="font-size:10px;color:#666;">5/5 beaches ✓</div>
+        </div>
+        <div style="background:#fff3e0;padding:12px;border-radius:12px;text-align:center;">
+          <div style="font-size:24px;">🦞</div>
+          <div style="font-size:11px;font-weight:bold;">Seafood Trail</div>
+          <div style="font-size:10px;color:#666;">3/8 spots</div>
+        </div>
+        <div style="background:#e3f2fd;padding:12px;border-radius:12px;text-align:center;">
+          <div style="font-size:24px;">🔦</div>
+          <div style="font-size:11px;font-weight:bold;">Lighthouse Quest</div>
+          <div style="font-size:10px;color:#666;">4/10 lights</div>
+        </div>
+        <div style="background:#f3e5f5;padding:12px;border-radius:12px;text-align:center;opacity:0.5;">
+          <div style="font-size:24px;">🔒</div>
+          <div style="font-size:11px;font-weight:bold;">???</div>
+          <div style="font-size:10px;color:#666;">Reach Level 5</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p>Location-based check-ins at POIs earn stamps. Complete trails (all lighthouses, all clam shacks, etc.) for badges. Levels unlock hidden gems. Extends your existing achievement system. Shareable passport card.</p>
+</div>
+
+<div class="section">
+  <h3>5. Tide-Smart Day Planner</h3>
+  <div class="mockup">
+    <div class="mockup-header">TidePlannerView.swift</div>
+    <div class="mockup-body" style="padding:16px;">
+      <div style="font-weight:bold;margin-bottom:4px;">Your Perfect Tuesday</div>
+      <div style="font-size:12px;color:#666;margin-bottom:12px;">Auto-planned around today's tides & weather</div>
+      <div style="border-left:3px solid #2196F3;padding-left:12px;margin-bottom:12px;">
+        <div style="font-size:12px;color:#2196F3;font-weight:bold;">9:00 AM · Low Tide</div>
+        <div style="font-weight:bold;">Brewster Flats Walk</div>
+        <div style="font-size:12px;color:#666;">Walk a mile out on the tidal flats — hermit crabs, sand dollars, tide pools</div>
+      </div>
+      <div style="border-left:3px solid #ff9800;padding-left:12px;margin-bottom:12px;">
+        <div style="font-size:12px;color:#ff9800;font-weight:bold;">11:30 AM · Tide Rising</div>
+        <div style="font-weight:bold;">Lunch at Cobie's</div>
+        <div style="font-size:12px;color:#666;">Clam rolls & lobster bisque · Brewster</div>
+      </div>
+      <div style="border-left:3px solid #4caf50;padding-left:12px;margin-bottom:12px;">
+        <div style="font-size:12px;color:#4caf50;font-weight:bold;">1:00 PM · High Tide</div>
+        <div style="font-weight:bold;">Skaket Beach Swimming</div>
+        <div style="font-size:12px;color:#666;">Warm bay water is deepest now — perfect for kids</div>
+      </div>
+      <div style="border-left:3px solid #e91e63;padding-left:12px;">
+        <div style="font-size:12px;color:#e91e63;font-weight:bold;">7:15 PM · Sunset</div>
+        <div style="font-weight:bold;">Rock Harbor Sunset</div>
+        <div style="font-size:12px;color:#666;">Best sunset spot on the bay side · Bring a camera</div>
+      </div>
+    </div>
+  </div>
+  <p>Input your interests + kids' ages → engine combines tide tables, weather, sunset time, and restaurant hours into a perfect day. Shareable as a card. "The app planned our whole day and it was perfect" = viral word of mouth.</p>
+</div>
+
+<div class="section">
+  <h3>6. Smart Packing List</h3>
+  <div class="mockup">
+    <div class="mockup-header">PackingListView.swift</div>
+    <div class="mockup-body" style="padding:16px;">
+      <div style="font-weight:bold;margin-bottom:4px;">Your Cape Cod Packing List</div>
+      <div style="font-size:12px;color:#666;margin-bottom:12px;">July 12-19 · Family of 4 (kids 6 & 10)</div>
+      <div style="margin-bottom:12px;">
+        <div style="font-size:12px;font-weight:bold;color:#e53935;margin-bottom:6px;">⚠️ WEATHER ALERT</div>
+        <div style="font-size:12px;background:#fff3e0;padding:8px;border-radius:8px;">Wednesday drops to 58° with rain — pack layers & rain jackets</div>
+      </div>
+      <div style="margin-bottom:8px;">
+        <div style="font-size:12px;font-weight:bold;text-transform:uppercase;color:#2196F3;margin-bottom:4px;">Beach Essentials</div>
+        <div style="font-size:13px;">☑️ Reef shoes (tide pooling Tues)</div>
+        <div style="font-size:13px;">☐ SPF 50+ (UV index 8+ Thu-Sat)</div>
+        <div style="font-size:13px;">☐ Beach umbrella</div>
+        <div style="font-size:13px;">☐ Boogie boards</div>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:bold;text-transform:uppercase;color:#4caf50;margin-bottom:4px;">Cape Cod Specific</div>
+        <div style="font-size:13px;">☐ Bug spray (evening marsh walks)</div>
+        <div style="font-size:13px;">☐ Binoculars (whale watch Fri)</div>
+        <div style="font-size:13px;">☐ Cash for beach parking ($25/car)</div>
+      </div>
+    </div>
+  </div>
+  <p>Input trip dates + planned activities → weather-aware packing list with Cape-specific items. Checkable list persists. Shareable. Pre-trip engagement hooks users before they arrive.</p>
+</div>
+
+<div class="section">
+  <h3>7. Hidden Gems</h3>
+  <div class="mockup">
+    <div class="mockup-header">HiddenGemsView.swift</div>
+    <div class="mockup-body" style="padding:16px;">
+      <div style="text-align:center;margin-bottom:12px;">
+        <div style="font-size:28px;">💎</div>
+        <div style="font-weight:bold;">Hidden Gems</div>
+        <div style="font-size:12px;color:#666;">Locals-only spots unlocked by exploring</div>
+      </div>
+      <div style="background:#f5f5f5;border-radius:12px;padding:12px;margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;">
+          <div style="font-weight:bold;font-size:14px;">🗝 The Secret Swimming Hole</div>
+          <div style="font-size:11px;color:#4caf50;">UNLOCKED</div>
+        </div>
+        <div style="font-size:12px;color:#666;margin-top:4px;">A freshwater kettle pond with no crowds, perfect for kids. Locals have been coming here for decades...</div>
+      </div>
+      <div style="background:#f5f5f5;border-radius:12px;padding:12px;margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;">
+          <div style="font-weight:bold;font-size:14px;">🗝 The Best Fried Clams Nobody Knows</div>
+          <div style="font-size:11px;color:#4caf50;">UNLOCKED</div>
+        </div>
+        <div style="font-size:12px;color:#666;margin-top:4px;">Skip the tourist traps. This roadside stand in a tiny town serves bellies that would make any Cape Codder weep...</div>
+      </div>
+      <div style="background:#e8e8e8;border-radius:12px;padding:12px;opacity:0.6;">
+        <div style="display:flex;justify-content:space-between;">
+          <div style="font-weight:bold;font-size:14px;">🔒 ???</div>
+          <div style="font-size:11px;color:#999;">Visit 3 more beaches</div>
+        </div>
+        <div style="font-size:12px;color:#999;margin-top:4px;">Keep exploring to unlock this local secret...</div>
+      </div>
+      <div style="background:#e8e8e8;border-radius:12px;padding:12px;opacity:0.4;">
+        <div style="display:flex;justify-content:space-between;">
+          <div style="font-weight:bold;font-size:14px;">🔒 ???</div>
+          <div style="font-size:11px;color:#999;">Reach Level 5</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p>Curated by locals, unlocked progressively as users explore. Creates FOMO ("what are the locked ones?!"), rewards exploration, and drives retention across multi-year visits. 30-year veterans AND newbies both want insider knowledge.</p>
+</div>
+
+<div style="background:linear-gradient(135deg,#1e3a5f,#2a5a8f);color:white;padding:24px;border-radius:16px;margin-top:24px;">
+  <h3 style="color:white;margin-top:0;">Build Order</h3>
+  <p style="opacity:0.8;font-size:14px;">Parallel agents will build these simultaneously. Estimated: all 7 features in one session.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;">
+    <div style="background:rgba(255,255,255,0.1);padding:10px;border-radius:8px;">Wave 1: Photo Studio + Beach Status + Packing List</div>
+    <div style="background:rgba(255,255,255,0.1);padding:10px;border-radius:8px;">Wave 2: Digital Passport + Hidden Gems</div>
+    <div style="background:rgba(255,255,255,0.1);padding:10px;border-radius:8px;">Wave 3: Tide Planner + Trip Summary</div>
+    <div style="background:rgba(255,255,255,0.1);padding:10px;border-radius:8px;">Wave 4: HomeView integration + build verification</div>
+  </div>
+</div>

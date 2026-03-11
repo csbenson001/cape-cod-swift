@@ -121,6 +121,42 @@ final class APIClient {
         return try await execute(request)
     }
 
+    // MARK: - Cached GET
+
+    /// Tries a network GET, caches on success, falls back to cached data on failure.
+    /// Pattern: try network -> cache result -> on failure, return cached data.
+    func cachedGet<T: Codable>(
+        _ endpoint: String,
+        cacheKey: String,
+        itemCount: Int = 1,
+        queryItems: [URLQueryItem]? = nil
+    ) async throws -> T {
+        let cache = OfflineCacheManager.shared
+
+        do {
+            let result: T = try await get(endpoint, queryItems: queryItems)
+            cache.cacheData(result, forKey: cacheKey, itemCount: itemCount)
+            return result
+        } catch {
+            if let cached: T = cache.loadCached(forKey: cacheKey) {
+                print("📦 Returning cached data for \(cacheKey)")
+                return cached
+            }
+            throw error
+        }
+    }
+
+    /// Dictionary query variant of cachedGet.
+    func cachedGet<T: Codable>(
+        _ endpoint: String,
+        cacheKey: String,
+        itemCount: Int = 1,
+        query: [String: String]
+    ) async throws -> T {
+        let items = query.map { URLQueryItem(name: $0.key, value: $0.value) }
+        return try await cachedGet(endpoint, cacheKey: cacheKey, itemCount: itemCount, queryItems: items.isEmpty ? nil : items)
+    }
+
     // MARK: - Execute
 
     private func execute<T: Decodable>(_ request: URLRequest) async throws -> T {

@@ -3,7 +3,6 @@ import SwiftUI
 struct ProfileView: View {
     @Environment(AppState.self) private var appState
 
-    @State private var selectedMode: ExperienceMode = .adult
     @State private var selectedVisitType: String = "tourist"
     @State private var selectedInterests: Set<String> = []
     @State private var selectedTideStation: TideStation = .hyannis
@@ -11,6 +10,7 @@ struct ProfileView: View {
     @State private var storyTriggersEnabled = true
     @State private var showingSubscription = false
     @State private var showingSignOut = false
+    @State private var showingModeSelector = false
 
     private var auth: AuthManager { .shared }
     private var subscription: SubscriptionManager { .shared }
@@ -21,6 +21,7 @@ struct ProfileView: View {
             List {
                 profileHeaderSection
                 experienceModeSection
+                aiMemorySection
                 visitTypeSection
                 interestsSection
                 appearanceSection
@@ -35,6 +36,11 @@ struct ProfileView: View {
             .sheet(isPresented: $showingSubscription) {
                 NavigationStack {
                     SubscriptionView()
+                }
+            }
+            .sheet(isPresented: $showingModeSelector) {
+                NavigationStack {
+                    ExperienceModeSelectorView()
                 }
             }
             .alert("Sign Out", isPresented: $showingSignOut) {
@@ -56,7 +62,7 @@ struct ProfileView: View {
 
     private func loadProfileState() {
         guard let profile = profileManager.currentProfile else { return }
-        selectedMode = profile.experienceMode
+        appState.experienceMode = profile.experienceMode
         selectedVisitType = profile.visitType
         selectedInterests = Set(profile.interests)
     }
@@ -119,86 +125,82 @@ struct ProfileView: View {
         }
     }
 
+    // MARK: - AI Memory
+
+    @ViewBuilder
+    private var aiMemorySection: some View {
+        Section {
+            NavigationLink {
+                ChatMemoryView()
+            } label: {
+                HStack(spacing: CodSpacing.sm) {
+                    Image(systemName: "brain")
+                        .font(.title3)
+                        .foregroundStyle(Color.capeCod.oceanBlue)
+                        .frame(width: 32)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("AI Memory")
+                            .codTextStyle(.body)
+                        Text(ChatMemoryManager.shared.isEnabled
+                            ? "\(ChatMemoryManager.shared.totalPreferenceCount) saved preferences"
+                            : "Off")
+                            .codTextStyle(.caption)
+                            .foregroundStyle(Color.capeCod.textSecondary)
+                    }
+                }
+            }
+        } header: {
+            Text("Assistant")
+        }
+    }
+
     // MARK: - Experience Mode
 
     @ViewBuilder
     private var experienceModeSection: some View {
         Section {
-            ForEach(ExperienceMode.allCases) { mode in
-                modeCard(mode)
-                    .listRowInsets(EdgeInsets(top: CodSpacing.xs, leading: CodSpacing.screenEdge, bottom: CodSpacing.xs, trailing: CodSpacing.screenEdge))
+            Button {
+                CodHaptic.tap()
+                showingModeSelector = true
+            } label: {
+                HStack(spacing: CodSpacing.md) {
+                    Image(systemName: appState.experienceMode.icon)
+                        .font(.title2)
+                        .foregroundStyle(modeAccentColor(appState.experienceMode))
+                        .frame(width: 40, height: 40)
+                        .background(modeAccentColor(appState.experienceMode).opacity(0.12))
+                        .clipShape(Circle())
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(appState.experienceMode.displayName)
+                            .codTextStyle(.cardTitle)
+                        Text(appState.experienceMode.subtitle)
+                            .codTextStyle(.caption)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(Color.capeCod.driftwood)
+                }
             }
+            .codAccessibleButton(
+                "Experience Mode: \(appState.experienceMode.displayName)",
+                hint: "Tap to change experience mode"
+            )
         } header: {
             Text("Experience Mode")
         }
     }
 
-    private func modeCard(_ mode: ExperienceMode) -> some View {
-        let isSelected = selectedMode == mode
-
-        return HStack(spacing: CodSpacing.md) {
-            Image(systemName: modeIcon(mode))
-                .font(.title2)
-                .foregroundStyle(isSelected ? Color.capeCod.oceanBlue : Color.capeCod.driftwood)
-                .frame(width: 40)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(mode.displayName)
-                    .codTextStyle(.cardTitle)
-                Text(modeDescription(mode))
-                    .codTextStyle(.caption)
-            }
-
-            Spacer()
-
-            if isSelected {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(Color.capeCod.oceanBlue)
-                    .contentTransition(.symbolEffect(.replace))
-            }
-        }
-        .padding(CodSpacing.cardPadding)
-        .background(isSelected ? Color.capeCod.oceanBlue.opacity(0.08) : Color.capeCod.surfaceElevated)
-        .clipShape(RoundedRectangle(cornerRadius: CodRadius.card, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: CodRadius.card, style: .continuous)
-                .stroke(isSelected ? Color.capeCod.oceanBlue : .clear, lineWidth: 2)
-        )
-        .onTapGesture {
-            withAnimation(CodAnimation.quick) {
-                selectedMode = mode
-            }
-            CodHaptic.selection()
-            updateProfileMode(mode)
-        }
-        .codAccessibleCard(
-            label: "\(mode.displayName): \(modeDescription(mode))",
-            hint: isSelected ? "Currently selected" : "Double tap to select"
-        )
-    }
-
-    private func modeIcon(_ mode: ExperienceMode) -> String {
+    private func modeAccentColor(_ mode: ExperienceMode) -> Color {
         switch mode {
-        case .kids: "figure.child"
-        case .teen: "figure.wave"
-        case .adult: "figure.hiking"
-        case .family: "figure.2.and.child.holdinghands"
-        }
-    }
-
-    private func modeDescription(_ mode: ExperienceMode) -> String {
-        switch mode {
-        case .kids: "Fun facts, pirate stories, and nature adventures"
-        case .teen: "Cool history, local legends, and hidden gems"
-        case .adult: "In-depth history, dining tips, and local insights"
-        case .family: "Something for everyone \u{2014} balanced and engaging"
-        }
-    }
-
-    private func updateProfileMode(_ mode: ExperienceMode) {
-        if let profile = profileManager.currentProfile {
-            profile.experienceMode = mode
-            profileManager.saveProfile()
+        case .kids: Color.capeCod.sunsetOrange
+        case .teen: Color.capeCod.seafoam
+        case .adult: Color.capeCod.oceanBlue
+        case .family: Color.capeCod.duneGrass
         }
     }
 

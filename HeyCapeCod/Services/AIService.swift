@@ -112,10 +112,18 @@ final class AIService: AIServiceProtocol {
         if let tide = context.currentTide { contextParts.append(tide) }
         if let bridge = context.bridgeStatus { contextParts.append("Bridge: \(bridge)") }
 
+        // Include memory context if enabled
+        var prefix = ""
+        if let memoryContext = ChatMemoryManager.shared.memoryContextString() {
+            prefix += memoryContext + " "
+        }
+
         if !contextParts.isEmpty {
-            // Prepend live context to the message so the backend's AI has it
-            let contextNote = "[Live conditions: \(contextParts.joined(separator: "; "))]"
-            body["message"] = "\(contextNote) \(text)"
+            prefix += "[Live conditions: \(contextParts.joined(separator: "; "))] "
+        }
+
+        if !prefix.isEmpty {
+            body["message"] = "\(prefix)\(text)"
         }
 
         request.httpBody = try JSONSerialization.data(withJSONObject: body)

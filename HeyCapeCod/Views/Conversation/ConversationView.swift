@@ -10,6 +10,25 @@ struct ConversationView: View {
                 // Messages
                 messageList
 
+                // Memory suggestion banner
+                if viewModel.showMemorySuggestion, let pref = viewModel.detectedPreference {
+                    MemorySuggestionBanner(
+                        preference: pref,
+                        onAccept: {
+                            CodHaptic.success()
+                            withAnimation(CodAnimation.quick) {
+                                viewModel.acceptDetectedPreference()
+                            }
+                        },
+                        onDismiss: {
+                            withAnimation(CodAnimation.quick) {
+                                viewModel.dismissDetectedPreference()
+                            }
+                        }
+                    )
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+
                 // Input Bar
                 inputBar
             }
@@ -163,6 +182,54 @@ private struct SuggestionChip: View {
         }
         .buttonStyle(.plain)
         .codAccessibleButton(text, hint: "Tap to ask this question")
+    }
+}
+
+// MARK: - Memory Suggestion Banner
+
+private struct MemorySuggestionBanner: View {
+    let preference: DetectedPreference
+    let onAccept: () -> Void
+    let onDismiss: () -> Void
+
+    var body: some View {
+        HStack(spacing: CodSpacing.sm) {
+            Image(systemName: "brain")
+                .foregroundStyle(Color.capeCod.oceanBlue)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Save to memory?")
+                    .codTextStyle(.label)
+                Text("\"\(preference.value)\"")
+                    .codTextStyle(.caption)
+                    .foregroundStyle(Color.capeCod.textSecondary)
+                    .lineLimit(1)
+            }
+
+            Spacer()
+
+            Button(action: onAccept) {
+                Text("Save")
+                    .codTextStyle(.label)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, CodSpacing.sm + 2)
+                    .padding(.vertical, CodSpacing.xs + 1)
+                    .background(Color.capeCod.oceanBlue)
+                    .clipShape(Capsule())
+            }
+            .codAccessibleButton("Save preference to memory")
+
+            Button(action: onDismiss) {
+                Image(systemName: "xmark")
+                    .font(.caption)
+                    .foregroundStyle(Color.capeCod.driftwood)
+                    .frame(minWidth: 32, minHeight: 32)
+            }
+            .codAccessibleButton("Dismiss suggestion")
+        }
+        .padding(.horizontal, CodSpacing.screenEdge)
+        .padding(.vertical, CodSpacing.sm)
+        .background(Color.capeCod.cardBackground)
     }
 }
 

@@ -58,6 +58,9 @@ struct RestaurantDetailView: View {
                     // Menu items
                     menuSection
 
+                    // Aggregated reviews link
+                    aggregatedReviewsLink
+
                     // Review button
                     CodButton("Write a Review", variant: .secondary, icon: "square.and.pencil", isFullWidth: true) {
                         CodHaptic.tap()
@@ -81,6 +84,43 @@ struct RestaurantDetailView: View {
                 targetType: .restaurant,
                 menuItems: restaurant.menuHighlights
             )
+        }
+    }
+
+    // MARK: - Aggregated Reviews Link
+
+    private var aggregatedReviewsLink: some View {
+        Group {
+            if let aggregated = RestaurantReviewAggregator.shared.getAggregatedData(for: restaurant.name) {
+                NavigationLink {
+                    AggregatedReviewsView(restaurant: aggregated)
+                } label: {
+                    HStack(spacing: CodSpacing.md) {
+                        Image(systemName: "chart.bar.doc.horizontal")
+                            .font(.system(size: 20))
+                            .foregroundStyle(Color.capeCod.oceanBlue)
+
+                        VStack(alignment: .leading, spacing: CodSpacing.xs) {
+                            Text("See All Reviews")
+                                .codTextStyle(.cardTitle)
+                            Text("Aggregated from \(aggregated.sources.count) sources")
+                                .codTextStyle(.caption)
+                                .foregroundStyle(Color.capeCod.textSecondary)
+                        }
+
+                        Spacer()
+
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(Color.capeCod.driftwood)
+                    }
+                    .padding(CodSpacing.cardPadding)
+                    .background(Color.capeCod.surfaceElevated)
+                    .clipShape(RoundedRectangle(cornerRadius: CodRadius.card, style: .continuous))
+                    .adaptiveCardStyle()
+                }
+                .buttonStyle(.plain)
+            }
         }
     }
 
@@ -268,16 +308,19 @@ struct RestaurantDetailView: View {
             withAnimation(CodAnimation.quick) { selectedMenuCategory = category }
             CodHaptic.selection()
         } label: {
+            let isSelected = selectedMenuCategory == category
             HStack(spacing: CodSpacing.xs) {
                 Image(systemName: icon)
                     .font(.caption)
                 Text(label)
-                    .codTextStyle(.label)
+                    .font(.system(size: 11, weight: .medium))
+                    .tracking(1.5)
+                    .textCase(.uppercase)
             }
+            .foregroundStyle(isSelected ? .white : Color.capeCod.textPrimary)
             .padding(.horizontal, CodSpacing.md)
             .padding(.vertical, CodSpacing.sm)
-            .background(selectedMenuCategory == category ? Color.capeCod.oceanBlue : Color.capeCod.surfaceElevated)
-            .foregroundStyle(selectedMenuCategory == category ? .white : Color.capeCod.textPrimary)
+            .background(isSelected ? Color.capeCod.oceanBlue : Color.capeCod.surfaceElevated)
             .clipShape(Capsule())
         }
         .buttonStyle(CodButtonPressStyle(variant: .ghost))

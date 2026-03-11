@@ -14,7 +14,7 @@ struct BeachRecommendation {
         case great = "Great day for the beach!"
         case good = "Good beach conditions"
         case caution = "Use caution"
-        case notRecommended = "Not recommended"
+        case notRecommended = "Best for a beach walk"
 
         var color: String {
             switch self {
@@ -30,7 +30,7 @@ struct BeachRecommendation {
             case .great: return "checkmark.circle.fill"
             case .good: return "hand.thumbsup.fill"
             case .caution: return "exclamationmark.triangle.fill"
-            case .notRecommended: return "xmark.circle.fill"
+            case .notRecommended: return "figure.walk.circle.fill"
             }
         }
     }
@@ -221,10 +221,17 @@ enum BeachRecommendationEngine {
             ? "tide is going out — more sand to explore"
             : "tide is coming in — set up above the high water line"
 
+        let summary: String
+        if rating == .notRecommended {
+            summary = "\(bestBeach.name) is the best spot for a beach walk today — \(bestBeach.description.lowercased()). Bundle up and enjoy the off-season beauty!"
+        } else {
+            summary = "\(bestBeach.name) is your best bet right now — \(bestBeach.description.lowercased())."
+        }
+
         return BeachRecommendation(
             beachName: bestBeach.name,
             rating: rating,
-            summary: "\(bestBeach.name) is your best bet right now — \(bestBeach.description.lowercased()).",
+            summary: summary,
             details: "It's \(windDetail), and the \(tideDetail).",
             factors: factors
         )

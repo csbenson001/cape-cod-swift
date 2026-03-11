@@ -32,7 +32,7 @@ struct APIStoryResponse: Codable, Identifiable {
     }
 }
 
-/// Experience mode for story variants
+/// Experience mode for story variants and dynamic tab configuration
 enum ExperienceMode: String, Codable, CaseIterable, Identifiable {
     case kids
     case teen
@@ -41,7 +41,60 @@ enum ExperienceMode: String, Codable, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    var displayName: String { rawValue.capitalized }
+    var displayName: String {
+        switch self {
+        case .kids: "Kid Mode"
+        case .teen: "Teen Mode"
+        case .adult: "Adult Mode"
+        case .family: "Family Mode"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .kids: "Ages 4-12"
+        case .teen: "Ages 13-17"
+        case .adult: "Full Experience"
+        case .family: "Something for Everyone"
+        }
+    }
+
+    var tagline: String {
+        switch self {
+        case .kids: "Ahoy, young explorer! Discover pirate treasure and sea creatures."
+        case .teen: "Find the best spots, share your adventures, and explore."
+        case .adult: "In-depth history, curated dining, and scenic tours."
+        case .family: "All ages welcome \u{2014} activities and content for the whole crew."
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .kids: "figure.child"
+        case .teen: "figure.wave"
+        case .adult: "figure.hiking"
+        case .family: "figure.2.and.child.holdinghands"
+        }
+    }
+
+    /// The tabs visible in each experience mode
+    var tabs: [AppTab] {
+        switch self {
+        case .kids: [.home, .explore, .stories, .funZone, .profile]
+        case .teen: [.home, .explore, .social, .events, .profile]
+        case .adult: [.home, .explore, .tours, .dining, .profile]
+        case .family: [.home, .explore, .tours, .dining, .profile]
+        }
+    }
+
+    var themeColor: String {
+        switch self {
+        case .kids: "sunsetOrange"
+        case .teen: "seafoam"
+        case .adult: "oceanBlue"
+        case .family: "duneGrass"
+        }
+    }
 }
 
 // MARK: - Story List Response

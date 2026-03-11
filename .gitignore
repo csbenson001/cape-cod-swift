@@ -54,3 +54,5 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+
+hey-cape-cod-backend/node_modules*

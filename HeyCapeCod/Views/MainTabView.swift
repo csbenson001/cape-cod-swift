@@ -3,34 +3,30 @@ import SwiftUI
 struct MainTabView: View {
     @Environment(AppState.self) private var appState
 
+    @State private var showOfflineStatus = false
+
     var body: some View {
         @Bindable var appState = appState
 
         ZStack(alignment: .bottom) {
-            // Tab content with cross-fade transition
-            ZStack {
-                HomeView()
-                    .opacity(appState.selectedTab == .home ? 1 : 0)
-
-                ExploreView()
-                    .opacity(appState.selectedTab == .explore ? 1 : 0)
-
-                TourListView()
-                    .opacity(appState.selectedTab == .tours ? 1 : 0)
-
-                RestaurantListView()
-                    .opacity(appState.selectedTab == .dining ? 1 : 0)
-
-                ProfileView()
-                    .opacity(appState.selectedTab == .profile ? 1 : 0)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .animation(CodAnimation.tabSwitch, value: appState.selectedTab)
-
-            // Custom tab bar
+            tabContent
             customTabBar
         }
         .background(Color.capeCod.background)
+        .offlineBanner(isOffline: !OfflineCacheManager.shared.isOnline) {
+            showOfflineStatus = true
+        }
+        .sheet(isPresented: $showOfflineStatus) {
+            NavigationStack {
+                OfflineStatusView()
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button("Done") { showOfflineStatus = false }
+                        }
+                    }
+            }
+            .presentationDragIndicator(.visible)
+        }
         .sheet(isPresented: $appState.isVoiceAssistantPresented) {
             VoiceAssistantView()
                 .presentationDragIndicator(.visible)
@@ -46,48 +42,81 @@ struct MainTabView: View {
                 Text(error.localizedDescription)
             }
         }
+        .onChange(of: appState.experienceMode) { _, newMode in
+            // Reset to home if current tab isn't in new mode's tabs
+            if !newMode.tabs.contains(appState.selectedTab) {
+                appState.selectedTab = .home
+            }
+        }
+    }
+
+    // MARK: - Tab Content
+
+    private var tabContent: some View {
+        ZStack {
+            ForEach(appState.visibleTabs) { tab in
+                tabDestination(tab)
+                    .opacity(appState.selectedTab == tab ? 1 : 0)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .animation(CodAnimation.tabSwitch, value: appState.selectedTab)
+    }
+
+    @ViewBuilder
+    private func tabDestination(_ tab: AppTab) -> some View {
+        switch tab {
+        case .home: HomeView()
+        case .explore: ExploreView()
+        case .tours: TourListView()
+        case .dining: RestaurantListView()
+        case .stories: TellMeAStoryView()
+        case .funZone: FunZoneView()
+        case .social: SocialHubView()
+        case .events: EventsView()
+        case .profile: ProfileView()
+        }
     }
 
     // MARK: - Custom Tab Bar
 
     private var customTabBar: some View {
         VStack(spacing: 0) {
-            // Floating FABs above the tab bar
-            HStack(spacing: CodSpacing.sm) {
-                Spacer()
-
-                // Text chat FAB
-                chatFAB
-
-                // Voice FAB (primary)
-                voiceFAB
-            }
-            .padding(.trailing, CodSpacing.screenEdge)
-            .padding(.bottom, CodSpacing.sm)
-
-            // Tab bar
-            HStack(spacing: 0) {
-                tabButton(.home)
-                tabButton(.explore)
-                tabButton(.tours)
-                tabButton(.dining)
-                tabButton(.profile)
-            }
-            .padding(.horizontal, CodSpacing.xs)
-            .padding(.top, 10)
-            .padding(.bottom, CodSpacing.xs)
-            .background(
-                Rectangle()
-                    .fill(.ultraThinMaterial)
-                    .overlay(alignment: .top) {
-                        Rectangle()
-                            .fill(Color.capeCod.driftwood.opacity(0.12))
-                            .frame(height: 0.5)
-                    }
-                    .ignoresSafeArea(edges: .bottom)
-            )
+            fabRow
+            tabBarButtons
         }
         .codAccessible(label: "Tab bar")
+    }
+
+    private var fabRow: some View {
+        HStack(spacing: CodSpacing.sm) {
+            Spacer()
+            chatFAB
+            voiceFAB
+        }
+        .padding(.trailing, CodSpacing.screenEdge)
+        .padding(.bottom, CodSpacing.sm)
+    }
+
+    private var tabBarButtons: some View {
+        HStack(spacing: 0) {
+            ForEach(appState.visibleTabs) { tab in
+                tabButton(tab)
+            }
+        }
+        .padding(.horizontal, CodSpacing.xs)
+        .padding(.top, 10)
+        .padding(.bottom, CodSpacing.xs)
+        .background(
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .overlay(alignment: .top) {
+                    Rectangle()
+                        .fill(Color.capeCod.driftwood.opacity(0.12))
+                        .frame(height: 0.5)
+                }
+                .ignoresSafeArea(edges: .bottom)
+        )
     }
 
     // MARK: - Tab Button
