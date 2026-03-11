@@ -10,123 +10,71 @@ extension Color {
 }
 
 struct CapeCodColors {
+    private var palette: ThemePalette { ThemeManager.shared.palette }
 
     // MARK: - Primary Colors
 
-    /// Ocean Blue — primary actions, links, selected states
-    let oceanBlue = Color(light: Color(hex: 0x1A6B8A), dark: Color(hex: 0x3FA8CC))
-
-    /// Deep Navy — dark backgrounds, text on light surfaces
-    let deepNavy = Color(light: Color(hex: 0x0D2137), dark: Color(hex: 0x0D2137))
-
-    /// Sunset Orange — accent, CTAs, notifications, AI speaking state
-    let sunsetOrange = Color(light: Color(hex: 0xE87040), dark: Color(hex: 0xF08860))
-
-    /// Seafoam — success states, AI listening state, secondary accent
-    let seafoam = Color(light: Color(hex: 0x7EC8B8), dark: Color(hex: 0x7EC8B8))
+    var oceanBlue: Color { palette.oceanBlue }
+    var deepNavy: Color { palette.deepNavy }
+    var sunsetOrange: Color { palette.sunsetOrange }
+    var seafoam: Color { palette.seafoam }
 
     // MARK: - Neutral Colors
 
-    /// Sand — warm backgrounds, card surfaces in dark mode
-    let sand = Color(light: Color(hex: 0xE8D5B7), dark: Color(hex: 0x3A3020))
-
-    /// Driftwood — secondary text, subtle borders
-    let driftwood = Color(light: Color(hex: 0xA69279), dark: Color(hex: 0x8C7E6A))
-
-    /// Shell White — primary light background (clean white)
-    let shellWhite = Color(light: Color(hex: 0xFFFFFF), dark: Color(hex: 0x111D2B))
-
-    /// Fog — secondary light background, card surfaces
-    let fog = Color(light: Color(hex: 0xF5F5F7), dark: Color(hex: 0x162233))
+    var sand: Color { palette.sand }
+    var driftwood: Color { palette.driftwood }
+    var shellWhite: Color { palette.shellWhite }
+    var fog: Color { palette.fog }
 
     // MARK: - Semantic / Nature Colors
 
-    /// Dune Grass — nature/success indicators
-    let duneGrass = Color(light: Color(hex: 0x8BA87E), dark: Color(hex: 0xA0C090))
-
-    /// Cranberry — alerts, errors, shark warnings
-    let cranberry = Color(light: Color(hex: 0xC94E50), dark: Color(hex: 0xE06668))
-
-    /// Lobster Red — traffic severe
-    let lobsterRed = Color(light: Color(hex: 0xD44D2D), dark: Color(hex: 0xE86A4E))
-
-    /// Sandbar Yellow — traffic moderate, warnings
-    let sandbarYellow = Color(light: Color(hex: 0xE8B94E), dark: Color(hex: 0xE8B94E))
+    var duneGrass: Color { palette.duneGrass }
+    var cranberry: Color { palette.cranberry }
+    var lobsterRed: Color { palette.lobsterRed }
+    var sandbarYellow: Color { palette.sandbarYellow }
 
     // MARK: - Semantic Aliases
 
-    var primary: Color { oceanBlue }
-    var secondary: Color { seafoam }
-    var accent: Color { sunsetOrange }
+    var primary: Color { palette.primary }
+    var secondary: Color { palette.secondary }
+    var accent: Color { palette.accent }
 
-    var background: Color { shellWhite }
-    var surface: Color { fog }
-    var surfaceElevated: Color {
-        Color(light: Color(hex: 0xFFFFFF), dark: Color(hex: 0x1C2E42))
-    }
+    var background: Color { palette.background }
+    var surface: Color { palette.surface }
+    var surfaceElevated: Color { palette.surfaceElevated }
 
-    var textPrimary: Color {
-        Color(light: Color(hex: 0x0D2137), dark: Color(hex: 0xF0EDE8))
-    }
-    var textSecondary: Color { driftwood }
-    var textOnPrimary: Color {
-        Color(light: .white, dark: .white)
-    }
+    var textPrimary: Color { palette.textPrimary }
+    var textSecondary: Color { palette.textSecondary }
+    var textOnPrimary: Color { palette.textOnPrimary }
 
     // MARK: - Convenience Aliases
 
-    var cardBackground: Color { surfaceElevated }
-    var primaryText: Color { textPrimary }
-    var secondaryText: Color { textSecondary }
-
-    /// Subtle border for cards (shadow + border in light, border-only in dark)
-    var cardBorder: Color {
-        Color(light: Color(hex: 0x000000).opacity(0.06), dark: .white.opacity(0.08))
-    }
-
-    /// Image overlay gradient base color — navy instead of pure black for warmth
-    var imageOverlay: Color {
-        Color(light: Color(hex: 0x0D2137).opacity(0.4), dark: Color(hex: 0x0D2137).opacity(0.5))
-    }
+    var cardBackground: Color { palette.cardBackground }
+    var primaryText: Color { palette.textPrimary }
+    var secondaryText: Color { palette.textSecondary }
+    var cardBorder: Color { palette.cardBorder }
+    var imageOverlay: Color { palette.imageOverlay }
 
     // MARK: - Traffic Semantic Colors
 
-    var trafficClear: Color { duneGrass }
-    var trafficModerate: Color { sandbarYellow }
-    var trafficHeavy: Color { sunsetOrange }
-    var trafficSevere: Color { lobsterRed }
+    var trafficClear: Color { palette.trafficClear }
+    var trafficModerate: Color { palette.trafficModerate }
+    var trafficHeavy: Color { palette.trafficHeavy }
+    var trafficSevere: Color { palette.trafficSevere }
 
     // MARK: - AI State Colors
 
-    var aiListening: Color { seafoam }
-    var aiThinking: Color { sunsetOrange }
-    var aiSpeaking: Color { sunsetOrange }
+    var aiListening: Color { palette.aiListening }
+    var aiThinking: Color { palette.aiThinking }
+    var aiSpeaking: Color { palette.aiSpeaking }
 
     // MARK: - Gradients
 
-    var oceanGradient: LinearGradient {
-        LinearGradient(
-            colors: [oceanBlue, seafoam],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-    }
+    var oceanGradient: LinearGradient { palette.oceanGradient }
+    var sunsetGradient: LinearGradient { palette.sunsetGradient }
 
-    var sunsetGradient: LinearGradient {
-        LinearGradient(
-            colors: [sunsetOrange, Color(hex: 0xE8B94E)],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-    }
-
-    /// Image overlay gradient — uses deep navy instead of pure black
     func imageOverlayGradient(from startPoint: UnitPoint = .top, to endPoint: UnitPoint = .bottom) -> LinearGradient {
-        LinearGradient(
-            colors: [.clear, Color(hex: 0x0D2137).opacity(0.45)],
-            startPoint: startPoint,
-            endPoint: endPoint
-        )
+        palette.imageOverlayGradient(from: startPoint, to: endPoint)
     }
 }
 

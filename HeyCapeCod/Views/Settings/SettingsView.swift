@@ -156,7 +156,26 @@ struct SettingsView: View {
 
                 // Appearance
                 Section("Appearance") {
-                    Picker("Theme", selection: Binding(
+                    NavigationLink {
+                        ThemePickerView()
+                    } label: {
+                        HStack(spacing: CodSpacing.sm) {
+                            Image(systemName: ThemeManager.shared.currentTheme.icon)
+                                .font(.title3)
+                                .foregroundStyle(Color.capeCod.oceanBlue)
+                                .frame(width: 32)
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("App Theme")
+                                    .codTextStyle(.body)
+                                Text(ThemeManager.shared.currentTheme.displayName)
+                                    .codTextStyle(.caption)
+                                    .foregroundStyle(Color.capeCod.textSecondary)
+                            }
+                        }
+                    }
+
+                    Picker("Mode", selection: Binding(
                         get: { appState.preferredColorScheme },
                         set: { appState.preferredColorScheme = $0 }
                     )) {

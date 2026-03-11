@@ -38,6 +38,8 @@ struct RestaurantListView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: CodSpacing.sectionSpacing) {
+                    // Quick links
+                    quickLinks
                     searchBar
                     cuisineFilters
                     sortToggle
@@ -56,6 +58,47 @@ struct RestaurantListView: View {
                 RestaurantDetailView(restaurant: restaurant)
             }
         }
+    }
+
+    // MARK: - Quick Links
+
+    private var quickLinks: some View {
+        HStack(spacing: CodSpacing.sm) {
+            NavigationLink {
+                LocalSuggestionsView()
+            } label: {
+                HStack(spacing: CodSpacing.xs) {
+                    Image(systemName: "mappin.and.ellipse")
+                        .font(.system(size: 14))
+                    Text("Local Picks")
+                        .font(.system(size: 13, weight: .semibold))
+                }
+                .foregroundStyle(Color.capeCod.oceanBlue)
+                .padding(.horizontal, CodSpacing.md)
+                .padding(.vertical, CodSpacing.sm)
+                .background(Color.capeCod.oceanBlue.opacity(0.1))
+                .clipShape(Capsule())
+            }
+
+            NavigationLink {
+                DishFinderView()
+            } label: {
+                HStack(spacing: CodSpacing.xs) {
+                    Image(systemName: "sparkle.magnifyingglass")
+                        .font(.system(size: 14))
+                    Text("Find a Dish")
+                        .font(.system(size: 13, weight: .semibold))
+                }
+                .foregroundStyle(Color.capeCod.sunsetOrange)
+                .padding(.horizontal, CodSpacing.md)
+                .padding(.vertical, CodSpacing.sm)
+                .background(Color.capeCod.sunsetOrange.opacity(0.1))
+                .clipShape(Capsule())
+            }
+
+            Spacer()
+        }
+        .padding(.horizontal, CodSpacing.screenEdge)
     }
 
     // MARK: - Search

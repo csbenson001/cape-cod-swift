@@ -156,7 +156,7 @@ struct HomeView: View {
                 HStack(spacing: CodSpacing.sm) {
                     QuickActionButton(
                         icon: "beach.umbrella",
-                        title: "Best Beach",
+                        title: "Best Beach", 
                         tint: Color.capeCod.oceanBlue
                     ) {
                         CodHaptic.tap()
@@ -165,7 +165,7 @@ struct HomeView: View {
 
                     QuickActionButton(
                         icon: "parkingsign.circle.fill",
-                        title: "Beach Status",
+                        title: "Beach Busyness",
                         tint: Color.capeCod.seafoam
                     ) {
                         CodHaptic.tap()
@@ -174,7 +174,7 @@ struct HomeView: View {
 
                     QuickActionButton(
                         icon: "water.waves",
-                        title: "Tide Planner",
+                        title: "Tides",
                         tint: Color.capeCod.oceanBlue
                     ) {
                         CodHaptic.tap()
@@ -183,7 +183,7 @@ struct HomeView: View {
 
                     QuickActionButton(
                         icon: "car.fill",
-                        title: "Bridge",
+                        title: "Traffic",
                         tint: Color.capeCod.duneGrass
                     ) {
                         CodHaptic.tap()
@@ -192,7 +192,7 @@ struct HomeView: View {
 
                     QuickActionButton(
                         icon: "cloud.rain.fill",
-                        title: "Rainy Day",
+                        title: "Weather",
                         tint: Color.capeCod.driftwood
                     ) {
                         CodHaptic.tap()

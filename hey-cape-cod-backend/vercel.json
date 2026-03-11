@@ -17,6 +17,10 @@
     {
       "path": "/api/traffic",
       "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/sharks",
+      "schedule": "0 */6 * * *"
     }
   ],
   "functions": {

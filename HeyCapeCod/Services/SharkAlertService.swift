@@ -65,13 +65,13 @@ final class SharkAlertService {
         isLoading = true
         defer { isLoading = false }
 
-        // Attempt live fetch, fall back to hardcoded data
+        // Fetch from our backend (which scrapes Sharktivity, NPS, MA alerts)
         do {
-            let liveSightings = try await fetchFromSharktivity()
+            let liveSightings = try await fetchFromBackend()
             sightings = liveSightings
             lastFetched = Date()
         } catch {
-            print("Sharktivity fetch failed: \(error.localizedDescription). Using fallback data.")
+            print("Shark backend fetch failed: \(error.localizedDescription). Using fallback data.")
             sightings = Self.fallbackSightings
             lastFetched = Date()
         }
@@ -107,27 +107,60 @@ final class SharkAlertService {
         }
     }
 
-    // MARK: - Live Fetch
+    // MARK: - Live Fetch (via our backend scraper)
 
-    private func fetchFromSharktivity() async throws -> [SharkSighting] {
-        // The Sharktivity API is not publicly documented;
-        // we attempt a fetch and fall back to hardcoded data.
-        guard let url = URL(string: "https://www.atlanticwhiteshark.org/sharktivity-app-data") else {
-            throw URLError(.badURL)
+    /// Backend response model from GET /api/sharks
+    private struct SharkAPIResponse: Codable {
+        let sightings: [APISighting]
+        let alertLevel: String
+        let recentCount: Int
+        let totalCount: Int
+        let isLiveData: Bool
+        let fetchedAt: String
+    }
+
+    private struct APISighting: Codable {
+        let id: String
+        let species: String
+        let location: String
+        let latitude: Double
+        let longitude: Double
+        let town: String?
+        let date: String
+        let description: String
+        let source: String
+        let isConfirmed: Bool
+    }
+
+    private func fetchFromBackend() async throws -> [SharkSighting] {
+        let response: SharkAPIResponse = try await APIClient.shared.get(
+            "/sharks",
+            queryItems: [URLQueryItem(name: "days", value: "30")]
+        )
+
+        let dateFormatter = ISO8601DateFormatter()
+        dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+
+        let fallbackFormatter = ISO8601DateFormatter()
+        fallbackFormatter.formatOptions = [.withInternetDateTime]
+
+        return response.sightings.map { api in
+            let date = dateFormatter.date(from: api.date)
+                ?? fallbackFormatter.date(from: api.date)
+                ?? Date()
+
+            return SharkSighting(
+                id: UUID(),
+                species: api.species,
+                location: api.location,
+                latitude: api.latitude,
+                longitude: api.longitude,
+                date: date,
+                description: api.description,
+                source: api.source,
+                isConfirmed: api.isConfirmed
+            )
         }
-
-        var request = URLRequest(url: url)
-        request.timeoutInterval = 10
-        request.setValue("HeyCapeCod/1.0", forHTTPHeaderField: "User-Agent")
-
-        let (_, response) = try await URLSession.shared.data(for: request)
-        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
-            throw URLError(.badServerResponse)
-        }
-
-        // If API response parsing were implemented, it would go here.
-        // For now, fall back to curated data.
-        throw URLError(.cannotParseResponse)
     }
 
     // MARK: - Fallback Data
