@@ -5,6 +5,7 @@
  * - Atlantic White Shark Conservancy (Sharktivity)
  * - National Park Service Cape Cod National Seashore alerts
  * - MA Division of Marine Fisheries / state beach alerts
+ * - OCEARCH Global Shark Tracker (GPS-tagged sharks)
  * - Curated fallback data based on historical patterns
  *
  * Query params:

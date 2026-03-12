@@ -326,39 +326,128 @@ struct SharkAlertView: View {
         }
     }
 
-    // MARK: - Learn More
+    // MARK: - Learn More & Sharktivity
 
     private var learnMoreSection: some View {
-        Button {
-            CodHaptic.tap()
-            if let url = URL(string: "https://www.atlanticwhiteshark.org") {
-                openURL(url)
-            }
-        } label: {
-            HStack(spacing: CodSpacing.md) {
-                Image(systemName: "globe")
-                    .font(.system(size: 24))
-                    .foregroundStyle(Color.capeCod.oceanBlue)
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Atlantic White Shark Conservancy")
-                        .codTextStyle(.cardTitle)
-                    Text("Learn more about shark research and conservation")
-                        .codTextStyle(.caption)
+        VStack(spacing: CodSpacing.sm) {
+            // Sharktivity App callout
+            Button {
+                CodHaptic.tap()
+                // Deep link to Sharktivity app, fallback to App Store
+                if let appURL = URL(string: "sharktivity://"),
+                   UIApplication.shared.canOpenURL(appURL) {
+                    openURL(appURL)
+                } else if let storeURL = URL(string: "https://apps.apple.com/app/sharktivity/id1045412804") {
+                    openURL(storeURL)
                 }
+            } label: {
+                HStack(spacing: CodSpacing.md) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.capeCod.oceanBlue.opacity(0.12))
+                            .frame(width: 44, height: 44)
 
-                Spacer()
+                        Text("\u{1F988}")
+                            .font(.system(size: 24))
+                    }
 
-                Image(systemName: "arrow.up.right")
-                    .foregroundStyle(Color.capeCod.driftwood)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Sharktivity App")
+                            .codTextStyle(.cardTitle)
+                        Text("Get real-time shark alerts, report sightings, and track tagged sharks")
+                            .codTextStyle(.caption)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+
+                    Spacer()
+
+                    VStack(spacing: 2) {
+                        Image(systemName: "arrow.down.app.fill")
+                            .font(.system(size: 18))
+                            .foregroundStyle(Color.capeCod.oceanBlue)
+                        Text("GET")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundStyle(Color.capeCod.oceanBlue)
+                    }
+                }
+                .padding(CodSpacing.cardPadding)
+                .background(Color.capeCod.cardBackground)
+                .clipShape(RoundedRectangle(cornerRadius: CodRadius.card, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: CodRadius.card, style: .continuous)
+                        .stroke(Color.capeCod.oceanBlue.opacity(0.2), lineWidth: 1)
+                )
+                .adaptiveCardStyle()
             }
-            .padding(CodSpacing.cardPadding)
-            .background(Color.capeCod.cardBackground)
-            .clipShape(RoundedRectangle(cornerRadius: CodRadius.card, style: .continuous))
-            .adaptiveCardStyle()
+            .buttonStyle(CodButtonPressStyle(variant: .ghost))
+            .codAccessibleButton("Sharktivity App", hint: "Opens Sharktivity in the App Store")
+
+            // AWSC website
+            Button {
+                CodHaptic.tap()
+                if let url = URL(string: "https://www.atlanticwhiteshark.org") {
+                    openURL(url)
+                }
+            } label: {
+                HStack(spacing: CodSpacing.md) {
+                    Image(systemName: "globe")
+                        .font(.system(size: 24))
+                        .foregroundStyle(Color.capeCod.oceanBlue)
+                        .frame(width: 44)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Atlantic White Shark Conservancy")
+                            .codTextStyle(.cardTitle)
+                        Text("Support shark research and conservation on Cape Cod")
+                            .codTextStyle(.caption)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "arrow.up.right")
+                        .foregroundStyle(Color.capeCod.driftwood)
+                }
+                .padding(CodSpacing.cardPadding)
+                .background(Color.capeCod.cardBackground)
+                .clipShape(RoundedRectangle(cornerRadius: CodRadius.card, style: .continuous))
+                .adaptiveCardStyle()
+            }
+            .buttonStyle(CodButtonPressStyle(variant: .ghost))
+            .codAccessibleButton("Atlantic White Shark Conservancy", hint: "Opens website in browser")
+
+            // OCEARCH tracker
+            Button {
+                CodHaptic.tap()
+                if let url = URL(string: "https://www.ocearch.org/tracker/") {
+                    openURL(url)
+                }
+            } label: {
+                HStack(spacing: CodSpacing.md) {
+                    Image(systemName: "location.circle.fill")
+                        .font(.system(size: 24))
+                        .foregroundStyle(Color.capeCod.seafoam)
+                        .frame(width: 44)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("OCEARCH Shark Tracker")
+                            .codTextStyle(.cardTitle)
+                        Text("Track GPS-tagged great white sharks in real time")
+                            .codTextStyle(.caption)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "arrow.up.right")
+                        .foregroundStyle(Color.capeCod.driftwood)
+                }
+                .padding(CodSpacing.cardPadding)
+                .background(Color.capeCod.cardBackground)
+                .clipShape(RoundedRectangle(cornerRadius: CodRadius.card, style: .continuous))
+                .adaptiveCardStyle()
+            }
+            .buttonStyle(CodButtonPressStyle(variant: .ghost))
+            .codAccessibleButton("OCEARCH Shark Tracker", hint: "Opens OCEARCH tracker in browser")
         }
-        .buttonStyle(CodButtonPressStyle(variant: .ghost))
-        .codAccessibleButton("Atlantic White Shark Conservancy", hint: "Opens website in browser")
     }
 
     // MARK: - Helpers

@@ -244,6 +244,81 @@ async function fetchMABeachAlerts() {
 }
 
 /**
+ * Source 4: OCEARCH Global Shark Tracker.
+ * Undocumented but publicly accessible JSON endpoint for tagged shark pings.
+ * Returns GPS locations of individually tagged great white sharks.
+ */
+async function fetchOCEARCHPings() {
+  const sightings = [];
+
+  try {
+    // Fetch recent white shark pings
+    const url = 'https://www.ocearch.org/tracker/ajax/filter-sharks?tracking-activity=ping-most-recent&species=White+Shark';
+    const body = await fetchUrl(url, {
+      timeout: 8000,
+      headers: {
+        'Accept': 'application/json',
+        'Referer': 'https://www.ocearch.org/tracker/',
+      },
+    });
+    const data = JSON.parse(body);
+
+    // OCEARCH returns an array of shark objects with ping data
+    const sharks = Array.isArray(data) ? data : (data.sharks || data.features || []);
+
+    for (const shark of sharks) {
+      // Extract coordinates — OCEARCH format varies
+      const lat = parseFloat(shark.lat || shark.latitude || shark.geometry?.coordinates?.[1]);
+      const lon = parseFloat(shark.lng || shark.lon || shark.longitude || shark.geometry?.coordinates?.[0]);
+      const name = shark.name || shark.properties?.name || 'Unknown';
+      const pingDate = shark.pings?.[0]?.datetime || shark.datetime || shark.last_ping || null;
+
+      if (!lat || !lon || isNaN(lat) || isNaN(lon)) continue;
+
+      // Only include sharks near Cape Cod (rough bounding box)
+      // Latitude: 41.3 to 42.2, Longitude: -70.7 to -69.8
+      if (lat < 41.3 || lat > 42.2 || lon < -70.7 || lon > -69.8) continue;
+
+      // Find closest beach
+      let closestBeach = 'Cape Cod Waters';
+      let closestDist = Infinity;
+      for (const [beach, coords] of Object.entries(CAPE_COD_BEACHES)) {
+        const dist = Math.sqrt(Math.pow(lat - coords.lat, 2) + Math.pow(lon - coords.lon, 2));
+        if (dist < closestDist) {
+          closestDist = dist;
+          closestBeach = beach;
+        }
+      }
+
+      const beachData = CAPE_COD_BEACHES[closestBeach] || { lat, lon, town: 'Cape Cod' };
+      const date = pingDate ? new Date(pingDate) : new Date();
+
+      sightings.push({
+        id: `ocearch-${name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`,
+        species: 'Great White Shark',
+        location: closestBeach,
+        latitude: lat,
+        longitude: lon,
+        town: beachData.town || 'Cape Cod',
+        date: date.toISOString(),
+        description: `Tagged white shark "${name}" detected via satellite ping near ${closestBeach}. Tracked by OCEARCH Global Shark Tracker.`,
+        source: 'OCEARCH',
+        isConfirmed: true,
+        sharkName: name,
+      });
+    }
+
+    if (sightings.length > 0) {
+      console.log(`OCEARCH: Found ${sightings.length} tagged sharks near Cape Cod`);
+    }
+  } catch (err) {
+    console.log(`OCEARCH fetch failed: ${err.message}`);
+  }
+
+  return sightings;
+}
+
+/**
  * Fallback sightings based on real historical Cape Cod patterns.
  * Great Whites are most active June-October along the Outer Cape.
  * These are realistic but fabricated for demonstration when live sources fail.
@@ -320,13 +395,14 @@ function deduplicateSightings(sightings) {
  */
 async function fetchSharkSightings() {
   // Fetch all sources in parallel — each one is fault-tolerant
-  const [sharktivity, nps, maAlerts] = await Promise.all([
+  const [sharktivity, nps, maAlerts, ocearch] = await Promise.all([
     scrapeAtlanticWhiteShark(),
     fetchNPSAlerts(),
     fetchMABeachAlerts(),
+    fetchOCEARCHPings(),
   ]);
 
-  const allSightings = [...sharktivity, ...nps, ...maAlerts];
+  const allSightings = [...sharktivity, ...nps, ...maAlerts, ...ocearch];
 
   // If we got any live data, use it
   if (allSightings.length > 0) {
@@ -336,6 +412,7 @@ async function fetchSharkSightings() {
         sharktivity: sharktivity.length,
         nps: nps.length,
         maAlerts: maAlerts.length,
+        ocearch: ocearch.length,
       },
       isLiveData: true,
       fetchedAt: new Date().toISOString(),
