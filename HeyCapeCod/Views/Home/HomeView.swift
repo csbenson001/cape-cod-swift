@@ -17,6 +17,8 @@ struct HomeView: View {
     @State private var showTidePlanner = false
     @State private var showTripSummary = false
     @State private var showSharkAlert = false
+    @State private var showTidePopup = false
+    @State private var showWeatherPopup = false
 
     var body: some View {
         NavigationStack {
@@ -128,7 +130,7 @@ struct HomeView: View {
             }
             .sheet(isPresented: $showHiddenGems) {
                 NavigationStack {
-                    HiddenGemsView()
+                    HiddenGemsExploreView()
                 }
             }
             .sheet(isPresented: $showTidePlanner) {
@@ -139,6 +141,16 @@ struct HomeView: View {
             .sheet(isPresented: $showTripSummary) {
                 NavigationStack {
                     TripSummaryView()
+                }
+            }
+            .sheet(isPresented: $showTidePopup) {
+                NavigationStack {
+                    TidePopupView()
+                }
+            }
+            .sheet(isPresented: $showWeatherPopup) {
+                NavigationStack {
+                    WeatherPopupView()
                 }
             }
         }
@@ -178,7 +190,7 @@ struct HomeView: View {
                         tint: Color.capeCod.oceanBlue
                     ) {
                         CodHaptic.tap()
-                        showTidePlanner = true
+                        showTidePopup = true
                     }
 
                     QuickActionButton(
@@ -191,12 +203,12 @@ struct HomeView: View {
                     }
 
                     QuickActionButton(
-                        icon: "cloud.rain.fill",
+                        icon: "cloud.sun.fill",
                         title: "Weather",
-                        tint: Color.capeCod.driftwood
+                        tint: Color.capeCod.sunsetOrange
                     ) {
                         CodHaptic.tap()
-                        showRainyDay = true
+                        showWeatherPopup = true
                     }
                 }
             }
@@ -210,106 +222,101 @@ struct HomeView: View {
             Text("Discover")
                 .codTextStyle(.sectionTitle)
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: CodSpacing.md) {
-                    // Cape Cod Bingo
-                    DiscoverCard(
-                        icon: "checklist",
-                        title: "Cape Cod Bingo",
-                        subtitle: "Check off Cape Cod classics!",
-                        gradientColors: [Color.capeCod.cranberry, Color.capeCod.sunsetOrange]
-                    ) {
-                        CodHaptic.tap()
-                        showBingo = true
-                    }
+            let columns = [
+                GridItem(.flexible(), spacing: CodSpacing.sm),
+                GridItem(.flexible(), spacing: CodSpacing.sm),
+                GridItem(.flexible(), spacing: CodSpacing.sm),
+            ]
 
-                    // Tell Me a Story
-                    DiscoverCard(
-                        icon: "book.closed.fill",
-                        title: "Tell Me a Story",
-                        subtitle: "AI Cape Cod tales for all ages",
-                        gradientColors: [Color.capeCod.sunsetOrange, Color(hex: 0xE8B94E)]
-                    ) {
-                        CodHaptic.tap()
-                        showTellMeAStory = true
-                    }
+            LazyVGrid(columns: columns, spacing: CodSpacing.sm) {
+                // Cape Cod Bingo
+                DiscoverTile(
+                    icon: "checklist",
+                    title: "Bingo",
+                    gradientColors: [Color.capeCod.cranberry, Color.capeCod.sunsetOrange]
+                ) {
+                    CodHaptic.tap()
+                    showBingo = true
+                }
 
-                    // Chat with AI
-                    DiscoverCard(
-                        icon: "bubble.left.and.text.bubble.right.fill",
-                        title: "Chat",
-                        subtitle: "Ask anything about the Cape",
-                        gradientColors: [Color.capeCod.oceanBlue, Color.capeCod.seafoam]
-                    ) {
-                        CodHaptic.tap()
-                        appState.isChatPresented = true
-                    }
+                // Tell Me a Story
+                DiscoverTile(
+                    icon: "book.closed.fill",
+                    title: "Stories",
+                    gradientColors: [Color.capeCod.sunsetOrange, Color(hex: 0xE8B94E)]
+                ) {
+                    CodHaptic.tap()
+                    showTellMeAStory = true
+                }
 
-                    // Tour Achievements
-                    DiscoverCard(
-                        icon: "trophy.fill",
-                        title: "Achievements",
-                        subtitle: "Track your Cape Cod journey",
-                        gradientColors: [Color.capeCod.duneGrass, Color(hex: 0x7EC8B8)]
-                    ) {
-                        CodHaptic.tap()
-                        showAchievements = true
-                    }
+                // Chat with AI
+                DiscoverTile(
+                    icon: "bubble.left.and.text.bubble.right.fill",
+                    title: "Chat",
+                    gradientColors: [Color.capeCod.oceanBlue, Color.capeCod.seafoam]
+                ) {
+                    CodHaptic.tap()
+                    appState.isChatPresented = true
+                }
 
-                    // Photo Studio
-                    DiscoverCard(
-                        icon: "camera.fill",
-                        title: "Photo Studio",
-                        subtitle: "Cape Cod frames & stickers",
-                        gradientColors: [Color(hex: 0xE91E63), Color(hex: 0xFF6B35)]
-                    ) {
-                        CodHaptic.tap()
-                        showPhotoStudio = true
-                    }
+                // Tour Achievements
+                DiscoverTile(
+                    icon: "trophy.fill",
+                    title: "Achievements",
+                    gradientColors: [Color.capeCod.duneGrass, Color(hex: 0x7EC8B8)]
+                ) {
+                    CodHaptic.tap()
+                    showAchievements = true
+                }
 
-                    // Digital Passport
-                    DiscoverCard(
-                        icon: "mappin.and.ellipse",
-                        title: "Passport",
-                        subtitle: "Earn stamps & badges",
-                        gradientColors: [Color(hex: 0x9C27B0), Color(hex: 0x3F51B5)]
-                    ) {
-                        CodHaptic.tap()
-                        showPassport = true
-                    }
+                // Photo Studio
+                DiscoverTile(
+                    icon: "camera.fill",
+                    title: "Photos",
+                    gradientColors: [Color(hex: 0xE91E63), Color(hex: 0xFF6B35)]
+                ) {
+                    CodHaptic.tap()
+                    showPhotoStudio = true
+                }
 
-                    // Hidden Gems
-                    DiscoverCard(
-                        icon: "sparkles",
-                        title: "Hidden Gems",
-                        subtitle: "Locals-only secrets",
-                        gradientColors: [Color(hex: 0xFFD700), Color.capeCod.sunsetOrange]
-                    ) {
-                        CodHaptic.tap()
-                        showHiddenGems = true
-                    }
+                // Digital Passport
+                DiscoverTile(
+                    icon: "mappin.and.ellipse",
+                    title: "Passport",
+                    gradientColors: [Color(hex: 0x9C27B0), Color(hex: 0x3F51B5)]
+                ) {
+                    CodHaptic.tap()
+                    showPassport = true
+                }
 
-                    // Trip Summary
-                    DiscoverCard(
-                        icon: "square.and.arrow.up.fill",
-                        title: "Trip Summary",
-                        subtitle: "Share your Cape Cod week",
-                        gradientColors: [Color.capeCod.deepNavy, Color.capeCod.oceanBlue]
-                    ) {
-                        CodHaptic.tap()
-                        showTripSummary = true
-                    }
+                // Hidden Gems
+                DiscoverTile(
+                    icon: "sparkles",
+                    title: "Hidden Gems",
+                    gradientColors: [Color(hex: 0xFFD700), Color.capeCod.sunsetOrange]
+                ) {
+                    CodHaptic.tap()
+                    showHiddenGems = true
+                }
 
-                    // Packing List
-                    DiscoverCard(
-                        icon: "suitcase.fill",
-                        title: "Packing List",
-                        subtitle: "Smart Cape Cod packing",
-                        gradientColors: [Color(hex: 0x795548), Color(hex: 0xBCAAA4)]
-                    ) {
-                        CodHaptic.tap()
-                        showPackingList = true
-                    }
+                // Trip Summary
+                DiscoverTile(
+                    icon: "square.and.arrow.up.fill",
+                    title: "Trip Recap",
+                    gradientColors: [Color.capeCod.deepNavy, Color.capeCod.oceanBlue]
+                ) {
+                    CodHaptic.tap()
+                    showTripSummary = true
+                }
+
+                // Packing List
+                DiscoverTile(
+                    icon: "suitcase.fill",
+                    title: "Packing",
+                    gradientColors: [Color(hex: 0x795548), Color(hex: 0xBCAAA4)]
+                ) {
+                    CodHaptic.tap()
+                    showPackingList = true
                 }
             }
         }
@@ -334,24 +341,38 @@ struct HomeView: View {
     private var quickGlanceSection: some View {
         VStack(spacing: CodSpacing.md) {
             HStack(spacing: CodSpacing.md) {
-                MetricCard(
-                    value: viewModel.temperatureString,
-                    unit: "",
-                    label: "Temperature",
-                    icon: viewModel.conditionIcon,
-                    tint: Color.capeCod.sunsetOrange
-                )
-                MetricCard(
-                    value: viewModel.nextTideString,
-                    unit: "",
-                    label: "Next Tide",
-                    icon: "water.waves",
-                    tint: Color.capeCod.oceanBlue
-                )
+                Button {
+                    CodHaptic.tap()
+                    showWeatherPopup = true
+                } label: {
+                    MetricCard(
+                        value: viewModel.temperatureString,
+                        unit: "",
+                        label: "Temperature",
+                        icon: viewModel.conditionIcon,
+                        tint: Color.capeCod.sunsetOrange
+                    )
+                }
+                .buttonStyle(.plain)
+
+                Button {
+                    CodHaptic.tap()
+                    showTidePopup = true
+                } label: {
+                    MetricCard(
+                        value: viewModel.nextTideString,
+                        unit: "",
+                        label: "Next Tide",
+                        icon: "water.waves",
+                        tint: Color.capeCod.oceanBlue
+                    )
+                }
+                .buttonStyle(.plain)
             }
 
             Button {
-                // Bridge traffic info
+                CodHaptic.tap()
+                showBridgeTiming = true
             } label: {
                 MetricCard(
                     value: viewModel.bridgeSummary,
@@ -631,6 +652,47 @@ struct DiscoverCard: View {
         }
         .buttonStyle(CodButtonPressStyle(variant: .ghost))
         .codAccessibleButton(title, hint: subtitle)
+    }
+}
+
+// MARK: - Discover Tile (compact grid version)
+
+struct DiscoverTile: View {
+    let icon: String
+    let title: String
+    let gradientColors: [Color]
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: CodSpacing.xs) {
+                Image(systemName: icon)
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .frame(width: 40, height: 40)
+                    .background(.white.opacity(0.2))
+                    .clipShape(Circle())
+
+                Text(title)
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 90)
+            .background(
+                LinearGradient(
+                    colors: gradientColors,
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .clipShape(RoundedRectangle(cornerRadius: CodRadius.card, style: .continuous))
+            .codShadow(.card)
+        }
+        .buttonStyle(CodButtonPressStyle(variant: .ghost))
+        .codAccessibleButton(title)
     }
 }
 
