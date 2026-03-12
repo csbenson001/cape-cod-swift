@@ -10,8 +10,10 @@ struct OnboardingView: View {
     @State private var currentPage = 0
     @State private var selectedMode: ExperienceMode = .adult
     @State private var selectedInterests: Set<String> = []
+    @State private var selectedRegions: Set<String> = []
+    @State private var selectedTowns: Set<String> = []
 
-    private let totalPages = 4
+    private let totalPages = 5
 
     var body: some View {
         ZStack {
@@ -32,13 +34,20 @@ struct OnboardingView: View {
                         selectedInterests: $selectedInterests
                     )
                     .tag(2)
+                    OnboardingAreaPage(
+                        selectedRegions: $selectedRegions,
+                        selectedTowns: $selectedTowns
+                    )
+                    .tag(3)
                     OnboardingReadyPage(
                         selectedMode: selectedMode,
                         selectedInterests: selectedInterests,
+                        selectedRegions: selectedRegions,
+                        selectedTowns: selectedTowns,
                         onSignIn: { completeOnboarding() },
                         onStart: { completeOnboarding() }
                     )
-                    .tag(3)
+                    .tag(4)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.capeCodSpring, value: currentPage)
@@ -131,10 +140,16 @@ struct OnboardingView: View {
         // Save interests to UserDefaults
         UserDefaults.standard.set(Array(selectedInterests), forKey: "selectedInterests")
 
+        // Save area preferences
+        UserProfileManager.shared.preferredRegions = Array(selectedRegions)
+        UserProfileManager.shared.preferredTowns = Array(selectedTowns)
+
         // Sync to user profile if available
         if let profile = UserProfileManager.shared.currentProfile {
             profile.experienceMode = selectedMode
             profile.interests = Array(selectedInterests)
+            profile.preferredRegions = Array(selectedRegions)
+            profile.preferredTowns = Array(selectedTowns)
             UserProfileManager.shared.saveProfile()
         }
 

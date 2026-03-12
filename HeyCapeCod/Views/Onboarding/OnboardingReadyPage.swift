@@ -4,6 +4,8 @@ import SwiftUI
 struct OnboardingReadyPage: View {
     let selectedMode: ExperienceMode
     let selectedInterests: Set<String>
+    var selectedRegions: Set<String> = []
+    var selectedTowns: Set<String> = []
     let onSignIn: () -> Void
     let onStart: () -> Void
 
@@ -73,6 +75,10 @@ struct OnboardingReadyPage: View {
             if !selectedInterests.isEmpty {
                 interestsSummary
             }
+
+            if !selectedRegions.isEmpty || !selectedTowns.isEmpty {
+                areaSummary
+            }
         }
         .padding(CodSpacing.cardPadding)
         .background(Color.capeCod.surfaceElevated)
@@ -123,6 +129,37 @@ struct OnboardingReadyPage: View {
             .padding(.vertical, CodSpacing.xs)
             .background(Color.capeCod.oceanBlue.opacity(0.1))
             .clipShape(Capsule())
+    }
+
+    private var areaSummary: some View {
+        VStack(alignment: .leading, spacing: CodSpacing.sm) {
+            Text("Cape Cod Areas")
+                .codTextStyle(.caption)
+
+            FlowLayout(spacing: CodSpacing.xs) {
+                ForEach(Array(selectedRegions).sorted(), id: \.self) { rawValue in
+                    if let region = CapeCodRegion(rawValue: rawValue) {
+                        Text(region.displayName)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(Color.capeCod.oceanBlue)
+                            .padding(.horizontal, CodSpacing.sm)
+                            .padding(.vertical, CodSpacing.xs)
+                            .background(Color.capeCod.oceanBlue.opacity(0.1))
+                            .clipShape(Capsule())
+                    }
+                }
+
+                ForEach(Array(selectedTowns).sorted(), id: \.self) { town in
+                    Text(town)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(Color.capeCod.deepNavy)
+                        .padding(.horizontal, CodSpacing.sm)
+                        .padding(.vertical, CodSpacing.xs)
+                        .background(Color.capeCod.deepNavy.opacity(0.1))
+                        .clipShape(Capsule())
+                }
+            }
+        }
     }
 
     private var sortedInterests: [String] {

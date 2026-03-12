@@ -5,12 +5,15 @@ struct ProfileView: View {
 
     @State private var selectedVisitType: String = "tourist"
     @State private var selectedInterests: Set<String> = []
-    @State private var selectedTideStation: TideStation = .hyannis
+    @State private var selectedTideStation: TideStation = UserProfileManager.shared.preferredTideStation
     @State private var notificationsEnabled = true
     @State private var storyTriggersEnabled = true
     @State private var showingSubscription = false
     @State private var showingSignOut = false
     @State private var showingModeSelector = false
+    @State private var showingAreaPicker = false
+    @State private var selectedRegions: Set<String> = Set(UserProfileManager.shared.preferredRegions)
+    @State private var selectedAreaTowns: Set<String> = Set(UserProfileManager.shared.preferredTowns)
 
     private var auth: AuthManager { .shared }
     private var subscription: SubscriptionManager { .shared }
@@ -23,6 +26,7 @@ struct ProfileView: View {
                 experienceModeSection
                 aiMemorySection
                 visitTypeSection
+                capeAreaSection
                 interestsSection
                 appearanceSection
                 locationSection
@@ -41,6 +45,14 @@ struct ProfileView: View {
             .sheet(isPresented: $showingModeSelector) {
                 NavigationStack {
                     ExperienceModeSelectorView()
+                }
+            }
+            .sheet(isPresented: $showingAreaPicker) {
+                NavigationStack {
+                    AreaPickerView(
+                        selectedRegions: $selectedRegions,
+                        selectedTowns: $selectedAreaTowns
+                    )
                 }
             }
             .alert("Sign Out", isPresented: $showingSignOut) {
@@ -227,6 +239,46 @@ struct ProfileView: View {
         }
     }
 
+    // MARK: - Cape Cod Areas
+
+    @ViewBuilder
+    private var capeAreaSection: some View {
+        Section {
+            Button {
+                CodHaptic.tap()
+                showingAreaPicker = true
+            } label: {
+                HStack(spacing: CodSpacing.md) {
+                    Image(systemName: "map.fill")
+                        .font(.title3)
+                        .foregroundStyle(Color.capeCod.oceanBlue)
+                        .frame(width: 32)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Cape Cod Areas")
+                            .codTextStyle(.body)
+                        Text(UserProfileManager.shared.areaPreferencesSummary)
+                            .codTextStyle(.caption)
+                            .foregroundStyle(Color.capeCod.textSecondary)
+                            .lineLimit(1)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(Color.capeCod.driftwood)
+                }
+            }
+            .codAccessibleButton(
+                "Cape Cod Areas",
+                hint: "Tap to choose regions and towns"
+            )
+        } header: {
+            Text("Cape Cod Areas")
+        }
+    }
+
     // MARK: - Interests
 
     @ViewBuilder
@@ -293,7 +345,24 @@ struct ProfileView: View {
     @ViewBuilder
     private var appearanceSection: some View {
         Section("Appearance") {
-            Picker("Theme", selection: Binding(
+            NavigationLink {
+                ThemePickerView()
+            } label: {
+                HStack(spacing: CodSpacing.md) {
+                    Image(systemName: ThemeManager.shared.currentTheme.icon)
+                        .font(.body)
+                        .foregroundStyle(ThemeManager.shared.currentTheme.palette.primary)
+                        .frame(width: 28)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("App Theme")
+                        Text(ThemeManager.shared.currentTheme.displayName)
+                            .font(.caption)
+                            .foregroundStyle(Color.capeCod.textSecondary)
+                    }
+                }
+            }
+
+            Picker("Color Scheme", selection: Binding(
                 get: { appState.preferredColorScheme },
                 set: { appState.preferredColorScheme = $0 }
             )) {
@@ -313,6 +382,9 @@ struct ProfileView: View {
                 ForEach(TideStation.allCases) { station in
                     Text(station.name).tag(station)
                 }
+            }
+            .onChange(of: selectedTideStation) { _, newStation in
+                UserProfileManager.shared.preferredTideStation = newStation
             }
 
             Toggle("GPS Story Triggers", isOn: $storyTriggersEnabled)

@@ -38,6 +38,10 @@ final class UserProfile {
     var totalStoriesPlayed: Int
     @Attribute(.transformable(by: NSValueTransformerName.secureUnarchiveFromDataTransformerName.rawValue))
     var favoriteBeaches: [String]
+    @Attribute(.transformable(by: NSValueTransformerName.secureUnarchiveFromDataTransformerName.rawValue))
+    var preferredRegions: [String]
+    @Attribute(.transformable(by: NSValueTransformerName.secureUnarchiveFromDataTransformerName.rawValue))
+    var preferredTowns: [String]
 
     init(
         uid: String,
@@ -66,6 +70,8 @@ final class UserProfile {
         self.totalConversations = 0
         self.totalStoriesPlayed = 0
         self.favoriteBeaches = []
+        self.preferredRegions = []
+        self.preferredTowns = []
     }
 
     // MARK: - Computed
@@ -123,6 +129,8 @@ final class UserProfile {
             "totalConversations": totalConversations,
             "totalStoriesPlayed": totalStoriesPlayed,
             "favoriteBeaches": favoriteBeaches,
+            "preferredRegions": preferredRegions,
+            "preferredTowns": preferredTowns,
             "createdAt": createdAt.timeIntervalSince1970,
             "lastSyncedAt": Date.now.timeIntervalSince1970,
         ]
@@ -146,6 +154,8 @@ final class UserProfile {
             premiumExpiresAt = Date(timeIntervalSince1970: expires)
         }
         if let beaches = data["favoriteBeaches"] as? [String] { favoriteBeaches = beaches }
+        if let regions = data["preferredRegions"] as? [String] { preferredRegions = regions }
+        if let towns = data["preferredTowns"] as? [String] { preferredTowns = towns }
         lastSyncedAt = .now
     }
 }
@@ -200,6 +210,80 @@ final class UserProfileManager {
         currentProfile = nil
     }
 
+    // MARK: - Preferred Tide Station (UserDefaults-backed)
+
+    private static let tideStationKey = "preferredTideStation"
+
+    // MARK: - Preferred Weather Location (UserDefaults-backed)
+
+    private static let weatherLocationKey = "preferredWeatherLocation"
+
+    /// Stored as "name|lat|lng" or nil for location services
+    var preferredWeatherLocation: WeatherLocation {
+        get {
+            guard let raw = UserDefaults.standard.string(forKey: Self.weatherLocationKey) else {
+                return .capeCodDefault
+            }
+            let parts = raw.split(separator: "|")
+            guard parts.count == 3,
+                  let lat = Double(parts[1]),
+                  let lng = Double(parts[2]) else {
+                return .capeCodDefault
+            }
+            return WeatherLocation(name: String(parts[0]), latitude: lat, longitude: lng)
+        }
+        set {
+            let raw = "\(newValue.name)|\(newValue.latitude)|\(newValue.longitude)"
+            UserDefaults.standard.set(raw, forKey: Self.weatherLocationKey)
+        }
+    }
+
+    var useLocationServicesForWeather: Bool {
+        get { UserDefaults.standard.bool(forKey: "useLocationServicesForWeather") }
+        set { UserDefaults.standard.set(newValue, forKey: "useLocationServicesForWeather") }
+    }
+
+    // MARK: - Preferred Cape Cod Areas (UserDefaults-backed)
+
+    private static let regionsKey = "preferredCapeCodRegions"
+    private static let townsKey = "preferredCapeCodTowns"
+
+    var preferredRegions: [String] {
+        get { UserDefaults.standard.stringArray(forKey: Self.regionsKey) ?? [] }
+        set { UserDefaults.standard.set(newValue, forKey: Self.regionsKey) }
+    }
+
+    var preferredTowns: [String] {
+        get { UserDefaults.standard.stringArray(forKey: Self.townsKey) ?? [] }
+        set { UserDefaults.standard.set(newValue, forKey: Self.townsKey) }
+    }
+
+    /// Summary text for display (e.g., "Mid Cape, Chatham")
+    var areaPreferencesSummary: String {
+        var parts: [String] = []
+        for rawValue in preferredRegions {
+            if let region = CapeCodRegion(rawValue: rawValue) {
+                parts.append(region.displayName)
+            }
+        }
+        parts.append(contentsOf: preferredTowns)
+        if parts.isEmpty { return "All of Cape Cod" }
+        return parts.joined(separator: ", ")
+    }
+
+    var preferredTideStation: TideStation {
+        get {
+            if let raw = UserDefaults.standard.string(forKey: Self.tideStationKey),
+               let station = TideStation(rawValue: raw) {
+                return station
+            }
+            return .hyannis
+        }
+        set {
+            UserDefaults.standard.set(newValue.rawValue, forKey: Self.tideStationKey)
+        }
+    }
+
     /// Sync profile to Firestore via backend API.
     func syncToCloud() async {
         guard let profile = currentProfile, !AuthManager.shared.isGuest else { return }
@@ -236,6 +320,8 @@ private struct ProfileSyncPayload: Encodable {
     let totalConversations: Int
     let totalStoriesPlayed: Int
     let favoriteBeaches: [String]
+    let preferredRegions: [String]
+    let preferredTowns: [String]
     let createdAt: Double
     let lastSyncedAt: Double
 
@@ -256,6 +342,8 @@ private struct ProfileSyncPayload: Encodable {
         self.totalConversations = profile.totalConversations
         self.totalStoriesPlayed = profile.totalStoriesPlayed
         self.favoriteBeaches = profile.favoriteBeaches
+        self.preferredRegions = profile.preferredRegions
+        self.preferredTowns = profile.preferredTowns
         self.createdAt = profile.createdAt.timeIntervalSince1970
         self.lastSyncedAt = Date.now.timeIntervalSince1970
     }
