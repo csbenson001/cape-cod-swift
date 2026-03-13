@@ -974,11 +974,92 @@ async function seed() {
     storyCount++;
   }
 
+  // Seed Sample Reviews
+  const SAMPLE_REVIEWS = [
+    {
+      id: 'review-1',
+      uid: 'seed-user-1',
+      targetId: 'chatham-lighthouse',
+      targetType: 'poi',
+      rating: 5,
+      title: 'Stunning views!',
+      body: 'The lighthouse is beautiful and the views of the Atlantic are incredible. Seals were playing right offshore!',
+      tags: ['niceView', 'familyFriendly'],
+      helpfulCount: 12,
+    },
+    {
+      id: 'review-2',
+      uid: 'seed-user-2',
+      targetId: 'chatham-lighthouse',
+      targetType: 'poi',
+      rating: 4,
+      title: 'Great spot but crowded in summer',
+      body: 'Beautiful lighthouse but parking is tough in July. Go early morning for the best experience.',
+      tags: ['niceView', 'touristSpot'],
+      helpfulCount: 8,
+    },
+    {
+      id: 'review-3',
+      uid: 'seed-user-1',
+      targetId: 'provincetown',
+      targetType: 'poi',
+      rating: 5,
+      title: 'Love PTown!',
+      body: 'Commercial Street is so fun to walk. Great shops, amazing food, and the most welcoming vibe on the Cape.',
+      tags: ['greatFood', 'livelyAtmosphere', 'goodValue'],
+      helpfulCount: 15,
+    },
+    {
+      id: 'review-4',
+      uid: 'seed-user-3',
+      targetId: 'nauset-beach',
+      targetType: 'poi',
+      rating: 5,
+      title: 'Best beach on the Cape',
+      body: 'Huge beach, great waves, stunning dunes. The parking lot fills up by 10am in summer so arrive early!',
+      tags: ['niceView', 'familyFriendly', 'localFavorite'],
+      helpfulCount: 20,
+    },
+    {
+      id: 'review-5',
+      uid: 'seed-user-2',
+      targetId: 'cape-cod-canal',
+      targetType: 'poi',
+      rating: 4,
+      title: 'Perfect for biking',
+      body: 'The canal bike path is flat and scenic. About 7 miles each way. Great for families with kids.',
+      tags: ['familyFriendly', 'hiddenGem'],
+      helpfulCount: 6,
+    },
+  ];
+
+  console.log(`\n⭐ Seeding ${SAMPLE_REVIEWS.length} sample reviews...`);
+  let reviewCount = 0;
+  for (const review of SAMPLE_REVIEWS) {
+    const ref = db.collection('reviews').doc(review.id);
+    const existing = await ref.get();
+
+    if (existing.exists && !forceSeed) {
+      console.log(`  ⏭️  Skipping existing review: ${review.title}`);
+      skippedCount++;
+      continue;
+    }
+
+    await ref.set({
+      ...review,
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+    console.log(`  ✅ ${review.title}`);
+    reviewCount++;
+  }
+
   console.log(`\n🎉 Seeding complete!`);
   console.log(`   POIs seeded: ${poiCount}`);
   console.log(`   Stories seeded: ${storyCount}`);
+  console.log(`   Reviews seeded: ${reviewCount}`);
   console.log(`   Skipped (existing): ${skippedCount}`);
-  console.log(`\n   Total documents: ${poiCount + storyCount}`);
+  console.log(`\n   Total documents: ${poiCount + storyCount + reviewCount}`);
 }
 
 seed()

@@ -235,6 +235,85 @@ final class TourAchievementService {
         defaults.set(Array(visitedPOIIds), forKey: Keys.visitedIds)
         defaults.set(beachesVisited, forKey: Keys.beaches)
         defaults.set(lighthousesVisited, forKey: Keys.lighthouses)
+
+        syncToBackend()
+    }
+
+    // MARK: - Backend Sync
+
+    /// Sync achievements to the backend (fire-and-forget).
+    private func syncToBackend() {
+        Task {
+            do {
+                let payload = AchievementSyncPayload(
+                    unlocked: Array(unlockedAchievements),
+                    metrics: AchievementMetrics(
+                        totalPOIsVisited: totalPOIsVisited,
+                        totalStoriesPlayed: totalStoriesPlayed,
+                        totalToursCompleted: totalToursCompleted,
+                        regionsVisited: Array(regionsVisited),
+                        categoriesVisited: Array(categoriesVisited),
+                        beachesVisited: beachesVisited,
+                        lighthousesVisited: lighthousesVisited,
+                        totalShares: totalShares,
+                        hasStartedTourAtNight: hasStartedTourAtNight,
+                        hasStartedTourEarly: hasStartedTourEarly,
+                        hasCompletedHistoryTour: hasCompletedHistoryTour,
+                        visitedPOIIds: Array(visitedPOIIds)
+                    )
+                )
+                let _: AchievementSyncResponse = try await APIClient.shared.put("achievements", body: payload)
+                print("✅ Achievements synced to backend")
+            } catch {
+                print("⚠️ Achievement sync failed (will retry next save): \(error.localizedDescription)")
+            }
+        }
+    }
+
+    /// Pull achievements from backend and merge with local state.
+    func syncFromBackend() async {
+        do {
+            let response: AchievementFetchResponse = try await APIClient.shared.get("achievements")
+            let remote = response.achievements
+
+            // Merge: take the union of unlocked achievements
+            let mergedUnlocked = unlockedAchievements.union(Set(remote.unlocked))
+            if mergedUnlocked.count > unlockedAchievements.count {
+                unlockedAchievements = mergedUnlocked
+            }
+
+            // Take the max of each metric
+            totalStoriesPlayed = max(totalStoriesPlayed, remote.metrics.totalStoriesPlayed)
+            totalToursCompleted = max(totalToursCompleted, remote.metrics.totalToursCompleted)
+            regionsVisited = regionsVisited.union(Set(remote.metrics.regionsVisited))
+            categoriesVisited = categoriesVisited.union(Set(remote.metrics.categoriesVisited))
+            beachesVisited = max(beachesVisited, remote.metrics.beachesVisited)
+            lighthousesVisited = max(lighthousesVisited, remote.metrics.lighthousesVisited)
+            totalShares = max(totalShares, remote.metrics.totalShares)
+            visitedPOIIds = visitedPOIIds.union(Set(remote.metrics.visitedPOIIds))
+            hasStartedTourAtNight = hasStartedTourAtNight || remote.metrics.hasStartedTourAtNight
+            hasStartedTourEarly = hasStartedTourEarly || remote.metrics.hasStartedTourEarly
+            hasCompletedHistoryTour = hasCompletedHistoryTour || remote.metrics.hasCompletedHistoryTour
+
+            // Persist merged state locally
+            let defaults = UserDefaults.standard
+            defaults.set(Array(unlockedAchievements), forKey: Keys.unlocked)
+            defaults.set(totalStoriesPlayed, forKey: Keys.storiesPlayed)
+            defaults.set(totalToursCompleted, forKey: Keys.toursCompleted)
+            defaults.set(Array(regionsVisited), forKey: Keys.regions)
+            defaults.set(Array(categoriesVisited), forKey: Keys.categories)
+            defaults.set(totalShares, forKey: Keys.shares)
+            defaults.set(hasStartedTourAtNight, forKey: Keys.nightTour)
+            defaults.set(hasStartedTourEarly, forKey: Keys.earlyTour)
+            defaults.set(hasCompletedHistoryTour, forKey: Keys.historyTour)
+            defaults.set(Array(visitedPOIIds), forKey: Keys.visitedIds)
+            defaults.set(beachesVisited, forKey: Keys.beaches)
+            defaults.set(lighthousesVisited, forKey: Keys.lighthouses)
+
+            print("✅ Achievements synced from backend")
+        } catch {
+            print("⚠️ Achievement fetch failed: \(error.localizedDescription)")
+        }
     }
 
     // MARK: - Recording Events
@@ -387,4 +466,39 @@ final class TourAchievementService {
     func isUnlocked(_ achievement: TourAchievement) -> Bool {
         unlockedAchievements.contains(achievement.id)
     }
+}
+
+// MARK: - Backend Sync Models
+
+private struct AchievementSyncPayload: Encodable {
+    let unlocked: [String]
+    let metrics: AchievementMetrics
+}
+
+private struct AchievementSyncResponse: Decodable {
+    let success: Bool
+}
+
+private struct AchievementFetchResponse: Decodable {
+    let achievements: AchievementData
+}
+
+private struct AchievementData: Decodable {
+    let unlocked: [String]
+    let metrics: AchievementMetrics
+}
+
+struct AchievementMetrics: Codable {
+    let totalPOIsVisited: Int
+    let totalStoriesPlayed: Int
+    let totalToursCompleted: Int
+    let regionsVisited: [String]
+    let categoriesVisited: [String]
+    let beachesVisited: Int
+    let lighthousesVisited: Int
+    let totalShares: Int
+    let hasStartedTourAtNight: Bool
+    let hasStartedTourEarly: Bool
+    let hasCompletedHistoryTour: Bool
+    let visitedPOIIds: [String]
 }

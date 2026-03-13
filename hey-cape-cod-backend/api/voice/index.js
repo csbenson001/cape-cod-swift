@@ -1,9 +1,9 @@
 /**
- * Voice relay endpoint.
+ * Voice relay connection info endpoint.
  *
- * On Vercel (serverless), this returns connection info for the persistent
- * voice relay server. The actual WebSocket handling runs on Railway/Render/Fly.io
- * using lib/voice-relay.js.
+ * Returns the WebSocket URL for the persistent voice relay server.
+ * The actual voice relay runs on Railway/Fly.io (see /voice-relay-server/)
+ * because Vercel doesn't support persistent WebSocket connections.
  */
 const { withMiddleware } = require('../../lib/middleware');
 const { getWsConnectionCount, MAX_WS_CONNECTIONS } = require('../../lib/rate-limiter');
